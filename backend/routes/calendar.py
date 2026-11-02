@@ -15,7 +15,7 @@ def get_calendar_deadlines():
             select
                 s.scholarship_id,
                 s.title,
-                sp.organization_name,
+                coalesce(s.import_metadata->>'source_sponsor', sp.organization_name) as organization_name,
                 to_char(s.deadline, 'YYYY-MM-DD') as deadline,
                 s.status
             from scholarship s

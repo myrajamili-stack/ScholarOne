@@ -1,13 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import api from "../api/axios";
-
-type DeadlineReminder = {
-  scholarship_id: number;
-  title: string;
-  organization_name?: string | null;
-  deadline: string;
-};
+import { useScholarshipReminders } from "../../context/ScholarshipRemindersContext";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 const dateFormatter = new Intl.DateTimeFormat("en-MY", {
   day: "numeric",
@@ -15,41 +9,19 @@ const dateFormatter = new Intl.DateTimeFormat("en-MY", {
   year: "numeric",
 });
 
-function getDaysUntil(date: string) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const targetDate = new Date(date);
-  targetDate.setHours(0, 0, 0, 0);
-
-  return Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-}
-
 function RemindersPage() {
-  const [deadlines, setDeadlines] = useState<DeadlineReminder[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { reminders, dueReminders, isLoading, error, toggleReminder, refresh } = useScholarshipReminders();
+  const [removingId, setRemovingId] = useState<number | null>(null);
+  const [actionError, setActionError] = useState("");
+  const upcomingReminders = reminders.filter((reminder) => reminder.days_until >= 0);
 
-  useEffect(() => {
-    async function loadReminders() {
-      try {
-        const response = await api.get<DeadlineReminder[]>("/calendar/deadlines");
-        setDeadlines(response.data);
-      } catch {
-        setError("Unable to load reminders right now.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadReminders();
-  }, []);
-
-  const upcomingReminders = useMemo(() => {
-    return deadlines
-      .map((deadline) => ({ ...deadline, daysUntil: getDaysUntil(deadline.deadline) }))
-      .filter((deadline) => deadline.daysUntil >= 0)
-      .sort((a, b) => a.daysUntil - b.daysUntil);
-  }, [deadlines]);
+  async function removeReminder(scholarshipId: number) {
+    setRemovingId(scholarshipId);
+    setActionError("");
+    try { await toggleReminder(scholarshipId, false); }
+    catch (error) { setActionError(getApiErrorMessage(error, "Unable to remove reminder.")); }
+    finally { setRemovingId(null); }
+  }
 
   const nextReminder = upcomingReminders[0];
 
@@ -59,7 +31,7 @@ function RemindersPage() {
         <div>
           <p className="module-eyebrow">Notifications</p>
           <h1>Reminders</h1>
-          <span>Track scholarship deadlines, consultation tasks, and important academic dates.</span>
+          <span>Your selected scholarship deadlines, synced with the calendar.</span>
         </div>
         <Link to="/calendar">Open Calendar</Link>
       </header>
@@ -71,11 +43,11 @@ function RemindersPage() {
         </article>
         <article>
           <span>Next reminder</span>
-          <strong>{nextReminder ? `${nextReminder.daysUntil} days` : "None"}</strong>
+          <strong>{nextReminder ? `${nextReminder.days_until} days` : "None"}</strong>
         </article>
         <article>
-          <span>Notification type</span>
-          <strong>Dashboard alert</strong>
+          <span>Due within 3 days</span>
+          <strong>{dueReminders.length}</strong>
         </article>
       </section>
 
@@ -84,18 +56,19 @@ function RemindersPage() {
           <div className="reminder-section-heading">
             <div>
               <h2>Upcoming Reminders</h2>
-              <p>Deadline reminders are created automatically from approved scholarship listings.</p>
+              <p>Click the bell beside a scholarship to add a reminder. Alerts begin 3 days before its deadline.</p>
             </div>
           </div>
 
           {isLoading && <p className="dashboard-message">Loading reminders...</p>}
-          {error && <p className="dashboard-message error">{error}</p>}
+          {error && <p className="dashboard-message error">{error} <button type="button" onClick={() => void refresh()}>Try again</button></p>}
+          {actionError && <p className="dashboard-message error" role="alert">{actionError}</p>}
           {!isLoading && !error && upcomingReminders.length === 0 && (
             <div className="reminder-empty-state">
               <div aria-hidden="true">⌁</div>
               <h3>No reminders yet</h3>
               <p>
-                When a sponsorship provider adds approved scholarships with deadlines, reminder alerts will appear here.
+                Click the bell beside a scholarship to add it here and schedule a calendar reminder.
               </p>
               <Link to="/scholarships">View Scholarships</Link>
             </div>
@@ -112,9 +85,11 @@ function RemindersPage() {
                   <h3>{reminder.title}</h3>
                   <p>{reminder.organization_name || "ScholarOne Provider"}</p>
                   <small>Deadline: {dateFormatter.format(new Date(reminder.deadline))}</small>
+                  <small>Reminder date: {dateFormatter.format(new Date(reminder.remind_on))}</small>
+                  <button className="reminder-remove-button" type="button" disabled={removingId !== null} onClick={() => void removeReminder(reminder.scholarship_id)}>{removingId === reminder.scholarship_id ? "Removing..." : "Turn off reminder"}</button>
                 </div>
-                <span className={reminder.daysUntil <= 7 ? "reminder-priority urgent" : "reminder-priority"}>
-                  {reminder.daysUntil === 0 ? "Today" : `${reminder.daysUntil} days left`}
+                <span className={reminder.days_until <= 3 ? "reminder-priority urgent" : "reminder-priority"}>
+                  {reminder.days_until === 0 ? "Today" : `${reminder.days_until} days left`}
                 </span>
               </article>
             ))}
@@ -122,19 +97,10 @@ function RemindersPage() {
         </article>
 
         <aside className="reminder-settings-card">
-          <h2>Reminder Settings</h2>
-          <label>
-            <span>Scholarship deadline alerts</span>
-            <input type="checkbox" defaultChecked />
-          </label>
-          <label>
-            <span>Appointment reminders</span>
-            <input type="checkbox" defaultChecked />
-          </label>
-          <label>
-            <span>Academic pathway tasks</span>
-            <input type="checkbox" defaultChecked />
-          </label>
+          <h2>How Reminders Work</h2>
+          <p>Use the bell beside a scholarship to turn its reminder on or off. Favourites are managed separately with the heart.</p>
+          <p>Reminders appear in your calendar 3 days before the deadline. Alerts stay active through deadline day.</p>
+          <p>Dates use Malaysia time. If the provider changes a deadline, your reminder updates with it.</p>
           <div className="reminder-note">
             Alerts are shown inside the dashboard for now. Email or push notifications can be added later.
           </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import api from "../api/axios";
+import api from "../../api/axios";
+import { useScholarshipReminders } from "../../context/ScholarshipRemindersContext";
 
 type DeadlineEvent = {
   scholarship_id: number;
@@ -7,6 +8,7 @@ type DeadlineEvent = {
   organization_name?: string | null;
   deadline: string;
   status?: string | null;
+  is_reminder?: boolean;
 };
 
 type CalendarDay = {
@@ -54,34 +56,47 @@ function buildCalendarDays(monthDate: Date): CalendarDay[] {
 }
 
 function CalendarPage() {
+  const { reminders, error: remindersError } = useScholarshipReminders();
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
   const [deadlines, setDeadlines] = useState<DeadlineEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let controller: AbortController | null = null;
     async function loadDeadlines() {
+      controller?.abort();
+      const request = new AbortController();
+      controller = request;
       try {
-        const response = await api.get<DeadlineEvent[]>("/calendar/deadlines");
-        setDeadlines(response.data);
+        const response = await api.get<DeadlineEvent[]>("/calendar/deadlines", { signal: request.signal, timeout: 15000 });
+        if (!request.signal.aborted) { setDeadlines(response.data); setError(""); }
       } catch {
-        setError("Unable to load calendar deadlines right now.");
+        if (!request.signal.aborted) setError("Unable to load calendar deadlines right now.");
       } finally {
-        setIsLoading(false);
+        if (!request.signal.aborted) setIsLoading(false);
       }
     }
 
     loadDeadlines();
+    const timer = window.setInterval(() => { if (!document.hidden) void loadDeadlines(); }, 60000);
+    const onFocus = () => { void loadDeadlines(); };
+    window.addEventListener("focus", onFocus);
+    return () => { controller?.abort(); window.clearInterval(timer); window.removeEventListener("focus", onFocus); };
   }, []);
 
   const calendarDays = useMemo(() => buildCalendarDays(currentMonth), [currentMonth]);
 
   const deadlinesByDate = useMemo(() => {
-    return deadlines.reduce<Record<string, DeadlineEvent[]>>((groupedDeadlines, deadline) => {
+    const reminderEvents: DeadlineEvent[] = reminders.map((reminder) => ({
+      scholarship_id: reminder.scholarship_id, title: reminder.title,
+      deadline: reminder.remind_on, is_reminder: true,
+    }));
+    return [...deadlines, ...reminderEvents].reduce<Record<string, DeadlineEvent[]>>((groupedDeadlines, deadline) => {
       groupedDeadlines[deadline.deadline] = [...(groupedDeadlines[deadline.deadline] || []), deadline];
       return groupedDeadlines;
     }, {});
-  }, [deadlines]);
+  }, [deadlines, reminders]);
 
   const upcomingDeadlines = deadlines
     .filter((deadline) => deadline.deadline >= toDateKey(new Date()))
@@ -105,7 +120,7 @@ function CalendarPage() {
         <div>
           <p className="module-eyebrow">Important Dates</p>
           <h1>Calendar</h1>
-          <span>Track scholarship deadlines added by sponsorship providers.</span>
+          <span>Track scholarship deadlines and your selected 3-day reminder dates.</span>
         </div>
         <div className="calendar-actions">
           <button type="button" onClick={goToPreviousMonth} aria-label="Previous month">
@@ -145,8 +160,8 @@ function CalendarPage() {
                   <time dateTime={day.dateKey}>{day.date.getDate()}</time>
                   <div className="calendar-events">
                     {dayDeadlines.slice(0, 2).map((deadline) => (
-                      <span className="calendar-event" key={deadline.scholarship_id}>
-                        {deadline.title}
+                      <span className={`calendar-event${deadline.is_reminder ? " calendar-reminder-event" : ""}`} key={`${deadline.scholarship_id}-${deadline.is_reminder ? "reminder" : "deadline"}`} title={`${deadline.is_reminder ? "3-day reminder" : "Deadline"}: ${deadline.title}`}>
+                        {deadline.is_reminder ? "🔔 " : ""}{deadline.title}
                       </span>
                     ))}
                     {dayDeadlines.length > 2 && <small>+{dayDeadlines.length - 2} more</small>}
@@ -161,6 +176,8 @@ function CalendarPage() {
           <h2>Upcoming Deadlines</h2>
           {isLoading && <p className="dashboard-message">Loading deadlines...</p>}
           {error && <p className="dashboard-message error">{error}</p>}
+          {remindersError && <p className="dashboard-message error">{remindersError}</p>}
+          <p className="dashboard-message">Bell markers show your selected reminder dates, 3 days before the deadline.</p>
           {!isLoading && !error && upcomingDeadlines.length === 0 && (
             <p className="dashboard-message">
               No scholarship deadlines yet. Provider-added scholarship deadlines will appear here.

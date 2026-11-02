@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { getStoredUser } from "../utils/authStorage";
+import { getStoredUser } from "../../utils/authStorage";
 
 function SettingsPage() {
   const user = getStoredUser();

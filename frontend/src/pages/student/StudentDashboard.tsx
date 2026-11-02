@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import StudentRightPanel from "../components/StudentRightPanel";
-import "../styles/student-dashboard.css";
-import { getStoredUser } from "../utils/authStorage";
+import StudentRightPanel from "../../components/StudentRightPanel";
+import "../../styles/student-dashboard.css";
+import { getStoredUser } from "../../utils/authStorage";
 
 function StudentDashboard() {
   const user = getStoredUser();

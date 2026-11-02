@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 
 from db import get_db_connection
 from responses import error_response
+from scholarship_filters import validate_filter_metadata
 
 sponsors_bp = Blueprint("sponsors", __name__, url_prefix="/api/sponsors")
 
@@ -418,6 +419,11 @@ def create_sponsor_scholarship(sponsor_id):
         return error_response(f"Missing required fields: {', '.join(missing_fields)}", 400)
 
     try:
+        filter_metadata = validate_filter_metadata(data)
+    except ValueError as error:
+        return error_response(str(error), 400)
+
+    try:
         amount = float(data["amount"])
     except (TypeError, ValueError):
         return error_response("Scholarship amount must be a valid number", 400)
@@ -486,9 +492,11 @@ def create_sponsor_scholarship(sponsor_id):
                 eligibility_criteria,
                 deadline,
                 funding_type,
+                study_level,
+                eligible_state,
                 status
             )
-            values (%s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+            values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
             returning
                 scholarship_id,
                 sponsor_id,
@@ -499,6 +507,8 @@ def create_sponsor_scholarship(sponsor_id):
                 eligibility_criteria,
                 deadline,
                 funding_type,
+                study_level,
+                eligible_state,
                 status,
                 created_at
         """, (
@@ -510,6 +520,8 @@ def create_sponsor_scholarship(sponsor_id):
             data["eligibility_criteria"].strip(),
             data["deadline"],
             data["funding_type"].strip(),
+            filter_metadata["study_level"],
+            filter_metadata["eligible_state"],
         ))
         scholarship = cursor.fetchone()
         connection.commit()

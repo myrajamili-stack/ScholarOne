@@ -1,0 +1,88 @@
+.home-page { background: #fff; color: #111827; font-family: Arial, Helvetica, sans-serif; min-height: 100vh; }
+.home-page a { text-decoration: none; }
+.home-header { max-width: 1280px; margin: auto; padding: 24px 48px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.home-brand { display: flex; align-items: center; gap: 14px; color: #111827; }
+.home-brand strong { display: block; font-size: 28px; letter-spacing: -1px; }
+.home-brand strong span { color: #2855c6; }
+.home-brand small { display: block; font-size: 12px; color: #626776; letter-spacing: .2px; }
+.home-crest { display: grid; place-items: center; width: 48px; height: 58px; background: #172342; border: 3px double white; outline: 2px solid #172342; border-radius: 5px 5px 24px 24px; font: bold 26px Georgia, serif; color: white; }
+.home-nav { display: flex; gap: 40px; }
+.home-nav a { color: #111827; font-weight: 700; padding: 12px 4px; border-bottom: 2px solid transparent; }
+.home-nav a[aria-current], .home-nav a:hover { border-bottom-color: #2855c6; }
+.home-account { display: flex; flex-direction: column; gap: 8px; }
+.home-signup { background: #294dbd; color: white; padding: 11px 30px; border-radius: 9px; text-align: center; font-weight: 700; }
+.home-account small { font-size: 10px; line-height: 1.4; color: #525766; }
+.home-account small a { color: #244dbd; text-decoration: underline; }
+.home-login-link { padding: 0; border: 0; background: transparent; color: #244dbd; text-decoration: underline; cursor: pointer; font: inherit; }
+.home-hero { background: #e9f0ff; padding: 60px max(48px, calc((100vw - 1184px) / 2)); display: flex; align-items: center; gap: 32px; }
+.home-hero-copy { flex: 1; }
+.home-tag { display: inline-block; font-size: 11px; font-weight: 600; background: #d4dfff; color: #2449ac; border-radius: 4px; padding: 5px 8px; }
+.home-hero h1 { font-size: clamp(28px, 3.3vw, 46px); font-weight: 750; line-height: 1.22; letter-spacing: -1.2px; margin: 18px 0 25px; }
+.home-hero h1 span { color: #0646c8; }
+.home-hero-copy > p { font-size: 15px; max-width: 470px; line-height: 1.6; margin-bottom: 28px; }
+.home-start { display: inline-flex; gap: 13px; align-items: center; padding: 7px 22px 7px 7px; background: #294dbd; color: white; font-size: 19px; font-weight: 700; border-radius: 40px; }
+.home-start > span { display: grid; place-items: center; background: white; color: #182544; width: 40px; height: 40px; border-radius: 50%; font-size: 29px; font-weight: 400; }
+.home-arrow { display: inline-block; transform: translateY(-5px); }
+.home-illustration { width: 27%; max-width: 320px; flex-shrink: 0; }
+.home-overview { max-width: 1200px; margin: auto; text-align: center; padding: 36px 40px 48px; }
+.home-overview h2 { font-size: 25px; font-weight: 700; margin: 0 0 10px; }
+.home-overview > p { font-size: 13px; color: #525766; }
+.home-features { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; margin-top: 38px; }
+.home-feature { border: 3px solid #e5e7eb; border-radius: 50%; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; background: #fefefe; }
+.home-feature-icon { font-size: 30px; color: #2855c6; margin-bottom: 9px; line-height: 1; }
+.home-feature h3 { font-size: 17px; font-weight: 700; margin: 0 0 5px; }
+.home-feature p { font-size: 12px; line-height: 1.4; color: #6b7280; max-width: 155px; margin: 0; }
+.home-about { background: #f6f8fe; text-align: center; padding: 55px 24px; scroll-margin-top: 20px; }
+.home-about h2 { font-size: 29px; font-weight: 700; margin: 18px 0 14px; }
+.home-about p { max-width: 620px; margin: 0 auto 20px; color: #626776; line-height: 1.7; }
+.home-about > a { color: #244dbd; font-weight: 700; }
+.about-page-content { background: #f8f9ff; padding: 48px 24px 64px; }
+.about-page-inner { max-width: 1100px; margin: auto; }
+.about-page-content h2 { font-size: 32px; font-weight: 700; margin: 0 0 30px; }
+.about-page-content p { font-size: 17px; line-height: 1.5; }
+.about-page-intro { margin: 0 0 58px; }
+.about-page-highlights { max-width: 960px; margin: auto; text-align: center; }
+.about-page-highlights article { margin-bottom: 25px; }
+.about-page-highlights h3 { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
+.about-page-highlights p { margin: 0; }
+.about-page-closing { padding-top: 8px; }
+@media (max-width: 540px) {
+  .about-page-content { padding: 32px 22px 44px; }
+  .about-page-content h2 { font-size: 28px; margin-bottom: 24px; }
+  .about-page-content p { font-size: 15px; }
+  .about-page-intro { margin-bottom: 44px; }
+  .about-page-highlights h3 { font-size: 16px; }
+}
+.home-footer { min-height: 50px; padding: 32px 24px 18px; background: #192940; color: #fff; font-size: 16px; display: flex; align-items: flex-end; justify-content: center; text-align: center; }
+.home-page a:focus-visible { outline: 3px solid #6289eb; outline-offset: 5px; }
+.home-signup:hover, .home-start:hover { background: #183a9c; color: white; }
+.home-signup, .home-start { border: 0; cursor: pointer; }
+.home-journey { border: 0; padding: 0; background: transparent; color: #244dbd; font-weight: 700; cursor: pointer; }
+.home-page button:focus-visible { outline: 3px solid #6289eb; outline-offset: 5px; }
+@media (max-width: 850px) {
+  .home-header { padding: 20px 24px; gap: 20px; }
+  .home-nav { gap: 18px; }
+  .home-brand strong { font-size: 23px; }
+  .home-hero { padding: 40px 28px; }
+  .home-features { grid-template-columns: repeat(2, minmax(0, 230px)); justify-content: center; }
+}
+@media (max-width: 540px) {
+  .home-header { flex-wrap: wrap; gap: 18px; }
+  .home-brand { gap: 10px; }
+  .home-crest { width: 36px; height: 45px; font-size: 22px; }
+  .home-brand strong { font-size: 21px; }
+  .home-brand small { font-size: 10px; }
+  .home-account { margin-left: auto; }
+  .home-signup { padding: 9px 20px; }
+  .home-nav { order: 3; width: 100%; justify-content: center; }
+  .home-hero { padding: 32px 24px; flex-direction: column; align-items: stretch; gap: 12px; }
+  .home-hero h1 { letter-spacing: -.7px; }
+  .home-illustration { width: 170px; align-self: center; }
+  .home-overview { padding: 32px 18px; }
+  .home-features { gap: 12px; margin-top: 25px; }
+  .home-feature { padding: 14px 9px; }
+  .home-feature h3 { font-size: 14px; }
+  .home-feature p { font-size: 10px; }
+  .home-feature-icon { font-size: 24px; }
+  .home-footer { font-size: 12px; gap: 14px; }
+}

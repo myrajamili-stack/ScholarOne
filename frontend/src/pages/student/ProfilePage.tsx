@@ -1,9 +1,9 @@
 import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
-import api from "../api/axios";
-import type { StudentProfile } from "../types/student";
-import { getStoredUser, storeUser } from "../utils/authStorage";
-import { PROFILE_UPDATED_EVENT } from "../utils/profileCompletion";
-import { getInitials } from "../utils/userDisplay";
+import api from "../../api/axios";
+import type { StudentProfile } from "../../types/student";
+import { getStoredUser, storeUser } from "../../utils/authStorage";
+import { PROFILE_UPDATED_EVENT } from "../../utils/profileCompletion";
+import { getInitials } from "../../utils/userDisplay";
 
 type ProfileForm = {
   full_name: string;

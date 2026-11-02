@@ -1,10 +1,15 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { clearStoredUser, getStoredUser } from "../utils/authStorage";
 import { getInitials } from "../utils/userDisplay";
+import { useScholarshipReminders } from "../context/ScholarshipRemindersContext";
+import ReminderBell from "./ReminderBell";
 
 function StudentTopbar() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isDashboard = pathname.replace(/\/$/, "") === "/dashboard";
   const user = getStoredUser();
+  const { dueReminders } = useScholarshipReminders();
 
   function handleLogout() {
     clearStoredUser();
@@ -12,15 +17,15 @@ function StudentTopbar() {
   }
 
   return (
-    <header className="topbar">
-      <label className="search-box">
+    <header className={`topbar${isDashboard ? "" : " topbar-without-search"}`}>
+      {isDashboard && <label className="search-box">
         <input type="search" placeholder="Search scholarships, advisors, and more..." />
         <span>⌕</span>
-      </label>
+      </label>}
 
       <div className="user-actions">
-        <button className="notification-button" type="button" aria-label="Notifications">
-          ♧<b>3</b>
+        <button className="notification-button" type="button" aria-label={`Deadline reminders: ${dueReminders.length} due`} onClick={() => navigate("/reminders")}>
+          <ReminderBell />{dueReminders.length > 0 && <b>{dueReminders.length}</b>}
         </button>
         <div className="user-mini">
           <div className="avatar">{getInitials(user?.full_name)}</div>

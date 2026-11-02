@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify
 
 from db import get_db_connection
 from responses import error_response
+from scholarship_imports import enrich_scholarship
 
 scholarships_bp = Blueprint("scholarships", __name__, url_prefix="/api/scholarships")
 
@@ -20,11 +21,14 @@ def get_scholarships():
                 s.description,
                 s.amount,
                 s.category,
+                s.study_level,
+                s.eligible_state,
                 s.eligibility_criteria,
                 s.deadline,
                 s.funding_type,
                 s.status,
-                s.created_at
+                s.created_at,
+                s.import_metadata
             from scholarship s
             left join sponsor sp on sp.sponsor_id = s.sponsor_id
             where lower(coalesce(s.status, 'pending')) in ('approved', 'active')
@@ -33,7 +37,7 @@ def get_scholarships():
         scholarships = cursor.fetchall()
         cursor.close()
         connection.close()
-        return jsonify(scholarships)
+        return jsonify([enrich_scholarship(scholarship) for scholarship in scholarships])
     except Exception as e:
         return error_response(str(e), 500)
 
@@ -59,6 +63,6 @@ def get_scholarship(scholarship_id):
         if not scholarship:
             return error_response("Scholarship not found", 404)
 
-        return jsonify(scholarship)
+        return jsonify(enrich_scholarship(scholarship))
     except Exception as e:
         return error_response(str(e), 500)

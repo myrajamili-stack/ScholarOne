@@ -1,20 +1,21 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RoleSelectionPage from "./pages/RoleSelectionPage";
 import AdminLayout from "./layouts/AdminLayout";
 import AdvisorLayout from "./layouts/AdvisorLayout";
 import SponsorLayout from "./layouts/SponsorLayout";
 import StudentLayout from "./layouts/StudentLayout";
-import AppointmentsPage from "./pages/AppointmentsPage";
-import CalendarPage from "./pages/CalendarPage";
-import LoginPage from "./pages/LoginPage";
-import MessagesPage from "./pages/MessagesPage";
-import PathwayQuizPage from "./pages/PathwayQuizPage";
-import ProfilePage from "./pages/ProfilePage";
-import RegisterPage from "./pages/RegisterPage";
-import RemindersPage from "./pages/RemindersPage";
-import ScholarshipsPage from "./pages/ScholarshipsPage";
-import SettingsPage from "./pages/SettingsPage";
-import StudentDashboard from "./pages/StudentDashboard";
+import AppointmentsPage from "./pages/student/AppointmentsPage";
+import CalendarPage from "./pages/student/CalendarPage";
+import LoginPage from "./pages/student/LoginPage";
+import MessagesPage from "./pages/student/MessagesPage";
+import PathwayQuizPage from "./pages/student/PathwayQuizPage";
+import ProfilePage from "./pages/student/ProfilePage";
+import RegisterPage from "./pages/student/RegisterPage";
+import RemindersPage from "./pages/student/RemindersPage";
+import ScholarshipsPage from "./pages/student/ScholarshipsPage";
+import SettingsPage from "./pages/student/SettingsPage";
+import StudentDashboard from "./pages/student/StudentDashboard";
 import AdminApplicationsPage from "./pages/admin/AdminApplicationsPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPlaceholderPage from "./pages/admin/AdminPlaceholderPage";
@@ -42,8 +43,9 @@ import SponsorSubscriptionsPage from "./pages/sponsor/SponsorSubscriptionsPage";
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/choose-role" element={<RoleSelectionPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/sponsor-login" element={<LoginPage audience="sponsor" />} />
       <Route path="/staff-login" element={<LoginPage audience="staff" />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route element={<ProtectedRoute />}>

@@ -4,6 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from db import get_db_connection
 from responses import error_response
+from security import issue_access_token
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
@@ -153,6 +154,6 @@ def login():
             return error_response("Invalid email or password", 401)
 
         user.pop("password", None)
-        return jsonify({"message": "Login successful", "user": user})
+        return jsonify({"message": "Login successful", "user": user, "access_token": issue_access_token(user)})
     except Exception as e:
         return error_response(str(e), 500)

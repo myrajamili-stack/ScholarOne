@@ -36,6 +36,7 @@ def create_application():
             from scholarship
             where scholarship_id = %s
               and lower(coalesce(status, '')) in ('approved', 'active')
+              and not coalesce((import_metadata->>'external_listing')::boolean,false)
         """, (scholarship_id,))
         if not cursor.fetchone():
             return error_response("Scholarship is not available for application.", 404)

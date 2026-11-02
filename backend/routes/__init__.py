@@ -8,9 +8,13 @@ from .quizzes import quizzes_bp
 from .scholarships import scholarships_bp
 from .sponsors import sponsors_bp
 from .students import students_bp
+from .assessment_attempts import assessment_attempts_bp
+from .scholarship_reminders import scholarship_reminders_bp
 
 
 def register_blueprints(app):
+    app.register_blueprint(scholarship_reminders_bp)
+    app.register_blueprint(assessment_attempts_bp)
     app.register_blueprint(health_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)

@@ -12,6 +12,7 @@ export type AuthUser = {
 export type LoginResponse = {
   message: string;
   user: AuthUser;
+  access_token: string;
 };
 
 export type RegisterResponse = {

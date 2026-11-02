@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import api from "../api/axios";
-import ScholarshipCard, { type Scholarship } from "../components/ScholarshipCard";
-import { getStoredUser } from "../utils/authStorage";
+import api from "../../api/axios";
+import ScholarshipCard, { type Scholarship } from "../../components/ScholarshipCard";
+import { getStoredUser } from "../../utils/authStorage";
+import { useScholarshipReminders } from "../../context/ScholarshipRemindersContext";
+import { getApiErrorMessage } from "../../utils/apiError";
+import { eligibilityStates, financialAidTypes, matchesFinancialAid, studyLevels, type FinancialAidFilter } from "../../utils/financialAid";
 
 type ApiScholarship = {
   scholarship_id: number;
@@ -13,6 +16,16 @@ type ApiScholarship = {
   amount?: number | string | null;
   funding_type?: string | null;
   category?: string | null;
+  study_level?: string | null;
+  eligible_state?: string | null;
+  study_levels?: string[] | null;
+  eligible_states?: string[] | null;
+  source_url?: string | null;
+  deadline_note?: string | null;
+  amount_note?: string | null;
+  intake_status?: string | null;
+  external_listing?: boolean;
+  import_notes?: string[];
   status?: string | null;
 };
 
@@ -47,12 +60,23 @@ function toScholarshipCard(scholarship: ApiScholarship): Scholarship {
     description: scholarship.description,
     eligibility_criteria: scholarship.eligibility_criteria,
     deadline: formatDate(scholarship.deadline),
+    deadline_date: scholarship.deadline,
     amount: scholarship.amount,
     status: scholarship.status,
     funding_type: scholarship.funding_type,
     category: scholarship.category,
+    study_level: scholarship.study_level,
+    eligible_state: scholarship.eligible_state,
+    study_levels: scholarship.study_levels,
+    eligible_states: scholarship.eligible_states,
+    source_url: scholarship.source_url,
+    deadline_note: scholarship.deadline_note,
+    amount_note: scholarship.amount_note,
+    intake_status: scholarship.intake_status,
+    external_listing: scholarship.external_listing,
+    import_notes: scholarship.import_notes,
     saved: false,
-    tags: [scholarship.category || "Bachelor", scholarship.funding_type || "Scholarship"],
+    tags: [...(scholarship.study_levels?.length ? scholarship.study_levels : [scholarship.study_level || scholarship.category || "Study level not specified"]), scholarship.funding_type || "Scholarship"],
   };
 }
 
@@ -65,8 +89,14 @@ function ScholarshipsPage() {
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
   const [selectedScholarship, setSelectedScholarship] = useState<Scholarship | null>(null);
   const [query, setQuery] = useState("");
+  const [aidFilter, setAidFilter] = useState<FinancialAidFilter>("all");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [stateFilter, setStateFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
   const [savingId, setSavingId] = useState<number | null>(null);
+  const [reminderSavingId, setReminderSavingId] = useState<number | null>(null);
+  const [reminderNotice, setReminderNotice] = useState("");
+  const { reminders, toggleReminder, error: remindersError } = useScholarshipReminders();
   const [applyingId, setApplyingId] = useState<number | null>(null);
   const [applicationNotice, setApplicationNotice] = useState<ApplicationNotice | null>(null);
   const [error, setError] = useState("");
@@ -112,8 +142,28 @@ function ScholarshipsPage() {
   }, [studentId]);
 
   const filteredScholarships = scholarships.filter((scholarship) =>
-    scholarship.title.toLowerCase().includes(query.toLowerCase())
+    matchesFinancialAid(scholarship, aidFilter, query, levelFilter, stateFilter)
   );
+
+  function clearFilters() {
+    setAidFilter("all"); setLevelFilter("all"); setStateFilter("all"); setQuery("");
+  }
+
+  async function handleToggleReminder(scholarship: Scholarship) {
+    const enabled = reminders.some((reminder) => reminder.scholarship_id === scholarship.scholarship_id);
+    setReminderSavingId(scholarship.scholarship_id);
+    setReminderNotice("");
+    setError("");
+    try {
+      await toggleReminder(scholarship.scholarship_id, !enabled);
+      setReminderNotice(enabled ? "Reminder turned off and removed from your reminders and calendar."
+        : "Reminder enabled. You will receive an in-app alert within 3 days of the deadline. Your calendar and reminders are updated.");
+    } catch (error) {
+      setError(getApiErrorMessage(error, "Unable to update the deadline reminder. Please try again."));
+    } finally {
+      setReminderSavingId(null);
+    }
+  }
 
   function updateSavedState(scholarshipId: number, saved: boolean) {
     setScholarships((currentScholarships) =>
@@ -256,6 +306,34 @@ function ScholarshipsPage() {
         />
       </div>
 
+      <div className="financial-aid-filter-bar">
+        <div className="financial-aid-dropdowns" role="group" aria-label="Filter financial aid">
+          <label>Financial Aid Type / Jenis Bantuan
+            <select value={aidFilter} onChange={(event) => setAidFilter(event.target.value as FinancialAidFilter)}>
+              <option value="all">All Financial Aid / Semua Bantuan</option>
+              {financialAidTypes.map((type) => <option key={type.id} value={type.id}>{type.english} / {type.malay}</option>)}
+            </select>
+          </label>
+          <label>Study Level / Peringkat Pengajian
+            <select value={levelFilter} onChange={(event) => setLevelFilter(event.target.value)}>
+              <option value="all">All Study Levels</option>
+              {studyLevels.map((level) => <option key={level} value={level}>{level === 'Postgraduate' ? 'Postgraduate (unspecified)' : level}</option>)}
+            </select>
+          </label>
+          <label>State / Negeri
+            <select value={stateFilter} onChange={(event) => setStateFilter(event.target.value)}>
+              <option value="all">All State</option>
+              {eligibilityStates.map((state) => <option key={state} value={state}>{state}</option>)}
+            </select>
+          </label>
+          <button className="financial-aid-clear" type="button" onClick={clearFilters}>Clear filters</button>
+        </div>
+        {stateFilter !== "all" && <p className="financial-aid-count">Some listings do not specify state eligibility. Select All State to include them.</p>}
+        {!isLoading && !error && <p className="financial-aid-count" role="status">Showing {filteredScholarships.length} of {scholarships.length} financial aid opportunities</p>}
+      </div>
+
+      {reminderNotice && <p className="scholarship-reminder-notice" role="status">{reminderNotice}</p>}
+      {remindersError && <p className="dashboard-message error">{remindersError}</p>}
       <section className="scholarship-grid module-scholarship-grid">
         {isLoading && <p className="dashboard-message">Loading scholarships...</p>}
         {error && <p className="dashboard-message error">{error}</p>}
@@ -266,12 +344,15 @@ function ScholarshipsPage() {
             isSaving={savingId === scholarship.scholarship_id}
             onToggleSaved={handleToggleSaved}
             onViewDetails={handleViewDetails}
+            reminderEnabled={reminders.some((reminder) => reminder.scholarship_id === scholarship.scholarship_id)}
+            isUpdatingReminder={reminderSavingId !== null}
+            onToggleReminder={handleToggleReminder}
           />
         ))}
         {!isLoading && !error && filteredScholarships.length === 0 && (
           <p className="dashboard-message">
-            No scholarships have been added yet. Approved scholarship listings will appear here after a sponsorship
-            provider creates them.
+            {scholarships.length === 0 ? "No financial aid opportunities have been added yet. Approved listings will appear here."
+              : <>No financial aid matches your selected filters and search.</>}
           </p>
         )}
       </section>
@@ -299,7 +380,7 @@ function ScholarshipsPage() {
             </button>
 
             <div className="scholarship-detail-header">
-              <span className="match listing-status">{selectedScholarship.status || "Available"}</span>
+              <span className="match listing-status">{selectedScholarship.intake_status === "closed" ? "Closed intake" : selectedScholarship.intake_status === "unconfirmed" ? "Check official source" : selectedScholarship.status || "Available"}</span>
               <h2 id="scholarship-detail-title">{selectedScholarship.title}</h2>
               <p>{selectedScholarship.organization_name || "ScholarOne Partner"}</p>
               <div className="pill-row">
@@ -312,17 +393,24 @@ function ScholarshipsPage() {
             <div className="scholarship-detail-grid">
               <div>
                 <span>Deadline</span>
-                <strong>{selectedScholarship.deadline || "To be announced"}</strong>
+                <strong>{selectedScholarship.deadline || "Not confirmed"}</strong>
+                {selectedScholarship.deadline_note && <p>{selectedScholarship.deadline_note}</p>}
               </div>
               <div>
                 <span>Funding amount</span>
-                <strong>{selectedScholarship.amount ? `RM ${selectedScholarship.amount}` : "Amount TBA"}</strong>
+                <strong>{selectedScholarship.amount_note ? selectedScholarship.amount_note.length > 70 ? "See funding details" : selectedScholarship.amount_note : selectedScholarship.amount ? `RM ${selectedScholarship.amount}` : "Amount TBA"}</strong>
               </div>
               <div>
                 <span>Funding type</span>
                 <strong>{selectedScholarship.funding_type || "Scholarship"}</strong>
               </div>
             </div>
+
+            {selectedScholarship.external_listing && <section className="scholarship-detail-section">
+              <h3>Published Funding Information</h3><p>{selectedScholarship.amount_note || "Funding amount not specified in the supplied document."}</p>
+              <p>Imported from the supplied scholarship document. Confirm current availability and requirements with the official provider.</p>
+              {selectedScholarship.import_notes?.map((note) => <p key={note}>{note}</p>)}
+            </section>}
 
             <section className="scholarship-detail-section">
               <h3>Scholarship Description</h3>
@@ -341,7 +429,10 @@ function ScholarshipsPage() {
             </section>
 
             <div className="scholarship-detail-actions">
-              <button
+              {selectedScholarship.external_listing ? selectedScholarship.source_url
+                ? <a className="scholarship-official-link" href={selectedScholarship.source_url} target="_blank" rel="noreferrer">Visit official source ↗</a>
+                : <p>No source URL was supplied. Check with the programme provider.</p>
+                : <button
                 type="button"
                 className={`scholarship-detail-apply${
                   selectedScholarship.application_status ? " is-applied" : ""
@@ -357,7 +448,7 @@ function ScholarshipsPage() {
                   : applyingId === selectedScholarship.scholarship_id
                     ? "Submitting..."
                     : "Apply for Scholarship"}
-              </button>
+              </button>}
               <button
                 type="button"
                 className={`scholarship-detail-save${selectedScholarship.saved ? " is-saved" : ""}`}

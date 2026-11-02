@@ -4,9 +4,12 @@ import api from "../api/axios";
 import type { StudentProfile } from "../types/student";
 import { getStoredUser } from "../utils/authStorage";
 import { formatEducationLevel, getInitials } from "../utils/userDisplay";
+import { useScholarshipReminders } from "../context/ScholarshipRemindersContext";
 
 function StudentRightPanel() {
   const user = getStoredUser();
+  const { reminders, dueReminders, isLoading: remindersLoading, error: remindersError } = useScholarshipReminders();
+  const upcomingReminders = reminders.filter((reminder) => reminder.days_until >= 0).slice(0, 3);
   const [profile, setProfile] = useState<StudentProfile | null>(null);
 
   useEffect(() => {
@@ -59,10 +62,11 @@ function StudentRightPanel() {
           <h3>Upcoming Deadlines</h3>
           <Link to="/calendar">View Calendar</Link>
         </div>
-        <p className="dashboard-message">
-          No upcoming scholarship deadlines yet. Deadlines will appear here after approved scholarship listings are
-          available.
-        </p>
+        {remindersLoading ? <p className="dashboard-message">Loading reminders...</p>
+          : remindersError ? <p className="dashboard-message error">{remindersError}</p>
+            : upcomingReminders.length ? upcomingReminders.map((reminder) => <div className="student-reminder-preview" key={reminder.scholarship_id}>
+              <strong>{reminder.title}</strong><span>{reminder.days_until === 0 ? "Due today" : `${reminder.days_until} days left`}</span>
+            </div>) : <p className="dashboard-message">Click the bell beside a scholarship to track its deadline.</p>}
       </section>
 
       <section className="notification-card">
@@ -70,7 +74,11 @@ function StudentRightPanel() {
           <h3>Latest Notifications</h3>
           <Link to="/reminders">View All</Link>
         </div>
-        <p className="dashboard-message">No notifications yet.</p>
+        {remindersLoading ? <p className="dashboard-message">Loading notifications...</p>
+          : remindersError ? <p className="dashboard-message error">{remindersError}</p>
+          : dueReminders.length ? dueReminders.slice(0, 3).map((reminder) => <div className="student-reminder-preview" key={reminder.scholarship_id}>
+          <strong>{reminder.title}</strong><span>{reminder.days_until === 0 ? "Deadline is today" : `Deadline in ${reminder.days_until} days`}</span>
+        </div>) : <p className="dashboard-message">No scholarship deadlines within 3 days.</p>}
       </section>
     </aside>
   );

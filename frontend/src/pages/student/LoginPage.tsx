@@ -1,16 +1,16 @@
 import { useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import api from "../api/axios";
-import type { LoginResponse } from "../types/auth";
-import { getApiErrorMessage } from "../utils/apiError";
-import { clearStoredUser, storeUser } from "../utils/authStorage";
-import "../styles/auth.css";
+import api from "../../api/axios";
+import type { LoginResponse } from "../../types/auth";
+import { getApiErrorMessage } from "../../utils/apiError";
+import { clearStoredUser, storeAccessToken, storeUser } from "../../utils/authStorage";
+import "../../styles/auth.css";
 
 type LoginPageProps = {
-  audience?: "general" | "staff";
+  audience?: "student" | "sponsor" | "staff";
 };
 
-const generalRoles = ["student", "sponsor"];
+const studentRoles = ["student"];
 const staffRoles = ["admin", "advisor"];
 
 function getDashboardPath(role: string) {
@@ -29,7 +29,7 @@ function getDashboardPath(role: string) {
   return "/dashboard";
 }
 
-function LoginPage({ audience = "general" }: LoginPageProps) {
+function LoginPage({ audience = "student" }: LoginPageProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const locationState = location.state as { message?: string; email?: string } | null;
@@ -39,6 +39,7 @@ function LoginPage({ audience = "general" }: LoginPageProps) {
   const [successMessage] = useState(locationState?.message || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isStaffLogin = audience === "staff";
+  const isSponsorLogin = audience === "sponsor";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,19 +53,21 @@ function LoginPage({ audience = "general" }: LoginPageProps) {
       });
 
       const userRole = response.data.user.role;
-      const allowedRoles = isStaffLogin ? staffRoles : generalRoles;
+      const allowedRoles = isStaffLogin ? staffRoles : isSponsorLogin ? ["sponsor"] : studentRoles;
 
       if (!allowedRoles.includes(userRole)) {
         clearStoredUser();
         setError(
           isStaffLogin
-            ? "This login is only for administrators and academic advisors. Please use the general user login."
-            : "This login is only for students and sponsorship providers. Please use the staff login.",
+            ? "This login is only for administrators and academic advisors."
+            : isSponsorLogin ? "This login is only for sponsorship providers."
+            : "This login is only for students. Please use a student account.",
         );
         return;
       }
 
       storeUser(response.data.user);
+      storeAccessToken(response.data.access_token);
       navigate(getDashboardPath(userRole));
     } catch (error) {
       setError(getApiErrorMessage(error, "Invalid email or password. Please try again."));
@@ -80,34 +83,26 @@ function LoginPage({ audience = "general" }: LoginPageProps) {
           Scholar<span>One</span>
         </a>
         <div className="auth-hero">
-          <p>{isStaffLogin ? "Staff Workspace" : "Scholarship Management & Academic Pathway System"}</p>
-          <h1>{isStaffLogin ? "Manage ScholarOne with confidence." : "Plan your scholarship journey with clarity."}</h1>
+          <p>{isStaffLogin ? "Staff Workspace" : isSponsorLogin ? "Provider Workspace" : "Scholarship Management & Academic Pathway System"}</p>
+          <h1>{isStaffLogin ? "Manage ScholarOne with confidence." : isSponsorLogin ? "Connect your scholarships with the right students." : "Plan your scholarship journey with clarity."}</h1>
         </div>
         <div className="auth-mock-card">
-          <span>{isStaffLogin ? "Staff access" : "Recommended match"}</span>
-          <strong>{isStaffLogin ? "Administrator & Academic Advisor Portal" : "Future Leaders Scholarship"}</strong>
-          <small>{isStaffLogin ? "Manage users, approvals, schedules, and reports" : "95% profile match"}</small>
+          <span>{isStaffLogin ? "Staff access" : isSponsorLogin ? "Provider tools" : "Recommended match"}</span>
+          <strong>{isStaffLogin ? "Administrator & Academic Advisor Portal" : isSponsorLogin ? "Sponsorship Provider Portal" : "Future Leaders Scholarship"}</strong>
+          <small>{isStaffLogin ? "Manage users, approvals, schedules, and reports" : isSponsorLogin ? "Manage scholarships and review applications" : "95% profile match"}</small>
         </div>
       </section>
 
       <section className="auth-panel">
         <div className="auth-card">
-          <p className="auth-eyebrow">{isStaffLogin ? "Staff login" : "General user login"}</p>
-          <h2>{isStaffLogin ? "Log in as Staff" : "Log in as Student or Provider"}</h2>
+          <p className="auth-eyebrow">{isStaffLogin ? "Staff login" : isSponsorLogin ? "Provider login" : "Student login"}</p>
+          <h2>{isStaffLogin ? "Log in as Staff" : isSponsorLogin ? "Log in as Sponsorship Provider" : "Log in as Student"}</h2>
           <p className="auth-subcopy">
             {isStaffLogin
               ? "For administrators and academic advisors managing ScholarOne operations."
-              : "For students and sponsorship providers using ScholarOne services."}
+              : isSponsorLogin ? "Manage your scholarship listings and student applications."
+              : "Access scholarships, plan your academic pathway, and manage your student profile."}
           </p>
-
-          <div className="auth-login-tabs" aria-label="Login type">
-            <Link className={!isStaffLogin ? "active" : ""} to="/login">
-              General User
-            </Link>
-            <Link className={isStaffLogin ? "active" : ""} to="/staff-login">
-              Staff User
-            </Link>
-          </div>
 
           <form className="auth-form" onSubmit={handleSubmit}>
             {successMessage && <p className="auth-success">{successMessage}</p>}
@@ -118,7 +113,7 @@ function LoginPage({ audience = "general" }: LoginPageProps) {
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="sarah@student.com"
+                placeholder={isStaffLogin ? "staff@scholarone.com" : isSponsorLogin ? "provider@organization.com" : "sarah@student.com"}
                 required
               />
             </label>
@@ -140,14 +135,9 @@ function LoginPage({ audience = "general" }: LoginPageProps) {
               {isSubmitting ? "Logging in..." : "Log In"}
             </button>
           </form>
-
-          {isStaffLogin ? (
+          {!isStaffLogin && !isSponsorLogin && (
             <p className="auth-switch">
-              Student or sponsorship provider? <Link to="/login">Use general user login</Link>
-            </p>
-          ) : (
-            <p className="auth-switch">
-              Need an account? <Link to="/register">Create an account</Link>
+              Do not have an account yet? <Link to="/register?role=student">Sign Up</Link>
             </p>
           )}
         </div>

@@ -4,10 +4,13 @@ import { Link } from "react-router-dom";
 import api from "../../api/axios";
 import { getApiErrorMessage } from "../../utils/apiError";
 import { getStoredUser } from "../../utils/authStorage";
+import { eligibilityStates, studyLevels } from "../../utils/financialAid";
 
 type ScholarshipForm = {
   title: string;
   category: string;
+  study_level: string;
+  eligible_state: string;
   funding_type: string;
   amount: string;
   deadline: string;
@@ -19,6 +22,8 @@ type ScholarshipForm = {
 const initialForm: ScholarshipForm = {
   title: "",
   category: "",
+  study_level: "",
+  eligible_state: "",
   funding_type: "",
   amount: "",
   deadline: "",
@@ -48,6 +53,11 @@ const scholarshipCategories = [
 ];
 
 const fundingTypes = [
+  "Scholarship",
+  "Education Loan",
+  "Financial Assistance",
+  "Special Assistance",
+  "One-off Assistance",
   "Full Scholarship",
   "Partial Funding",
   "Tuition Fee Waiver",
@@ -57,7 +67,7 @@ const fundingTypes = [
   "Research Grant",
 ];
 
-const sampleScholarships: ScholarshipForm[] = [
+const sampleScholarships: Array<Omit<ScholarshipForm, 'study_level' | 'eligible_state'>> = [
   {
     title: "IJM Scholarship Programme 2026",
     category: "Undergraduate",
@@ -192,7 +202,7 @@ function SponsorAddScholarshipPage() {
                   (scholarship) => scholarship.title === event.target.value,
                 );
                 if (selectedScholarship) {
-                  setForm(selectedScholarship);
+                  setForm({ ...initialForm, ...selectedScholarship });
                 }
               }}
             >
@@ -250,6 +260,22 @@ function SponsorAddScholarshipPage() {
                 </select>
               </label>
 
+              <label>
+                Eligible study level
+                <select value={form.study_level} onChange={(event) => updateField("study_level", event.target.value)}>
+                  <option value="">Not specified</option>
+                  <option value="All Study Levels">All Study Levels</option>
+                  {studyLevels.map((level) => <option key={level} value={level}>{level}</option>)}
+                </select>
+              </label>
+              <label>
+                Eligible state
+                <select value={form.eligible_state} onChange={(event) => updateField("eligible_state", event.target.value)}>
+                  <option value="">Not specified</option>
+                  <option value="All States">All States / Nationwide</option>
+                  {eligibilityStates.map((state) => <option key={state} value={state}>{state}</option>)}
+                </select>
+              </label>
               <label>
                 Amount (MYR)
                 <input

@@ -1,16 +1,14 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import api from "../api/axios";
-import type { RegisterResponse } from "../types/auth";
-import { getApiErrorMessage } from "../utils/apiError";
-import { clearStoredUser } from "../utils/authStorage";
-import "../styles/auth.css";
-
-type AccountType = "student" | "sponsor";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import api from "../../api/axios";
+import type { RegisterResponse } from "../../types/auth";
+import { getApiErrorMessage } from "../../utils/apiError";
+import { clearStoredUser } from "../../utils/authStorage";
+import "../../styles/auth.css";
 
 function RegisterPage() {
   const navigate = useNavigate();
-  const [accountType, setAccountType] = useState<AccountType | null>(null);
+  const [searchParams] = useSearchParams();
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -73,7 +71,7 @@ function RegisterPage() {
         subscription_status: "free",
       });
 
-      navigate("/login", {
+      navigate("/sponsor-login", {
         state: {
           message: "Provider account created successfully. Please log in to continue.",
           email: response.data.user.email,
@@ -86,8 +84,8 @@ function RegisterPage() {
     }
   }
 
-  const isStudent = accountType === "student";
-  const isSponsor = accountType === "sponsor";
+  const isSponsor = searchParams.get("role") === "sponsor";
+  const isStudent = !isSponsor;
 
   return (
     <main className="auth-shell">
@@ -108,37 +106,8 @@ function RegisterPage() {
 
       <section className="auth-panel">
         <div className="auth-card register-card">
-          {!accountType && (
-            <>
-              <p className="auth-eyebrow">Create account</p>
-              <h2>Are you a Student or Sponsorship Provider?</h2>
-              <p className="auth-subcopy">Choose the account type that matches how you want to use ScholarOne.</p>
-
-              <div className="account-choice-grid">
-                <button type="button" className="account-choice-card" onClick={() => setAccountType("student")}>
-                  <span>Student</span>
-                  <strong>Find scholarships and academic pathways</strong>
-                  <small>Create a student profile, get recommendations, take pathway quizzes, and book advisor sessions.</small>
-                </button>
-
-                <button type="button" className="account-choice-card" onClick={() => setAccountType("sponsor")}>
-                  <span>Sponsorship Provider</span>
-                  <strong>Advertise and manage scholarships</strong>
-                  <small>Register your organization, submit scholarship listings, and review student applications.</small>
-                </button>
-              </div>
-
-              <p className="auth-switch">
-                Already have an account? <Link to="/login">Log in</Link>
-              </p>
-            </>
-          )}
-
           {isStudent && (
             <>
-              <button className="auth-back-button" type="button" onClick={() => setAccountType(null)}>
-                Back to account type
-              </button>
               <p className="auth-eyebrow">Create account</p>
               <h2>Register as Student</h2>
               <p className="auth-subcopy">Fill in your basic academic details to start receiving scholarship matches.</p>
@@ -170,12 +139,16 @@ function RegisterPage() {
 
                 <div className="auth-grid">
                   <label>
-                    Education level
+                    Current Education level
                     <select name="education_level" defaultValue="Undergraduate">
-                      <option>Foundation</option>
+                      <option>SPM / IGCSE / O-Level</option>
+                      <option>Pre-University (A-Level / Foundation / Matriculation / STPM / IB)</option>
+                      <option>Certificate / TVET</option>
                       <option>Diploma</option>
-                      <option>Undergraduate</option>
-                      <option>Postgraduate</option>
+                      <option>Bachelor's Degree</option>
+                      <option>Postgraduate Diploma</option>
+                      <option>Master's Degree</option>
+                      <option>PhD / Doctoral Studies</option>
                     </select>
                   </label>
 
@@ -212,9 +185,6 @@ function RegisterPage() {
 
           {isSponsor && (
             <>
-              <button className="auth-back-button" type="button" onClick={() => setAccountType(null)}>
-                Back to account type
-              </button>
               <p className="auth-eyebrow">Create account</p>
               <h2>Register as Sponsorship Provider</h2>
               <p className="auth-subcopy">Register your organization to advertise scholarships and manage student applications.</p>
@@ -275,7 +245,7 @@ function RegisterPage() {
               </form>
 
               <p className="auth-switch">
-                Already have an account? <Link to="/login">Log in</Link>
+                Already have an account? <Link to="/sponsor-login">Log in</Link>
               </p>
             </>
           )}
