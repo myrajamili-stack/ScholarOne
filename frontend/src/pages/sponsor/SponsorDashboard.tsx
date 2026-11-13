@@ -1,5 +1,8 @@
+import SubscriptionBilling from "../../components/sponsor/SubscriptionBilling";
+import Icon from "../../components/advisor/AdvisorIcon";
+import AppointmentArtwork from "../../components/student/AppointmentArtwork";
 import { Link } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { getApiErrorMessage } from "../../utils/apiError";
 import { getStoredUser } from "../../utils/authStorage";
@@ -79,19 +82,21 @@ function getStatusTone(status?: string | null) {
 
 function SponsorDashboard() {
   const user = getStoredUser();
+  const sponsorId = user?.user_id;
+  const [retry, setRetry] = useState(0);
   const [dashboard, setDashboard] = useState<SponsorDashboardData | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadDashboard() {
-      if (!user?.user_id) {
+      if (!sponsorId) {
         setIsLoading(false);
         return;
       }
 
       try {
-        const response = await api.get<SponsorDashboardData>(`/sponsors/${user.user_id}/dashboard`);
+        const response = await api.get<SponsorDashboardData>(`/sponsors/${sponsorId}/dashboard`);
         setDashboard(response.data);
       } catch (error) {
         setError(getApiErrorMessage(error, "Unable to load sponsorship provider dashboard."));
@@ -101,15 +106,15 @@ function SponsorDashboard() {
     }
 
     loadDashboard();
-  }, [user?.user_id]);
+  }, [sponsorId, retry]);
 
-  const maxTrendValue = useMemo(() => {
-    if (!dashboard?.application_trend.length) {
-      return 0;
-    }
+  useEffect(() => {
+    const refresh = () => setRetry(value => value + 1);
+    window.addEventListener("scholarone-billing-updated", refresh);
+    return () => window.removeEventListener("scholarone-billing-updated", refresh);
+  }, []);
 
-    return Math.max(...dashboard.application_trend.map((item) => Number(item.total || 0)));
-  }, [dashboard?.application_trend]);
+  const maxTrendValue = Math.max(0, ...(dashboard?.application_trend || []).map((item) => Number(item.total || 0)));
 
   if (isLoading) {
     return (
@@ -122,7 +127,7 @@ function SponsorDashboard() {
   if (error || !dashboard) {
     return (
       <div className="sponsor-page">
-        <section className="sponsor-empty-state">{error || "Sponsor dashboard data is not available."}</section>
+        <section className="sponsor-empty-state" role="alert"><p>{error || "Sponsor dashboard data is not available."}</p><button type="button" className="sponsor-add-button" onClick={() => {setIsLoading(true);setError("");setRetry(value => value + 1);}}>Try again</button></section>
       </div>
     );
   }
@@ -135,36 +140,37 @@ function SponsorDashboard() {
     <div className="sponsor-page">
       <section className="sponsor-hero">
         <div>
-          <p className="sponsor-kicker">Provider Workspace</p>
-          <h2>{dashboard.sponsor.organization_name || "Sponsorship Provider"}</h2>
-          <span>Track scholarship listings, student applications, subscription usage, and provider updates.</span>
+          <p className="sponsor-kicker"><Icon name="home" />Provider Workspace</p>
+          <h2>Manage Your Scholarship Programs</h2>
+          <span>Track scholarship listings, student applications, subscription usage, and provider updates in one place.</span>
         </div>
+        <img className="sph-hero-art" src="/images/sponsor-dashboard-hero.png" alt="" />
         <Link className="sponsor-hero-action" to="/sponsor/add-scholarship">
-          Add Scholarship
+          <span aria-hidden="true">＋</span> Add Scholarship
         </Link>
       </section>
 
       <section className="sponsor-stats-grid" aria-label="Sponsorship provider summary">
         <article className="sponsor-stat-card purple">
-          <span>▣</span>
+          <span><Icon name="graduation" /></span>
           <p>Total Scholarships</p>
           <strong>{dashboard.summary.total_scholarships}</strong>
           <small>{dashboard.summary.active_scholarships} active listings</small>
         </article>
-        <article className="sponsor-stat-card blue">
-          <span>□</span>
+        <article className="sponsor-stat-card amber">
+          <span><Icon name="users" /></span>
           <p>Total Applications</p>
           <strong>{dashboard.summary.total_applications}</strong>
           <small>Applications from student submissions</small>
         </article>
-        <article className="sponsor-stat-card green">
-          <span>◉</span>
+        <article className="sponsor-stat-card blue">
+          <span><Icon name="eye" /></span>
           <p>Total Views</p>
           <strong>{dashboard.summary.total_views}</strong>
           <small>Views tracking is not available yet</small>
         </article>
-        <article className="sponsor-stat-card blue">
-          <span>♛</span>
+        <article className="sponsor-stat-card pink">
+          <span><Icon name="layers" /></span>
           <p>Plan</p>
           <strong>{dashboard.subscription.plan_name || dashboard.sponsor.subscription_status}</strong>
           <small>Renewal: {formatDate(dashboard.subscription.end_date)}</small>
@@ -175,16 +181,17 @@ function SponsorDashboard() {
         <article className="sponsor-panel applications-chart">
           <div className="sponsor-panel-header">
             <div>
-              <p className="sponsor-kicker">Applications Overview</p>
-              <h2>Application activity</h2>
+              <h2><Icon name="chart" />Applications Overview</h2>
+              <p className="sph-panel-subtitle">Application activity</p>
             </div>
-            <span className="sponsor-muted">From application table</span>
+            <Link to="/sponsor/applications">View applications <Icon name="chevron" /></Link>
           </div>
 
           {dashboard.application_trend.length > 0 ? (
             <div className="sponsor-bars" aria-label="Application overview bar chart">
               {dashboard.application_trend.map((item) => (
                 <span
+                  role="img" aria-label={`${formatDate(item.application_date)}: ${item.total} applications`}
                   key={item.application_date}
                   title={`${formatDate(item.application_date)}: ${item.total} applications`}
                   style={{ height: `${maxTrendValue > 0 ? Math.max((Number(item.total) / maxTrendValue) * 100, 8) : 0}%` }}
@@ -193,7 +200,8 @@ function SponsorDashboard() {
             </div>
           ) : (
             <div className="sponsor-empty-state chart">
-              No application activity yet. Student applications will appear here after students apply to your scholarships.
+              <div className="sph-application-art" aria-hidden="true"><Icon name="users" /><Icon name="search" /></div>
+              <h3>No application activity yet.</h3><p>Student applications will appear here after students apply to your scholarships.</p>
             </div>
           )}
         </article>
@@ -206,28 +214,29 @@ function SponsorDashboard() {
           <article className="sponsor-panel subscription-panel">
             <div className="sponsor-panel-header">
               <div>
-                <p className="sponsor-kicker">Subscription Usage</p>
+                <p className="sponsor-kicker"><Icon name="layers" />Subscription Usage</p>
                 <h2>
                   {usedScholarships} / {scholarshipLimit} Scholarships Used
                 </h2>
               </div>
             </div>
-            <div className="sponsor-progress">
+            <div className="sponsor-progress" role="progressbar" aria-label="Scholarship slots used" aria-valuemin={0} aria-valuemax={scholarshipLimit} aria-valuenow={Math.min(usedScholarships, scholarshipLimit)}>
               <span style={{ width: `${usagePercentage}%` }} />
             </div>
             <div className="sponsor-upgrade-box">
+              <AppointmentArtwork name="calendar" className="sph-slots-art" />
               <strong>{usedScholarships >= scholarshipLimit ? "Limit reached" : "Available slots"}</strong>
               <p>
                 {usedScholarships >= scholarshipLimit
                   ? "Upgrade your plan to advertise more scholarships."
                   : `${Math.max(scholarshipLimit - usedScholarships, 0)} scholarship slot(s) remaining on this plan.`}
               </p>
-              <Link to="/sponsor/subscriptions">Manage Plan</Link>
+              <Link to="/sponsor/subscriptions">Manage Plan <Icon name="chevron" /></Link>
             </div>
           </article>
         </aside>
 
-        <article className="sponsor-panel program-panel">
+        {dashboard.scholarships.length > 0 && <article className="sponsor-panel program-panel">
           <div className="sponsor-panel-header">
             <div>
               <p className="sponsor-kicker">My Scholarships</p>
@@ -260,9 +269,9 @@ function SponsorDashboard() {
               No scholarship listings yet. Create your first scholarship advertisement to start receiving student applications.
             </div>
           )}
-        </article>
+        </article>}
 
-        <aside className="sponsor-side-stack">
+        {dashboard.notifications.length > 0 && <aside className="sponsor-side-stack">
           <article className="sponsor-panel">
             <div className="sponsor-panel-header">
               <div>
@@ -295,8 +304,9 @@ function SponsorDashboard() {
             </h2>
             <Link to="/sponsor/add-scholarship">Continue</Link>
           </article>
-        </aside>
+        </aside>}
       </section>
+      <SubscriptionBilling />
     </div>
   );
 }

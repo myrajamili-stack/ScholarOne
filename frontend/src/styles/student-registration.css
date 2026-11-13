@@ -1,0 +1,42 @@
+.student-registration { min-height: 100vh; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 40px; padding: 44px clamp(24px, 4.6vw, 72px); color: #1d1048; background: #f5efff url('/images/student-calendar-waves.png') center bottom / cover no-repeat; }
+.registration-introduction { display: flex; flex-direction: column; min-width: 0; }
+.registration-brand { display: flex; align-items: center; gap: 12px; width: fit-content; color: #1d1048; text-decoration: none; }
+.registration-brand > svg { width: 64px; height: 64px; color: #801cff; }
+.registration-brand strong { font-size: 36px; font-weight: 850; letter-spacing: -1.4px; line-height: 1.1; }
+.registration-brand strong span { color: #801cff; }
+.registration-brand small { display: block; font-size: 14px; margin-top: 4px; }
+.registration-welcome { margin-top: 56px; }
+.registration-badge { display: inline-flex; align-items: center; gap: 10px; padding: 12px 22px; border-radius: 40px; color: #710de4; background: #edddff; font-weight: 750; font-size: 18px; }
+.registration-badge svg { width: 27px; height: 27px; }
+.registration-welcome h1 { font-size: clamp(36px, 3.5vw, 54px); font-weight: 850; line-height: 1.08; letter-spacing: -1px; margin: 22px 0 16px; }
+.registration-welcome h1 span { color: #7220d7; }
+.registration-welcome > p:last-child { font-size: 21px; line-height: 1.5; color: #5b568a; max-width: 500px; margin: 0; }
+.registration-illustration { width: 100%; max-height: 450px; object-fit: contain; object-position: center bottom; margin-top: 18px; flex: 1; min-height: 0; }
+.registration-form-panel { display: flex; align-items: center; min-width: 0; }
+.registration-card { width: 100%; padding: 42px clamp(24px, 4vw, 64px); border: 1px solid #fff; border-radius: 38px; background: #ffffffd9; box-shadow: 0 18px 40px #783dcc12; }
+.registration-eyebrow { text-transform: uppercase; color: #7c0bfc; font-weight: 800; margin: 0 0 12px; font-size: 17px; }
+.registration-card h2 { margin: 0 0 8px; font-size: clamp(28px, 2.7vw, 42px); font-weight: 850; line-height: 1.15; letter-spacing: -.7px; }
+.registration-description { color: #5b568a; font-size: 20px; line-height: 1.35; margin: 0; }
+.registration-form { display: grid; gap: 18px; margin-top: 25px; }
+.registration-form label { display: grid; gap: 5px; font-size: 18px; font-weight: 750; }
+.registration-form label > span:first-child { display: flex; align-items: center; gap: 12px; }
+.registration-form label > span > svg { width: 25px; height: 25px; color: #8a20ff; }
+.registration-form input, .registration-form select { min-width: 0; width: 100%; height: 50px; border: 1.5px solid #d4c8f0; border-radius: 13px; color: #26204c; background: #fcfaff; padding: 0 20px; font: inherit; font-size: 17px; font-weight: 400; }
+.registration-form input::placeholder { color: #67618c; }
+.registration-form input:focus, .registration-form select:focus { outline: 3px solid #dfceff; outline-offset: 1px; border-color: #8d43ee; }
+.registration-password { position: relative; display: block; }
+.registration-password input { padding-right: 52px; }
+.registration-password button { position: absolute; right: 6px; top: 5px; display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 9px; background: transparent; color: #69608d; cursor: pointer; }
+.registration-password button svg { width: 24px; height: 24px; }
+.registration-phone { display: grid; grid-template-columns: 125px minmax(0, 1fr); gap: 15px; margin-top: 5px; }
+.registration-phone select { padding: 0 12px; background: #efe5ff; font-weight: 650; }
+.registration-submit { display: flex; justify-content: center; align-items: center; gap: 16px; border: 0; border-radius: 40px; background: linear-gradient(110deg, #9b4dff, #790dff); color: #fff; font-size: 21px; font-weight: 750; min-height: 58px; padding: 12px 16px; margin-top: 16px; box-shadow: 0 10px 22px #7624e524; cursor: pointer; }
+.registration-submit svg { width: 28px; height: 28px; }
+.registration-submit:disabled { opacity: .6; cursor: wait; }
+.registration-login { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 12px; color: #5b568a; margin: 38px 0 0; font-size: 18px; }
+.registration-login::before, .registration-login::after { content: ''; height: 1px; background: #ded1f5; flex: 1; min-width: 12px; }
+.registration-login a { color: #7e12fb; font-weight: 800; text-decoration: none; }
+.student-registration a:focus-visible, .student-registration button:focus-visible { outline: 3px solid #b27aff; outline-offset: 3px; }
+@media (max-width: 1050px) { .student-registration { gap: 24px; padding: 30px; } .registration-card { padding: 32px 26px; } .registration-brand strong { font-size: 29px; } .registration-welcome > p:last-child { font-size: 18px; } .registration-welcome h1 { font-size: 38px; } }
+@media (max-width: 800px) { .student-registration { grid-template-columns: minmax(0, 1fr); } .registration-welcome { margin-top: 25px; } .registration-illustration { display: none; } .registration-card { max-width: 650px; margin: 0 auto; } .registration-welcome h1 br { display: none; } .registration-welcome h1 span { display: block; } }
+@media (max-width: 450px) { .student-registration { padding: 24px 16px; } .registration-brand > svg { width: 48px; height: 48px; } .registration-welcome h1 { font-size: 34px; } .registration-badge { font-size: 16px; padding: 10px 16px; } .registration-card { border-radius: 26px; padding: 28px 20px; } .registration-description { font-size: 17px; } .registration-phone { grid-template-columns: 100px minmax(0, 1fr); gap: 8px; } .registration-form input { padding-left: 12px; font-size: 15px; } .registration-submit { font-size: 17px; } .registration-login { font-size: 15px; gap: 8px; } }

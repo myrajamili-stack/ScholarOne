@@ -1,0 +1,48 @@
+.apw-hero { background: linear-gradient(115deg,#7636ed,#5852e4 65%,#8938ee); }
+.apw-hero::before { background-image: url('/images/sponsor-dashboard-hero.png'); background-size: auto 100%; background-position: 98% center; mask-image: none; }
+.apw-hero > div { max-width: 61%; }
+.apw-hero h2, .apw-hero p { color: white; }
+.apw-eyebrow { display: block; color: white; font-size: 12px; font-weight: 750; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+.apw-page .adh-metric.amber { background: linear-gradient(120deg,#fffaff,#fff7e8); }
+.apw-page .adh-metric.green { background: linear-gradient(120deg,#fffaff,#eef9f6); }
+.apw-page .adh-metric.green .adh-icon { color: #0ab090; background: #dcf5ee; }
+.apw-tabs { width: fit-content; margin: 6px 0 0; }
+.apw-tabs button { padding: 12px 25px; }
+.apw-columns { display: grid; grid-template-columns: minmax(0,1.8fr) minmax(310px,1fr); gap: 18px; align-items: start; }
+.apw-directory { min-width: 0; }
+.apw-directory-heading { display: flex; align-items: center; gap: 20px; justify-content: space-between; margin-bottom: 18px; }
+.apw-directory-heading h2 { font-size: 19px; font-weight: 800; margin: 0 0 5px; }
+.apw-directory-heading p { font-size: 12px; color: #6c528b; margin: 0; }
+.apw-directory-heading .aum-search { min-width: 190px; max-width: 235px; }
+.apw-table { min-width: 625px; }
+.apw-table th,.apw-table td { padding: 15px 10px; }
+.apw-table td:first-child { min-width: 170px; width: auto; }
+.apw-table small { display: block; font-size: 11px; color: #795b92; margin-top: 3px; }
+.apw-details { padding: 6px 11px; border-radius: 18px; font-size: 11px; }
+.apw-page .admin-status-badge.active,.apw-page .admin-status-badge.published { background: #e2f7de; color: #218134; }
+.apw-page .admin-status-badge.pending,.apw-page .admin-status-badge.pending_review,.apw-page .admin-status-badge.submitted { background: #fff0ce; color: #9b6013; }
+.apw-page .admin-status-badge.draft { background: #eee8f3; color: #756385; }
+.apw-aside { display: grid; gap: 16px; min-width: 0; }
+.apw-aside .adh-chart-content { gap: 15px; }
+.apw-aside .adh-donut { width: 120px; height: 120px; flex-basis: 120px; }
+.apw-aside .adh-breakdown > div { font-size: 11px; gap: 6px; }
+.apw-aside .adh-breakdown small { min-width: auto; }
+.apw-submission { width: 100%; display: flex; align-items: center; gap: 10px; background: transparent; border: 0; border-bottom: 1px solid #eee4fa; padding: 12px 0; text-align: left; color: #301445; }
+.apw-submission > svg { color: #8e45ec; width: 27px; flex: 0 0 27px; }
+.apw-submission strong,.apw-submission small { display: block; font-size: 11px; }
+.apw-submission small { color: #765b8c; margin-top: 4px; }
+.apw-submission em { margin-left: auto; white-space: nowrap; font-size: 10px; font-style: normal; color: #9b6013; background: #fff0ce; border-radius: 20px; padding: 5px 9px; }
+.apw-view-all { display: block; margin: 18px 0 0 auto; border: 0; background: transparent; color: #7820ea; font-size: 12px; font-weight: 700; }
+.apw-empty { font-size: 12px; line-height: 1.7; color: #806595; padding: 18px 0; }
+.apw-dialog { width: min(650px,calc(100vw - 30px)); }
+.apw-dialog h3 { font-size: 22px; font-weight: 800; }
+.apw-dialog h4 { font-size: 15px; font-weight: 750; }
+.apw-dialog p,.apw-dialog li { font-size: 13px; line-height: 1.7; }
+.apw-copy { white-space: pre-wrap; overflow-wrap: anywhere; }
+.apw-dialog dl { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; background: #f4edff; padding: 18px; border-radius: 12px; margin: 20px 0; }
+.apw-dialog dt { color: #806499; font-size: 11px; margin-bottom: 4px; }
+.apw-dialog dd { font-size: 13px; margin: 0; overflow-wrap: anywhere; }
+.apw-related { display: flex; justify-content: space-between; gap: 12px; width: 100%; border: 1px solid #e1cff8; border-radius: 10px; padding: 12px; margin-top: 9px; text-align: left; color: #6b29bd; background: #faf5ff; font-size: 13px; }
+.apw-detail-note { color: #806595; }
+@media(max-width:1250px) { .apw-columns { grid-template-columns: minmax(0,1fr); } .apw-aside { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:700px) { .apw-hero { min-height: 370px; } .apw-hero > div { max-width: 100%; } .apw-hero::before { background-size: auto 145px; background-position: right bottom; } .apw-tabs { width: 100%; } .apw-tabs button { padding: 10px 13px; } .apw-aside { grid-template-columns: minmax(0,1fr); } .apw-directory-heading { flex-wrap: wrap; } .apw-directory-heading .aum-search { width: 100%; max-width: none; } }

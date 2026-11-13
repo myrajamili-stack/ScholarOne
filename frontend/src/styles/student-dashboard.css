@@ -3329,3 +3329,59 @@ a {
     display: none;
   }
 }
+
+.advisor-profile-card button:enabled { opacity: 1; cursor: pointer; }
+.advisor-profile-card button[aria-pressed="true"] { outline: 3px solid #c9c1ff; outline-offset: 2px; }
+.appointment-booking-panel { min-width: 0; overflow-wrap: anywhere; }
+.appointment-date-label { display: grid; gap: 8px; margin: 16px 0; font-weight: 700; }
+.appointment-date-label input { min-width: 0; padding: 10px; border: 1px solid #d9e2ef; border-radius: 10px; font: inherit; }
+.appointment-hours { list-style: none; padding: 0; margin: 12px 0; }
+.appointment-hours li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; font-size: 13px; }
+.appointment-booking-panel details { margin: 16px 0; }
+.appointment-booking-panel summary { cursor: pointer; font-weight: 700; }
+.appointment-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(75px, 1fr)); gap: 8px; margin: 12px 0; }
+.appointment-slots button, .appointment-refresh { padding: 10px; border: 1px solid #d9e2ef; border-radius: 10px; background: #fff; color: #4c3bdb; font-weight: 700; }
+.appointment-slots button[aria-pressed="true"] { color: #fff; background: #5945ed; }
+.appointment-book-button { width: 100%; border: 0; border-radius: 10px; background: #5945ed; color: #fff; padding: 12px; font-weight: 700; }
+.appointment-booking-panel button:disabled { opacity: .6; cursor: not-allowed; }
+.appointment-feedback { padding: 14px 18px; border-radius: 12px; background: #eaf8f0; color: #176343; }
+.student-appointment-list { display: grid; gap: 12px; margin-top: 16px; }
+.student-appointment-list article { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; border-bottom: 1px solid #e5eaf5; padding: 12px 0; }
+.appointment-status { text-transform: capitalize; font-weight: 700; color: #4c3bdb; }
+
+.advisor-profile-actions {
+  display: grid;
+  gap: 8px;
+}
+.advisor-profile-card .advisor-view-availability {
+  color: #5845d6;
+  background: #f0edff;
+}
+.appointment-booking-panel {
+  align-self: start;
+  scroll-margin-top: 24px;
+}
+.appointment-booking-help,
+.appointment-approval-note {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.appointment-next-date {
+  color: #4c3bdb;
+  font-size: 13px;
+  font-weight: 700;
+}
+.appointment-booking-selection {
+  display: grid;
+  gap: 6px;
+  margin: 16px 0;
+  padding: 12px;
+  border: 1px solid #e3ddfc;
+  border-radius: 10px;
+  background: #f8f6ff;
+  font-size: 13px;
+}
+.appointment-approval-note {
+  margin-top: 10px;
+}

@@ -1,0 +1,23 @@
+.sponsor-workspace-shell .subscription-billing { padding: 24px; }
+.billing-heading { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.billing-heading h2 { margin: 0 0 7px; font-size: 22px; color: #30134e; }
+.billing-heading p, .billing-help { color: #75558e; line-height: 1.6; font-size: 13px; }
+.billing-test-badge { border-radius: 20px; padding: 6px 12px; color: #6924c5; background: #eee2ff; font-size: 12px; font-weight: 700; }
+.billing-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin: 22px 0; }
+.billing-summary dt { font-size: 12px; color: #75558e; margin-bottom: 7px; }
+.billing-summary dd { margin: 0; font-size: 16px; font-weight: 750; color: #30134e; text-transform: capitalize; }
+.billing-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.billing-secondary { border: 1px solid #c9a8ed; padding: 10px 18px; border-radius: 12px; background: #faf6ff; color: #6924c5; cursor: pointer; }
+.billing-table-wrap { overflow-x: auto; }
+.billing-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+.billing-table th { background: #f0e6fc; color: #4d2871; padding: 12px; }
+.billing-table td { padding: 14px 12px; border-bottom: 1px solid #eee2fa; }
+.billing-table td a { color: #7225d1; margin-right: 12px; white-space: nowrap; }
+.billing-status { display: inline-block; background: #fff1d5; color: #865a13; border-radius: 20px; padding: 4px 9px; text-transform: capitalize; }
+.billing-paid { background: #dcf7e2; color: #22743a; }
+.billing-failed, .billing-uncollectible { background: #ffe5ec; color: #a52449; }
+.sps-checkout-dialog { width: min(500px, calc(100% - 32px)); padding: 28px; border: 1px solid #ddc7f7; border-radius: 24px; color: #30134e; background: #fdfaff; box-shadow: 0 20px 70px #39155333; }
+.sps-checkout-dialog::backdrop { background: #25113c77; backdrop-filter: blur(4px); }
+.sps-checkout-dialog p { line-height: 1.7; }
+.sps-checkout-dialog button { margin: 6px; }
+@media(max-width:700px) { .billing-summary { grid-template-columns: repeat(2, minmax(0,1fr)); } }

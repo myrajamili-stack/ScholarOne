@@ -1,0 +1,56 @@
+.sponsor-listings-shell .spl-hero .sph-hero-art {width:36%;right:18%;padding:12px 0}
+.sponsor-listings-shell .spl-trophy-banner {
+  min-height: 245px;
+  aspect-ratio: 4.2;
+  background: #eadbfc url('/images/sponsor-scholarships-trophy-banner.png') center / 102% auto no-repeat;
+}
+.sponsor-listings-shell .spl-trophy-banner .sponsor-hero-action {
+  display: flex;
+  width: fit-content;
+  margin-top: 16px;
+}
+.sponsor-listings-shell .sponsor-stat-card.green>span {color:#25aa68;background:#def7e9}
+.sponsor-listings-shell .sponsor-stat-card.green::after {background:#90e0b644}
+.sponsor-listings-shell .sponsor-scholarship-manager {padding:24px;gap:20px}
+.sponsor-listings-shell .sponsor-scholarship-toolbar {align-items:center;flex-wrap:wrap}
+.sponsor-listings-shell .sponsor-scholarship-toolbar h2 {display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800;letter-spacing:-.5px}
+.sponsor-listings-shell .sponsor-scholarship-toolbar h2 svg {color:#8639ef}
+.sponsor-listings-shell .sponsor-scholarship-toolbar .sponsor-kicker {color:#8d73aa;font-size:10px;letter-spacing:.06em;margin:0 0 8px 33px}
+.sponsor-listings-shell .sponsor-scholarship-toolbar input {height:43px;background:#f7f1ff;border-color:#e3d4fa;color:#30204b;font-size:12px;border-radius:14px}
+.sponsor-listings-shell .sponsor-filter-tabs {padding-bottom:18px;border-bottom:1px solid #eee4fa;gap:8px}
+.sponsor-listings-shell .sponsor-filter-tabs button {border-color:#e5d8fc;background:#fcfaff;color:#755790;font-size:12px;display:flex;align-items:center;gap:9px}
+.sponsor-listings-shell .sponsor-filter-tabs button.active,.sponsor-listings-shell .sponsor-filter-tabs button:hover {color:white;background:linear-gradient(110deg,#a054ff,#6418e7)}
+.sponsor-listings-shell .sponsor-filter-tabs button span {padding:1px 6px;border-radius:10px;background:#b898db22;font-size:10px}
+.spl-results-toolbar {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:#7c6298}
+.spl-results-toolbar p {margin:0}
+.spl-results-toolbar label {display:flex;align-items:center;gap:9px}
+.spl-results-toolbar select {padding:7px 30px 7px 12px;border:1px solid #e0cef8;border-radius:11px;background:#fff;color:#543874;font:inherit}
+.sponsor-listings-shell .sponsor-scholarship-list {grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.sponsor-listings-shell .sponsor-scholarship-card {display:flex;flex-direction:column;min-width:0;padding:22px;border:1px solid #e5d7fb;border-radius:20px;background:linear-gradient(135deg,#ffffff,#faf6ff);gap:20px}
+.spl-card-title {display:flex;gap:13px;align-items:flex-start;margin-top:16px}
+.spl-card-title>span {display:grid;place-items:center;flex-shrink:0;width:43px;height:43px;border-radius:13px;color:#853ce9;background:#eee0ff}
+.sponsor-listings-shell .sponsor-scholarship-main h3 {font-size:17px;line-height:1.45;margin:0;font-weight:800;color:#2c1b4e;overflow-wrap:anywhere}
+.sponsor-listings-shell .sponsor-scholarship-main p {font-size:12px;line-height:1.7;color:#82669c;font-weight:500;margin-top:14px;overflow-wrap:anywhere}
+.sponsor-listings-shell .sponsor-scholarship-tags span {font-size:10px;background:#eee2ff;color:#7b37d8}
+.sponsor-listings-shell .sponsor-scholarship-tags span:nth-child(2) {background:#e3f6ec;color:#318358}
+.sponsor-listings-shell .sponsor-status {font-size:10px;padding:5px 10px;border-radius:10px;display:inline-block;text-transform:capitalize}
+.sponsor-listings-shell .sponsor-scholarship-meta {margin-top:auto;border-top:1px solid #eadff7;padding-top:16px;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.sponsor-listings-shell .sponsor-scholarship-meta div {padding:0;border:0;background:none;min-width:0}
+.sponsor-listings-shell .sponsor-scholarship-meta svg {color:#a17bc7;width:18px;height:18px;margin-bottom:8px}
+.sponsor-listings-shell .sponsor-scholarship-meta strong {font-size:12px;color:#38234f;overflow-wrap:anywhere}
+.sponsor-listings-shell .sponsor-scholarship-meta span {font-size:10px;color:#9a81b1;font-weight:500}
+.sponsor-listings-shell .scholarship-empty {display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:45px 20px;border:1px dashed #decbf7;border-radius:18px;background:#fbf8ff}
+.sponsor-listings-shell .scholarship-empty>svg {width:64px;height:64px;color:#a76bef;margin-bottom:8px}
+.sponsor-listings-shell .scholarship-empty strong {font-size:19px;color:#352050}
+.sponsor-listings-shell .scholarship-empty p {max-width:420px;font-size:12px;color:#876b9e;line-height:1.7;margin:0}
+.sponsor-listings-shell .scholarship-empty a {padding:11px 18px;border-radius:18px;background:linear-gradient(110deg,#a054ff,#6418e7);color:white;font-size:12px;text-decoration:none;font-weight:750}
+@media(max-width:1200px){.sponsor-listings-shell .spl-hero .sph-hero-art{right:0;width:45%}.sponsor-listings-shell .sponsor-scholarship-list{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:700px){.sponsor-listings-shell .spl-hero .sph-hero-art{width:100%;height:155px;padding:4px}.sponsor-listings-shell .sponsor-scholarship-manager{padding:16px}.sponsor-listings-shell .sponsor-scholarship-toolbar input{width:100%}.sponsor-listings-shell .sponsor-scholarship-card{padding:17px}.sponsor-listings-shell .sponsor-scholarship-toolbar h2{font-size:18px}}
+@media (max-width: 700px) {
+  .sponsor-listings-shell .spl-trophy-banner {
+    min-height: 390px;
+    aspect-ratio: auto;
+    background-size: auto 190px;
+    background-position: right bottom;
+  }
+}

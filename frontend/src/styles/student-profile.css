@@ -1,0 +1,60 @@
+.student-profile { display: grid; gap: 20px; color: #211448; }
+.student-profile h1, .student-profile h2, .student-profile p { margin: 0; }
+.sp-hero { position: relative; overflow: hidden; min-height: 220px; padding: 28px 34px; border-radius: 24px; background: #f2e6ff url('/images/student-calendar-waves.png') center / cover no-repeat; }
+.sp-hero-copy { position: relative; z-index: 1; width: 47%; }
+.sp-eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 7px 13px; border-radius: 22px; background: linear-gradient(110deg, #7525ee, #b477ff); color: white; font-size: 12px; font-weight: 800; text-transform: uppercase; box-shadow: 0 3px 6px #8a50cf1a; }
+.sp-eyebrow svg { width: 19px; height: 19px; flex-shrink: 0; }
+.sp-hero h1 { margin: 10px 0; font-size: clamp(34px,3.2vw,46px); font-weight: 850; letter-spacing: -1.4px; line-height: 1.15; }
+.sp-hero h1 span { color: #ffbd00; font-size: .65em; }
+.sp-hero-copy p { max-width: 440px; font-size: 14px; line-height: 1.6; font-weight: 550; }
+.sp-hero-art { position: absolute; right: 5px; bottom: 0; width: 60%; height: 100%; }
+.sp-layout { display: grid; grid-template-columns: minmax(230px, .8fr) minmax(0,2.45fr); gap: 18px; align-items: stretch; }
+.sp-card { min-width: 0; border: 1px solid #e8dcff; border-radius: 24px; background: #ffffffcc; box-shadow: 0 5px 12px #6d3bb51a; }
+.sp-summary { padding: 25px 16px; text-align: center; }
+.sp-photo { position: relative; width: 120px; margin: 0 auto 16px; }
+.sp-avatar { display: flex; align-items: center; justify-content: center; width: 120px; height: 120px; border: 5px solid white; outline: 2px solid #e7d9ff; border-radius: 50%; background: linear-gradient(135deg,#ffce44,#ff8a1b); font-size: 40px; color: white; font-weight: 800; }
+.sp-photo button { position: absolute; right: -3px; bottom: 0; display: grid; place-items: center; width: 36px; height: 36px; padding: 7px; border: 2px solid white; border-radius: 50%; color: #7c35ea; background: #efe0ff; box-shadow: 0 2px 5px #6a32a329; }
+.sp-photo svg { width: 21px; height: 21px; }
+.sp-summary h2 { font-size: 22px; font-weight: 800; overflow-wrap: anywhere; }
+.sp-summary > p { margin-top: 5px; color: #625084; font-size: 14px; }
+.sp-completion { margin: 25px 0; padding: 14px; border: 1px solid #e5d4ff; border-radius: 17px; background: #f8f2ff; text-align: left; }
+.sp-completion > div:first-child { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; margin-bottom: 11px; }
+.sp-completion b { color: #7b29e9; }
+.sp-completion [role="progressbar"] { height: 11px; overflow: hidden; border-radius: 10px; background: #e4d4fb; }
+.sp-completion [role="progressbar"] span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#9b4cff,#6021e7); }
+.sp-summary nav { display: grid; gap: 6px; text-align: left; }
+.sp-summary nav button, .sp-summary nav a { display: flex; align-items: center; gap: 13px; min-height: 49px; padding: 12px; border: 0; border-radius: 14px; background: transparent; color: #281951; text-decoration: none; font-size: 13px; line-height: 1.4; }
+.sp-summary nav [aria-current="page"] { color: #792bea; background: #efe2ff; font-weight: 750; }
+.sp-summary nav svg { flex-shrink: 0; width: 23px; height: 23px; }
+.sp-summary .sp-photo-help { margin-top: 24px; color: #9279a7; font-size: 10px; line-height: 1.6; }
+.sp-editor { overflow: hidden; }
+.sp-tabs { display: flex; gap: 4px; padding: 19px 23px; border-bottom: 1px solid #ebddff; background: #fbf7ff; }
+.sp-tabs button { display: flex; align-items: center; justify-content: center; gap: 12px; flex: 1; padding: 13px 10px; border: 0; border-radius: 22px; background: #f5eeff; color: #4d3a79; font-weight: 750; font-size: 14px; }
+.sp-tabs [aria-selected="true"] { background: linear-gradient(110deg,#a054ff,#6520e8); color: white; box-shadow: 0 3px 6px #723ac42b; }
+.sp-tabs svg { flex-shrink: 0; }
+.sp-editor-body { padding: 23px; }
+.sp-editor fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.sp-editor h2 { font-size: 22px; font-weight: 800; letter-spacing: -.6px; }
+.sp-description { margin: 8px 0 27px !important; color: #6f568d; font-size: 13px; line-height: 1.6; }
+.student-profile .profile-form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px 18px; }
+.student-profile .profile-form-grid label { min-width: 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 750; color: #291b50; }
+.student-profile input, .student-profile select { width: 100%; min-width: 0; padding: 12px 13px; border: 1px solid #dcd3f7; border-radius: 13px; background: #fdfbff; color: #35225e; font-size: 13px; font-weight: 500; outline: none; }
+.student-profile input:disabled { background: #eeecf7; color: #7c7199; }
+.student-profile .date-select-grid { display: grid; grid-template-columns: .8fr 1fr .9fr; gap: 7px; }
+.student-profile .date-select-grid select { padding-left: 9px; padding-right: 2px; }
+.student-profile [aria-invalid="true"] { border-color: #d44568; }
+.student-profile [role="group"][aria-invalid="true"] { outline: 1px solid #d44568; border-radius: 13px; }
+.sp-field-error { color: #ba3155; font-size: 11px; font-weight: 500; line-height: 1.5; }
+.sp-footer { display: flex; justify-content: flex-end; gap: 12px; padding-top: 20px; margin-top: 28px; border-top: 1px solid #eadfff; }
+.sp-footer button { border-radius: 24px; padding: 11px 23px; font-size: 13px; font-weight: 750; }
+.sp-discard { border: 1px solid #c8a5f8; background: white; color: #7431d6; }
+.sp-footer .ss-button { display: inline-flex; align-items: center; gap: 10px; }
+.sp-notice { padding: 12px; margin-bottom: 16px !important; border-radius: 12px; background: #f2eaff; font-size: 12px; line-height: 1.5; }
+.sp-notice.success { background: #e7f8ed; color: #287548; }
+.sp-notice.error { background: #fff0f4; color: #ba3155; }
+.student-profile button:disabled { opacity: .55; cursor: wait; }
+.student-profile button:focus-visible, .student-profile a:focus-visible, .student-profile input:focus, .student-profile select:focus { outline: 3px solid #c6a0f3; outline-offset: 2px; }
+@media(max-width:1100px) { .sp-layout { grid-template-columns: 230px minmax(0,1fr); } .student-profile .profile-form-grid { grid-template-columns: 1fr; } .sp-tabs { padding: 15px; } .sp-tabs button { font-size: 12px; gap: 6px; } }
+@media(max-width:760px) { .sp-layout { grid-template-columns: 1fr; } .sp-summary { padding: 22px; } .sp-summary nav { grid-template-columns: repeat(3,minmax(0,1fr)); } .sp-summary nav button, .sp-summary nav a { flex-direction: column; text-align: center; padding: 10px 5px; font-size: 11px; gap: 7px; } .sp-completion { margin: 20px 0; } .sp-hero { min-height: 350px; padding: 23px; } .sp-hero-copy { width: 100%; } .sp-hero-art { width: 100%; height: 160px; right: 0; } .sp-hero h1 { font-size: 35px; } .sp-editor-body { padding: 20px 17px; } .sp-tabs { padding: 13px; } .sp-tabs button { flex-direction: column; font-size: 12px; } .sp-footer button { padding: 11px 18px; } }
+
+.sp-required { color: #d44568; }

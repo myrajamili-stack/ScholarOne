@@ -1,0 +1,301 @@
+.at-page .am-header {
+  min-height: 180px;
+}
+.at-page .am-title {
+  padding-top: 18px;
+}
+.at-page .as-eyebrow {
+  color: #7633ef;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.at-page .am-title h1 {
+  font-size: 37px;
+}
+.at-page .am-title > p:last-child {
+  max-width: 450px;
+}
+.at-page .am-header-art.settings {
+  width: 345px;
+  height: 170px;
+  right: 235px;
+}
+.at-page .am-header-art.settings::before {
+  content: "⚙";
+  position: absolute;
+  top: 15px;
+  left: -10px;
+  display: grid;
+  place-items: center;
+  width: 80px;
+  height: 70px;
+  color: #9c75ee;
+  font-size: 60px;
+  line-height: 1;
+  border-radius: 15px;
+  border: 1px solid #e2d4fb;
+  background: #fbf7ff;
+  box-shadow: 0 5px 15px #9868e320;
+  transform: rotate(-7deg);
+}
+.at-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.at-grid > section {
+  min-width: 0;
+  padding: 24px;
+  scroll-margin-top: 20px;
+}
+.at-card-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 17px;
+  margin-bottom: 24px;
+}
+.at-card-heading > svg {
+  color: #813dff;
+  width: 33px;
+  height: 36px;
+  flex-shrink: 0;
+}
+.at-card-heading h2 {
+  font-size: 22px;
+  letter-spacing: -.6px;
+  margin: 0 0 4px;
+}
+.at-card-heading p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #6c508d;
+}
+.at-account-details {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 17px;
+  min-height: 110px;
+}
+.at-photo-link {
+  position: relative;
+  text-decoration: none;
+}
+.at-photo {
+  display: grid;
+  place-items: center;
+  width: 85px;
+  height: 85px;
+  border-radius: 50%;
+  background: linear-gradient(140deg, #ffd455, #ff9824);
+  color: white;
+  font-size: 29px;
+  font-weight: 850;
+}
+.at-photo-link > span:last-child {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: #8336f6;
+  color: white;
+  border: 2px solid white;
+  border-radius: 50%;
+}
+.at-photo-link > span:last-child svg {
+  width: 16px;
+  height: 16px;
+}
+.at-identity {
+  flex: 1;
+  min-width: 150px;
+  overflow-wrap: anywhere;
+}
+.at-identity h3 {
+  margin: 0 0 5px;
+  font-size: 20px;
+}
+.at-identity p, .at-identity a {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #654687;
+  margin: 0;
+}
+.at-identity a {
+  text-decoration: none;
+}
+.at-identity a:hover {
+  text-decoration: underline;
+}
+.at-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 11px 13px;
+  border: 1px solid #decafb;
+  border-radius: 12px;
+  background: #fcf8ff;
+  color: #7430ee;
+  box-shadow: 0 3px 5px #7643b610;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.at-outline svg {
+  width: 17px;
+  height: 17px;
+}
+.at-account-note, .at-note {
+  margin: 17px 0 0;
+  color: #816895;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.at-note a {
+  color: #7734de;
+}
+.at-preference {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 11px 0;
+}
+.at-row-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 43px;
+  border-radius: 12px;
+  background: linear-gradient(140deg, #f5edff, #eadeff);
+  color: #823aff;
+}
+.at-preference > div, .at-action-row > span:nth-child(2), .at-session summary > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.at-preference strong, .at-action-row strong, .at-session summary strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.at-preference p, .at-action-row small, .at-session summary small {
+  display: block;
+  font-size: 12px;
+  color: #72598d;
+  line-height: 1.6;
+  margin: 0;
+}
+.at-switch {
+  appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 42px;
+  height: 24px;
+  border: 2px solid #d3c9e9;
+  border-radius: 20px;
+  background: #eae5f3;
+  margin: 0;
+}
+.at-switch::before {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 4px #39244825;
+}
+.at-switch:disabled {
+  cursor: not-allowed;
+}
+.at-action-row, .at-session {
+  border: 1px solid #ece1fb;
+  background: linear-gradient(115deg, #fcfaff, #f8f4ff);
+  border-radius: 14px;
+  margin: 10px 0;
+  box-shadow: 0 2px 0 #eee4fc70;
+}
+.at-action-row, .at-session summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  color: #29154a;
+  text-decoration: none;
+}
+.at-action-row > svg, .at-session summary > svg {
+  width: 17px;
+  flex-shrink: 0;
+}
+.at-action-row[href]:hover, .at-outline:hover {
+  border-color: #ba96ef;
+  background: #f1e9ff;
+}
+.at-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 9px;
+  line-height: 1.5;
+  font-weight: 700;
+  color: #7b648f;
+  background: #eee7f6;
+  white-space: nowrap;
+}
+.at-badge.positive {
+  background: #e4f8e9;
+  color: #2a8d48;
+}
+.at-action-row strong .at-badge {
+  margin-left: 5px;
+}
+.at-session summary {
+  cursor: pointer;
+  list-style: none;
+}
+.at-session summary::-webkit-details-marker {
+  display: none;
+}
+.at-session[open] summary > svg {
+  transform: rotate(90deg);
+}
+.at-session > div {
+  padding: 0 16px 16px;
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1400px) {
+  .at-page .am-header-art.settings { display: none; }
+}
+@media (max-width: 1100px) {
+  .at-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .at-page .am-header { min-height: 205px; }
+  .at-page .am-title { padding-top: 65px; }
+  .at-page .am-title h1 { font-size: 30px; }
+  .at-page .as-eyebrow { font-size: 10px; }
+  .at-grid > section { padding: 18px 14px; }
+  .at-card-heading { gap: 12px; margin-bottom: 17px; }
+  .at-card-heading h2 { font-size: 20px; }
+  .at-card-heading p { font-size: 11px; }
+  .at-account-details { gap: 13px; }
+  .at-account-details > .at-outline { margin-left: 98px; }
+  .at-identity h3 { font-size: 18px; }
+  .at-preference strong, .at-action-row strong, .at-session summary strong { font-size: 12px; }
+  .at-preference p, .at-action-row small, .at-session summary small { font-size: 11px; }
+  .at-action-row, .at-session summary { gap: 10px; padding: 10px; }
+  .at-row-icon { width: 36px; height: 39px; }
+  .at-action-row > .at-badge { display: none; }
+}

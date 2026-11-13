@@ -1,4 +1,7 @@
+import Icon from "../../components/advisor/AdvisorIcon";
+import "../../styles/student-scholarships.css";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
 import ScholarshipCard, { type Scholarship } from "../../components/ScholarshipCard";
 import { getStoredUser } from "../../utils/authStorage";
@@ -27,6 +30,7 @@ type ApiScholarship = {
   external_listing?: boolean;
   import_notes?: string[];
   status?: string | null;
+  created_at?: string | null;
 };
 
 type ApiApplication = {
@@ -55,6 +59,7 @@ function formatDate(date?: string | null) {
 function toScholarshipCard(scholarship: ApiScholarship): Scholarship {
   return {
     scholarship_id: scholarship.scholarship_id,
+    created_at: scholarship.created_at,
     title: scholarship.title,
     organization_name: scholarship.organization_name,
     description: scholarship.description,
@@ -88,7 +93,10 @@ function getApplicationStatusLabel(status?: string | null) {
 function ScholarshipsPage() {
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
   const [selectedScholarship, setSelectedScholarship] = useState<Scholarship | null>(null);
-  const [query, setQuery] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = searchParams.get("q") || "";
+  const savedView = searchParams.get("view") === "saved";
+  const [sort, setSort] = useState("latest");
   const [aidFilter, setAidFilter] = useState<FinancialAidFilter>("all");
   const [levelFilter, setLevelFilter] = useState("all");
   const [stateFilter, setStateFilter] = useState("all");
@@ -141,12 +149,18 @@ function ScholarshipsPage() {
     loadScholarships();
   }, [studentId]);
 
-  const filteredScholarships = scholarships.filter((scholarship) =>
+  const savedCount = scholarships.filter((scholarship) => scholarship.saved).length;
+  const visibleScholarships = savedView ? scholarships.filter((scholarship) => scholarship.saved) : scholarships;
+  const filteredScholarships = visibleScholarships.filter((scholarship) =>
     matchesFinancialAid(scholarship, aidFilter, query, levelFilter, stateFilter)
-  );
+  ).sort((a, b) => {
+    if (sort === "title") return a.title.localeCompare(b.title);
+    if (sort === "deadline") return (a.deadline_date ? Date.parse(a.deadline_date) : Infinity) - (b.deadline_date ? Date.parse(b.deadline_date) : Infinity);
+    return (Date.parse(b.created_at || "") || 0) - (Date.parse(a.created_at || "") || 0) || b.scholarship_id - a.scholarship_id;
+  });
 
   function clearFilters() {
-    setAidFilter("all"); setLevelFilter("all"); setStateFilter("all"); setQuery("");
+    setAidFilter("all"); setLevelFilter("all"); setStateFilter("all"); setSearchParams(savedView ? { view: "saved" } : {});
   }
 
   async function handleToggleReminder(scholarship: Scholarship) {
@@ -291,47 +305,42 @@ function ScholarshipsPage() {
   }
 
   return (
-    <section className="module-page">
-      <div className="module-header-row">
-        <div>
-          <p className="module-eyebrow">Scholarship Search</p>
-          <h1>Scholarships</h1>
-          <span>Search and filter scholarship opportunities available in ScholarOne.</span>
-        </div>
-        <input
-          className="module-search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search scholarship name..."
-        />
-      </div>
+    <section className="student-scholarships">
+      <header className="sh-hero"><div className="sh-hero-copy"><p className="sh-eyebrow"><Icon name="graduation" />Scholarship Search</p><h1>Scholarships<span aria-hidden="true">✦</span></h1><p>Search and filter scholarship opportunities available in ScholarOne based on your eligibility and study goals.</p></div><img className="sh-hero-art" src="/images/student-scholarships-hero.png" alt="" /></header>
+
+      <nav className="sh-views" aria-label="Scholarship collection">
+        <button type="button" aria-pressed={!savedView} onClick={() => { const next = new URLSearchParams(searchParams); next.delete("view"); setSearchParams(next); }}><Icon name="graduation" />All Scholarships <span>{isLoading ? "…" : scholarships.length}</span></button>
+        <button type="button" aria-pressed={savedView} onClick={() => { const next = new URLSearchParams(searchParams); next.set("view", "saved"); setSearchParams(next); }}><Icon name="heart" />Saved Scholarships <span>{isLoading ? "…" : savedCount}</span></button>
+      </nav>
+      {savedView && <p className="sh-saved-intro">Your favourites, saved to your account. Select a heart again to remove a scholarship from this list.</p>}
 
       <div className="financial-aid-filter-bar">
         <div className="financial-aid-dropdowns" role="group" aria-label="Filter financial aid">
-          <label>Financial Aid Type / Jenis Bantuan
+          <label><span><Icon name="layers" />Financial Aid Type / Jenis Bantuan</span>
             <select value={aidFilter} onChange={(event) => setAidFilter(event.target.value as FinancialAidFilter)}>
               <option value="all">All Financial Aid / Semua Bantuan</option>
               {financialAidTypes.map((type) => <option key={type.id} value={type.id}>{type.english} / {type.malay}</option>)}
             </select>
           </label>
-          <label>Study Level / Peringkat Pengajian
+          <label><span><Icon name="graduation" />Study Level / Peringkat Pengajian</span>
             <select value={levelFilter} onChange={(event) => setLevelFilter(event.target.value)}>
               <option value="all">All Study Levels</option>
               {studyLevels.map((level) => <option key={level} value={level}>{level === 'Postgraduate' ? 'Postgraduate (unspecified)' : level}</option>)}
             </select>
           </label>
-          <label>State / Negeri
+          <label><span><Icon name="home" />State / Negeri</span>
             <select value={stateFilter} onChange={(event) => setStateFilter(event.target.value)}>
               <option value="all">All State</option>
               {eligibilityStates.map((state) => <option key={state} value={state}>{state}</option>)}
             </select>
           </label>
-          <button className="financial-aid-clear" type="button" onClick={clearFilters}>Clear filters</button>
+          <button className="financial-aid-clear" type="button" onClick={clearFilters}><Icon name="filter" />Clear Filters</button>
         </div>
         {stateFilter !== "all" && <p className="financial-aid-count">Some listings do not specify state eligibility. Select All State to include them.</p>}
-        {!isLoading && !error && <p className="financial-aid-count" role="status">Showing {filteredScholarships.length} of {scholarships.length} financial aid opportunities</p>}
+
       </div>
 
+      <div className="sh-results-bar"><p role="status">{isLoading ? "Loading opportunities…" : `Showing ${filteredScholarships.length} of ${visibleScholarships.length} ${savedView ? "saved scholarships" : "financial aid opportunities"}`}{query && <> matching “{query}” <button type="button" onClick={() => { const next = new URLSearchParams(searchParams); next.delete("q"); setSearchParams(next); }}>Clear search</button></>}</p><label>Sort by:<select value={sort} onChange={event => setSort(event.target.value)}><option value="latest">Latest</option><option value="deadline">Nearest deadline</option><option value="title">Name A–Z</option></select></label></div>
       {reminderNotice && <p className="scholarship-reminder-notice" role="status">{reminderNotice}</p>}
       {remindersError && <p className="dashboard-message error">{remindersError}</p>}
       <section className="scholarship-grid module-scholarship-grid">
@@ -339,6 +348,7 @@ function ScholarshipsPage() {
         {error && <p className="dashboard-message error">{error}</p>}
         {filteredScholarships.map((scholarship) => (
           <ScholarshipCard
+            variant="search"
             scholarship={scholarship}
             key={scholarship.scholarship_id}
             isSaving={savingId === scholarship.scholarship_id}
@@ -350,10 +360,12 @@ function ScholarshipsPage() {
           />
         ))}
         {!isLoading && !error && filteredScholarships.length === 0 && (
-          <p className="dashboard-message">
-            {scholarships.length === 0 ? "No financial aid opportunities have been added yet. Approved listings will appear here."
-              : <>No financial aid matches your selected filters and search.</>}
-          </p>
+          <div className="dashboard-message sh-empty">
+            <Icon name={savedView ? "heart" : "search"} />
+            <h2>{savedView && savedCount === 0 ? "No saved scholarships yet" : "No scholarships found"}</h2>
+            <p>{savedView && savedCount === 0 ? "Tap the heart on any scholarship to keep it here for later." : scholarships.length === 0 ? "No financial aid opportunities have been added yet. Approved listings will appear here." : "No scholarships match your selected filters and search."}</p>
+            {savedView && savedCount === 0 ? <button type="button" className="ss-button" onClick={() => { setAidFilter("all"); setLevelFilter("all"); setStateFilter("all"); setSearchParams({}); }}>Browse Scholarships</button> : scholarships.length > 0 && <button type="button" className="ss-button" onClick={clearFilters}>Clear Filters</button>}
+          </div>
         )}
       </section>
 

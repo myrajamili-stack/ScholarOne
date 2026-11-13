@@ -1,0 +1,164 @@
+.student-calendar { display: grid; gap: 17px; color: #211448; }
+.student-calendar h1, .student-calendar h2, .student-calendar h3, .student-calendar p { margin: 0; }
+.student-calendar button { cursor: pointer; font: inherit; }
+.sc-hero { position: relative; min-height: 235px; padding: 28px 40px; overflow: hidden; border-radius: 24px; background: #f2e6ff url('/images/student-calendar-waves.png') center / cover no-repeat; }
+.sc-hero-copy { position: relative; z-index: 1; width: 52%; }
+.sc-eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 7px 13px; border-radius: 22px; background: linear-gradient(110deg, #7525ee, #b477ff); color: white; font-size: 12px; font-weight: 800; text-transform: uppercase; box-shadow: 0 3px 6px #8a50cf1a; }
+.sc-eyebrow svg { width: 19px; height: 19px; }
+.sc-hero h1 { font-size: clamp(30px, 2.8vw, 44px); font-weight: 850; line-height: 1.2; letter-spacing: -1.4px; margin: 14px 0 16px; }
+.sc-title-accent { position: relative; display: inline-block; }
+.sc-title-accent::after { content: ''; position: absolute; left: 8%; right: 3%; bottom: -8px; height: 9px; border-top: 4px solid #ffc62b; border-radius: 50%; transform: rotate(-3deg); }
+.sc-hero-copy > p:not(.sc-eyebrow) { font-size: 13px; font-weight: 600; line-height: 1.7; max-width: 350px; }
+.sc-hero-art { position: absolute; right: 0; bottom: 0; width: 62%; height: 110%; object-fit: contain; object-position: center bottom; }
+.sc-layout { display: grid; grid-template-columns: minmax(0, 2.1fr) minmax(280px, 1fr); align-items: start; gap: 17px; }
+.sc-card { min-width: 0; padding: 20px 17px; border: 1px solid #e9dcff; border-radius: 24px; background: #ffffffc9; box-shadow: 0 5px 10px #6d3bb51a; }
+.sc-toolbar { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 15px; margin-bottom: 20px; }
+.sc-month-navigation, .sc-view-controls { display: flex; align-items: center; gap: 7px; }
+.sc-month-navigation > button { width: 29px; height: 29px; display: grid; place-items: center; padding: 0; border: 1px solid #e7d8ff; border-radius: 50%; background: #fff; color: #6026c3; font-size: 24px; line-height: 1; box-shadow: 0 2px 5px #7843b21c; }
+.sc-month-navigation h2 { font-size: 23px; font-weight: 850; letter-spacing: -.7px; margin-left: 7px; }
+.sc-view-controls { gap: 10px; }
+.sc-today-button { display: flex; align-items: center; gap: 6px; padding: 7px 11px; border: 1px solid #e0d0ff; border-radius: 20px; background: #fff; color: #6430c5; font-size: 11px !important; font-weight: 750 !important; }
+.sc-today-button svg { width: 16px; height: 16px; }
+.sc-view-switch { display: flex; border: 1px solid #e2d2ff; border-radius: 20px; padding: 2px; background: #fff; }
+.sc-view-switch button { border: 0; border-radius: 20px; padding: 7px 11px; color: #6430b6; background: transparent; font-size: 11px; font-weight: 750; }
+.sc-view-switch button[aria-pressed="true"] { background: linear-gradient(110deg, #a15bff, #6721e3); color: #fff; box-shadow: 0 3px 6px #6a31c82b; }
+.sc-legend { display: flex; flex-wrap: wrap; gap: 13px; padding: 0; margin: 0 0 13px; list-style: none; font-size: 10px; font-weight: 700; }
+.sc-legend li { display: flex; align-items: center; gap: 6px; }
+.sc-legend li > span { display: inline-block; width: 13px; height: 13px; border: 3px solid #ffffff77; border-radius: 4px; box-shadow: 0 0 0 2px #efe6fa; }
+.sc-legend .deadline { background: #bb85f7; }
+.sc-legend .appointment { background: #ffc851; }
+.sc-legend .reminder { background: #79c9ff; }
+.sc-month-scroll { overflow-x: auto; border: 1px solid #dfceff; border-radius: 17px; }
+.sc-month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); min-width: 560px; overflow: hidden; }
+.sc-weekday { padding: 9px 3px; background: #f0e5ff; text-align: center; font-size: 12px; font-weight: 800; color: #6a31ba; }
+.sc-day { min-width: 0; min-height: 87px; padding: 5px 4px; border-right: 1px solid #e9ddfb; border-top: 1px solid #e9ddfb; }
+.sc-day:nth-child(7n) { border-right: 0; }
+.sc-day.muted { background: #f7f3fc; }
+.sc-day.muted .sc-day-number { color: #b4a7c9; }
+.sc-day.today { background: linear-gradient(#f8f0ff, #fffcff); }
+.sc-day.selected { box-shadow: inset 0 0 0 2px #be91f1; }
+.sc-day-number { display: grid; place-items: center; min-width: 23px; height: 23px; padding: 0 4px; margin-bottom: 4px; border: 0; border-radius: 50%; background: transparent; color: #281a46; font-size: 12px !important; font-weight: 750 !important; }
+.sc-day.today .sc-day-number { color: white; background: linear-gradient(120deg, #a454ff, #6321e7); }
+.sc-day-events { display: grid; gap: 4px; }
+.sc-event { display: flex; align-items: center; gap: 4px; width: 100%; min-width: 0; padding: 5px 6px; border: 0; border-radius: 11px; color: #3d225f; text-align: left; font-size: 10px !important; font-weight: 650 !important; }
+.sc-event svg { width: 13px; height: 13px; flex-shrink: 0; }
+.sc-event span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.sc-event.deadline { background: #eddbff; }
+.sc-event.appointment { background: #fff0bf; }
+.sc-event.reminder { background: #ddf2ff; }
+.sc-more-events { padding: 4px; border: 0; background: transparent; color: #7950a0; font-size: 10px !important; }
+.sc-timezone { margin-top: 14px !important; color: #947da9; font-size: 10px; line-height: 1.6; }
+.sc-side-column { display: grid; gap: 16px; }
+.sc-section-heading { display: flex; align-items: center; gap: 9px; margin-bottom: 15px; }
+.sc-section-heading > svg { width: 26px; height: 26px; color: #8235e9; flex-shrink: 0; }
+.sc-section-heading h2 { font-size: 18px; font-weight: 800; letter-spacing: -.5px; line-height: 1.25; }
+.sc-section-heading button { display: inline-flex; align-items: center; gap: 3px; margin-left: auto; border: 0; background: transparent; padding: 0; color: #7131d0; font-size: 10px; font-weight: 750; white-space: nowrap; }
+.sc-section-heading button svg { width: 14px; height: 14px; }
+.sc-deadline-row { width: 100%; display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 13px; align-items: start; text-align: left; background: transparent; border: 0; border-bottom: 1px solid #eee4fb; padding: 12px 0; color: #241640; }
+.sc-deadline-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.sc-deadline-row time { display: grid; justify-items: center; gap: 1px; padding: 7px 8px; border-radius: 13px; background: #f0e3ff; color: #7429d9; font-size: 12px; font-weight: 750; }
+.sc-deadline-row time strong { font-size: 23px; line-height: 1; }
+.sc-deadline-row > span > strong { display: block; font-size: 13px; line-height: 1.4; font-weight: 800; }
+.sc-deadline-row small { display: block; color: #79638f; font-size: 11px; line-height: 1.5; margin-top: 4px; }
+.sc-notice { padding: 14px 18px; border-radius: 13px; background: #fff0f4; color: #b12c53; font-size: 13px; line-height: 1.6; }
+.sc-loading { color: #937aab; padding-bottom: 12px; font-size: 12px; }
+.sc-empty { display: grid; justify-items: center; gap: 12px; padding: 30px 10px; color: #957eaa; text-align: center; font-size: 13px; }
+.sc-empty svg { width: 33px; height: 33px; color: #b092d6; }
+.sc-agenda { display: grid; gap: 9px; }
+.sc-agenda-event { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #e7daf8; border-radius: 15px; text-align: left; background: #fffcff; color: #3f235e; }
+.sc-agenda-event > time { display: grid; justify-items: center; flex-shrink: 0; padding: 7px; border-radius: 12px; background: #f2e7ff; min-width: 42px; font-size: 11px; }
+.sc-agenda-event time strong { font-size: 20px; }
+.sc-agenda-event > svg { width: 19px; height: 19px; color: #8d4bd2; flex-shrink: 0; }
+.sc-agenda-event > span { min-width: 0; flex: 1; }
+.sc-agenda-event > span strong { display: block; font-size: 13px; line-height: 1.5; }
+.sc-agenda-event small { display: block; color: #8b709f; font-size: 11px; line-height: 1.5; margin-top: 4px; text-transform: capitalize; }
+.sc-agenda-event.appointment { border-left: 4px solid #ffd36c; }
+.sc-agenda-event.reminder { border-left: 4px solid #89ccf7; }
+.sc-agenda-event.deadline { border-left: 4px solid #be89f0; }
+.sc-selected-day { display: grid; gap: 8px; margin-top: 16px; padding: 16px; border: 1px solid #e4d3f6; border-radius: 14px; background: #fbf6ff; }
+.sc-selected-day header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.sc-selected-day h3 { font-size: 14px; font-weight: 750; }
+.sc-selected-day header button { display: grid; place-items: center; padding: 4px; border: 0; border-radius: 50%; background: #efe3ff; color: #7545ae; }
+.sc-selected-day header svg { width: 16px; height: 16px; }
+.sc-selected-day .sc-event { font-size: 12px !important; padding: 9px; }
+.sc-selected-day .sc-event span { white-space: normal; }
+.sc-selected-day p { color: #997eae; font-size: 12px; }
+.sc-event-dialog { width: min(470px, calc(100% - 32px)); padding: 24px; border: 1px solid #e5d5fa; border-radius: 23px; background: #fffaff; color: #321e4e; box-shadow: 0 15px 60px #321c493d; }
+.sc-event-dialog::backdrop { background: #29153c66; }
+.sc-event-dialog header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+.sc-event-dialog header > span { text-transform: uppercase; color: #9067ae; font-size: 11px; font-weight: 750; }
+.sc-event-dialog header button { width: 29px; height: 29px; display: grid; place-items: center; border: 0; border-radius: 50%; background: #efe2ff; color: #6b3e96; }
+.sc-event-dialog header svg { width: 18px; height: 18px; }
+.sc-event-dialog h2 { font-size: 22px; line-height: 1.3; font-weight: 800; }
+.sc-event-dialog p { color: #80608e; font-size: 13px; line-height: 1.6; margin-top: 10px; }
+.sc-event-dialog dl { margin: 20px 0; font-size: 13px; }
+.sc-event-dialog dt { margin-top: 13px; color: #92769f; font-size: 11px; }
+.sc-event-dialog dd { margin: 5px 0 0; }
+.sc-event-dialog .sc-status { text-transform: capitalize; }
+.sc-event-dialog a { gap: 8px; }
+.sc-event-dialog a svg { width: 16px; height: 16px; }
+.student-calendar button:focus-visible, .student-calendar a:focus-visible { outline: 3px solid #b88ce9; outline-offset: 2px; }
+@media (max-width: 1150px) {
+  .sc-layout { grid-template-columns: minmax(0, 1fr); }
+  .sc-side-column { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; }
+}
+@media (max-width: 1000px) {
+  .sc-hero { padding: 24px; min-height: 230px; }
+  .sc-hero-copy { width: 54%; }
+  .sc-hero-art { width: 52%; height: 90%; }
+  .sc-side-column { grid-template-columns: 1fr; }
+}
+@media (max-width: 650px) {
+  .sc-hero { min-height: 365px; padding: 22px; }
+  .sc-hero-copy { width: 100%; }
+  .sc-hero h1 { font-size: 39px; }
+  .sc-hero-art { width: 100%; height: 165px; right: 0; }
+  .sc-card { padding: 18px 13px; }
+  .sc-toolbar { gap: 13px; margin-bottom: 16px; }
+  .sc-month-navigation h2 { font-size: 22px; }
+  .sc-view-controls { margin-left: auto; }
+  .sc-day { min-height: 87px; }
+  .sc-legend { gap: 11px; font-size: 9px; }
+  .sc-agenda-event { gap: 9px; padding: 10px; }
+  .sc-agenda-event > svg:not(:last-child) { display: none; }
+}
+.sc-reminder-help { margin-top: 13px !important; color: #927aa6; font-size: 10px; line-height: 1.6; }
+@media (max-width: 650px) {
+  .sc-month-grid { min-width: 0; }
+  .sc-weekday { padding: 9px 2px; font-size: 10px; }
+  .sc-day { min-height: 82px; padding: 4px 2px; }
+  .sc-day-number { min-width: 21px; height: 21px; font-size: 11px !important; }
+  .sc-day .sc-event { padding: 4px 3px; gap: 2px; font-size: 9px !important; }
+  .sc-day .sc-event svg { width: 11px; height: 11px; }
+  .sc-more-events { font-size: 9px !important; padding: 4px 1px; }
+}
+
+.sc-reminders { scroll-margin-top: 20px; }
+.sc-reminders:focus-visible { outline: 3px solid #b88ce9; outline-offset: 3px; }
+.sc-reminders-heading { display: flex; flex-direction: column; align-items: stretch; gap: 15px; margin-bottom: 14px; }
+.sc-reminders-heading .sc-section-heading { margin-bottom: 0; }
+.sc-reminders-heading .sc-section-heading p { margin-top: 5px; color: #806393; font-size: 12px; line-height: 1.5; }
+.sc-reminders-heading .ss-button { flex-shrink: 0; justify-content: center; gap: 6px; }
+.sc-reminders-heading .ss-button svg { width: 15px; height: 15px; }
+.sc-reminder-counts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.sc-reminder-counts span { padding: 5px 10px; border-radius: 15px; background: #eee4ff; color: #7039b5; font-size: 11px; font-weight: 750; }
+.sc-reminder-list { display: grid; gap: 12px; }
+.sc-reminder-card { display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: start; gap: 12px; padding: 17px; border: 1px solid #e6d7f8; border-radius: 18px; background: linear-gradient(110deg, #fffcff, #f8f2ff); }
+.sc-reminder-icon { display: grid; place-items: center; width: 36px; height: 36px; flex-shrink: 0; background: #eee0ff; color: #7b38ce; border-radius: 13px; }
+.sc-reminder-copy { min-width: 0; flex: 1; }
+.sc-reminder-copy h3 { font-size: 15px; font-weight: 800; line-height: 1.5; }
+.sc-reminder-copy p { color: #826795; font-size: 12px; margin-top: 4px; line-height: 1.5; }
+.sc-reminder-copy dl { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 10px 0 0; font-size: 11px; }
+.sc-reminder-copy dt { color: #9c82ac; font-weight: 550; }
+.sc-reminder-copy dd { color: #61447b; margin: 3px 0 0; }
+.sc-reminder-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+.sc-reminder-priority { padding: 5px 9px; border-radius: 13px; background: #e8e2ff; color: #704db4; font-size: 11px; font-weight: 750; }
+.sc-reminder-priority.urgent { background: #fff0ce; color: #a46b18; }
+.sc-reminder-actions button, .sc-reminders .sc-notice button { padding: 7px 10px; border: 1px solid #dfcaef; border-radius: 10px; background: white; color: #7c449e; font-size: 11px; font-weight: 650; }
+.sc-reminder-actions button:disabled { cursor: wait; opacity: .55; }
+.sc-reminder-success { padding: 10px 13px; margin: 0 0 13px !important; border-radius: 12px; background: #eaf9f0; color: #32724c; font-size: 12px; }
+.sc-reminders .sc-empty a { color: #7838c6; font-weight: 750; }
+@media (max-width: 650px) {
+  .sc-hero h1 { font-size: 31px; }
+  .sc-reminder-card { padding: 13px; }
+}

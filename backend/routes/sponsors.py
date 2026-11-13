@@ -2,9 +2,17 @@ from flask import Blueprint, jsonify, request
 
 from db import get_db_connection
 from responses import error_response
+from security import sponsor_access_required
 from scholarship_filters import validate_filter_metadata
 
 sponsors_bp = Blueprint("sponsors", __name__, url_prefix="/api/sponsors")
+
+
+@sponsors_bp.before_request
+@sponsor_access_required
+def verify_provider_access():
+    """Check current approval on every provider request, including existing tokens."""
+    return None
 
 
 def ensure_default_subscription_plans(cursor):
@@ -133,6 +141,10 @@ def get_sponsor_dashboard(sponsor_id):
             from subscription sub
             left join subscription_plan sp on sp.plan_id = sub.plan_id
             where sub.sponsor_id = %s
+              and lower(coalesce(sub.subscription_status, 'inactive')) = 'active'
+              and (sub.start_date is null or sub.start_date <= current_date)
+              and (sub.end_date is null or sub.end_date >= current_date)
+              and (sub.stripe_subscription_id is null or sub.end_date > (now() at time zone 'UTC'))
             order by sub.start_date desc nulls last, sub.subscription_id desc
             limit 1
         """, (sponsor_id,))
@@ -156,7 +168,7 @@ def get_sponsor_dashboard(sponsor_id):
         connection.close()
 
         scholarship_limit = 3
-        plan_name = sponsor["subscription_status"].title()
+        plan_name = "Free"
         if subscription and subscription.get("scholarship_limit"):
             scholarship_limit = subscription["scholarship_limit"]
             plan_name = subscription.get("plan_name") or plan_name
@@ -460,6 +472,9 @@ def create_sponsor_scholarship(sponsor_id):
             left join subscription_plan sp on sp.plan_id = sub.plan_id
             where sub.sponsor_id = %s
               and lower(coalesce(sub.subscription_status, 'inactive')) = 'active'
+              and (sub.start_date is null or sub.start_date <= current_date)
+              and (sub.end_date is null or sub.end_date >= current_date)
+              and (sub.stripe_subscription_id is null or sub.end_date > (now() at time zone 'UTC'))
             order by sub.start_date desc nulls last, sub.subscription_id desc
             limit 1
         """, (sponsor_id,))
@@ -851,7 +866,8 @@ def get_sponsor_subscriptions(sponsor_id):
                 plan_name,
                 price,
                 scholarship_limit,
-                duration_month
+                duration_month,
+                to_jsonb(subscription_plan)->'benefits' AS benefits
             from subscription_plan
             order by price asc, scholarship_limit asc
         """)
@@ -860,6 +876,7 @@ def get_sponsor_subscriptions(sponsor_id):
         cursor.execute("""
             select
                 sub.subscription_id,
+                sub.stripe_subscription_id,
                 sub.plan_id,
                 sub.start_date,
                 sub.end_date,
@@ -871,6 +888,10 @@ def get_sponsor_subscriptions(sponsor_id):
             from subscription sub
             left join subscription_plan sp on sp.plan_id = sub.plan_id
             where sub.sponsor_id = %s
+              and lower(coalesce(sub.subscription_status, 'inactive')) = 'active'
+              and (sub.start_date is null or sub.start_date <= current_date)
+              and (sub.end_date is null or sub.end_date >= current_date)
+              and (sub.stripe_subscription_id is null or sub.end_date > (now() at time zone 'UTC'))
             order by sub.start_date desc nulls last, sub.subscription_id desc
             limit 1
         """, (sponsor_id,))
@@ -894,8 +915,8 @@ def get_sponsor_subscriptions(sponsor_id):
                 "plan_id": free_plan["plan_id"] if free_plan else None,
                 "start_date": None,
                 "end_date": None,
-                "subscription_status": sponsor["subscription_status"],
-                "plan_name": free_plan["plan_name"] if free_plan else sponsor["subscription_status"].title(),
+                "subscription_status": "free",
+                "plan_name": free_plan["plan_name"] if free_plan else "Free",
                 "price": free_plan["price"] if free_plan else 0,
                 "scholarship_limit": free_plan["scholarship_limit"] if free_plan else 3,
                 "duration_month": free_plan["duration_month"] if free_plan else 1,
@@ -955,7 +976,8 @@ def create_sponsor_subscription(sponsor_id):
                 plan_name,
                 price,
                 scholarship_limit,
-                duration_month
+                duration_month,
+                to_jsonb(subscription_plan)->'benefits' AS benefits
             from subscription_plan
             where plan_id = %s
         """, (plan_id,))
@@ -965,6 +987,15 @@ def create_sponsor_subscription(sponsor_id):
             cursor.close()
             connection.close()
             return error_response("Subscription plan not found", 404)
+
+        if plan["price"] and float(plan["price"]) > 0:
+            return error_response("Paid plans require Stripe Checkout. Complete payment before activation.", 402)
+        cursor.execute("SELECT sponsor_id FROM sponsor WHERE sponsor_id=%s FOR UPDATE", (sponsor_id,))
+        cursor.execute("""SELECT subscription_id FROM subscription WHERE sponsor_id=%s
+            AND stripe_subscription_id IS NOT NULL
+            AND stripe_status NOT IN ('canceled', 'incomplete_expired') LIMIT 1""", (sponsor_id,))
+        if cursor.fetchone():
+            return error_response("Use Manage Billing to cancel automatic renewal. Your paid plan continues until the end of its billing period.", 409)
 
         cursor.execute("""
             update subscription
@@ -1021,6 +1052,11 @@ def create_sponsor_subscription(sponsor_id):
         if connection:
             connection.close()
         return error_response(str(e), 500)
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
 
 @sponsors_bp.route("/<int:sponsor_id>/appeals", methods=["GET"])
@@ -1052,7 +1088,24 @@ def get_sponsor_appeals(sponsor_id):
             select
                 count(*) filter (where lower(coalesce(status, 'pending')) = 'rejected') as rejected,
                 count(*) filter (where lower(coalesce(status, 'pending')) = 'appeal_submitted') as under_review,
-                count(*) filter (where lower(coalesce(status, 'pending')) in ('active', 'approved')) as approved_after_review
+                count(*) filter (
+                    where lower(coalesce(status, 'pending')) in ('active', 'approved')
+                      and exists (
+                          select 1 from audit_log al
+                          where al.user_id = scholarship.sponsor_id
+                            and al.action = 'sponsor_appeal_submitted'
+                            and al.description like 'Appeal submitted for scholarship #' || scholarship.scholarship_id || ' (%%'
+                      )
+                ) as approved_after_review,
+                count(*) filter (
+                    where lower(coalesce(status, 'pending')) = 'rejected'
+                      and exists (
+                          select 1 from audit_log al
+                          where al.user_id = scholarship.sponsor_id
+                            and al.action = 'sponsor_appeal_submitted'
+                            and al.description like 'Appeal submitted for scholarship #' || scholarship.scholarship_id || ' (%%'
+                      )
+                ) as unsuccessful
             from scholarship
             where sponsor_id = %s
         """, (sponsor_id,))
@@ -1079,16 +1132,21 @@ def get_sponsor_appeals(sponsor_id):
 
         cursor.execute("""
             select
-                log_id,
-                user_id,
-                action,
-                description,
-                action_time
-            from audit_log
-            where user_id = %s
-              and action = 'sponsor_appeal_submitted'
-            order by action_time desc nulls last, log_id desc
-            limit 8
+                al.log_id,
+                al.user_id,
+                al.action,
+                al.description,
+                al.action_time,
+                s.scholarship_id,
+                s.title as scholarship_title,
+                s.status as current_status
+            from audit_log al
+            left join scholarship s
+              on s.scholarship_id = substring(al.description from 'scholarship #([0-9]+)')::integer
+             and s.sponsor_id = al.user_id
+            where al.user_id = %s
+              and al.action = 'sponsor_appeal_submitted'
+            order by al.action_time desc nulls last, al.log_id desc
         """, (sponsor_id,))
         appeal_history = cursor.fetchall()
 
@@ -1109,6 +1167,7 @@ def get_sponsor_appeals(sponsor_id):
                 "rejected": summary["rejected"] or 0,
                 "under_review": summary["under_review"] or 0,
                 "resolved": summary["approved_after_review"] or 0,
+                "unsuccessful": summary["unsuccessful"] or 0,
                 "latest_status": latest_status,
             },
             "scholarships": scholarships,
@@ -1149,6 +1208,7 @@ def create_sponsor_appeal(sponsor_id):
             from scholarship
             where scholarship_id = %s
               and sponsor_id = %s
+            for update
         """, (scholarship_id, sponsor_id))
         scholarship = cursor.fetchone()
 

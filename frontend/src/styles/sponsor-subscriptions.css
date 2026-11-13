@@ -1,0 +1,64 @@
+.sps-overview { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.sponsor-workspace-shell .sps-overview .sponsor-panel { padding: 22px; }
+.sps-current-plan { display: grid; grid-template-columns: max-content minmax(0, 1fr); column-gap: 48px; row-gap: 24px; align-items: center; }
+.sps-plan-identity { display: flex; gap: 18px; align-items: center; }
+.sps-large-icon { display: grid; place-items: center; flex: 0 0 78px; height: 78px; border-radius: 24px; background: #efe0ff; color: #8b3bff; }
+.sps-large-icon svg { width: 45px; height: 45px; }
+.sps-plan-identity p { margin: 0 0 6px; font-size: 12px; color: #33204e; font-weight: 750; }
+.sponsor-workspace-shell .sponsor-subscriptions-page .sps-plan-identity h2 { font-size: 29px; font-weight: 850; margin: 0 0 10px; color: #23113f; white-space: nowrap; }
+.sps-active-status { display: inline-flex; border-radius: 18px; padding: 4px 10px; color: #218238; background: #e2f8d9; font-size: 12px; font-weight: 750; }
+.sps-plan-facts { display: grid; gap: 16px; border-left: 1px solid #cfa9f5; padding-left: 32px; }
+.sps-plan-facts > div { display: flex; gap: 12px; align-items: center; }
+.sps-plan-facts svg { box-sizing: content-box; padding: 8px; border-radius: 12px; background: #f2e5ff; color: #903bfa; flex: 0 0 21px; width: 21px; height: 21px; }
+.sps-plan-facts span { display: block; color: #44305b; font-size: 11px; font-weight: 700; }
+.sps-plan-facts strong { display: block; font-size: 15px; color: #25143f; }
+.sps-usage { display: flex; flex-direction: column; justify-content: center; gap: 18px; }
+.sps-usage header { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+.sps-usage h2 { display: flex; align-items: center; gap: 12px; margin: 0; font-size: 18px; font-weight: 800; color: #25143f; }
+.sps-usage h2 svg { box-sizing: content-box; padding: 8px; background: #f0e3ff; border-radius: 12px; color: #8e36ff; }
+.sps-usage header > strong { font-size: 12px; color: #4e2b77; }
+.sps-progress { width: 100%; height: 14px; border-radius: 20px; background: #e6d7fa; overflow: hidden; }
+.sps-progress > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(100deg, #ad65ff, #6b17ea); transition: width .2s; }
+.sps-usage p { color: #806293; margin: 0; font-size: 12px; line-height: 1.6; }
+.sps-plans-heading { margin: 8px 0 18px; }
+.sps-plans-heading h2 { margin: 0 0 4px; font-size: 24px; font-weight: 850; color: #26113f; }
+.sps-plans-heading p { margin: 0; color: #866b9b; font-size: 13px; }
+.sps-plan-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.sps-plan-card { position: relative; display: flex; flex-direction: column; border: 1px solid #e5d5fa; border-radius: 22px; padding: 24px 20px 18px; background: linear-gradient(135deg, #fff, #fcf8ff); box-shadow: 0 4px 12px #7d49ae0b; min-width: 0; }
+.sps-plan-card h3 { margin: 0 0 5px; font-size: 21px; font-weight: 850; letter-spacing: -.6px; color: #251140; }
+.sps-plan-description { color: #76588b; font-size: 12px; line-height: 1.6; min-height: 40px; margin: 0; }
+.sps-price { display: flex; align-items: baseline; gap: 6px; margin: 14px 0 22px; flex-wrap: wrap; }
+.sps-price strong { font-size: 29px; font-weight: 850; letter-spacing: -.8px; color: #21103b; }
+.sps-price > span { font-size: 11px; color: #4f3668; }
+.sps-plan-card ul { list-style: none; padding: 0; display: grid; gap: 12px; margin: 0 0 25px; }
+.sps-plan-card li { display: flex; gap: 9px; font-size: 11px; line-height: 1.6; color: #3d2856; }
+.sps-plan-card li > span { color: #15a339; font-size: 17px; font-weight: 850; line-height: 1; }
+.sps-plan-card button { margin-top: auto; width: 100%; padding: 11px; border: 1px solid #a76cff; border-radius: 13px; background: #fcf8ff; color: #7320e9; font-size: 13px; font-weight: 750; }
+.sps-plan-card .sps-primary-choice { background: linear-gradient(110deg, #a054ff, #650de9); color: white; border-color: transparent; box-shadow: 0 3px 8px #7533b71a; }
+.sps-plan-card.sps-current button { color: #a28abd; background: #f1e5fc; border-color: transparent; }
+.sps-plan-card.sps-recommended { border: 1.5px solid #b178ff; }
+.sps-plan-badge { position: absolute; top: -10px; right: 18px; display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 14px; color: white; background: #8f35eb; font-size: 10px; font-weight: 700; }
+.sps-plan-badge svg { width: 12px; height: 12px; }
+.sponsor-workspace-shell .sps-benefits { display: grid; grid-template-columns: 1.1fr repeat(3, minmax(0, 1fr)); align-items: center; gap: 22px; padding: 20px 24px; }
+.sps-benefits h2 { display: flex; align-items: center; gap: 12px; margin: 0; font-size: 17px; font-weight: 800; color: #2f154d; border-right: 1px solid #e2c9ff; min-height: 50px; }
+.sps-benefits > div { display: flex; align-items: center; gap: 12px; }
+.sps-benefits svg { box-sizing: content-box; background: #f1e4ff; color: #933aff; padding: 9px; border-radius: 13px; flex: 0 0 23px; }
+.sps-benefits > div:last-child > svg { color: #f6ac1a; background: #fff2df; }
+.sps-benefits h3 { font-size: 12px; font-weight: 800; margin: 0 0 4px; color: #32164e; }
+.sps-benefits p { font-size: 11px; line-height: 1.5; margin: 0; color: #806096; }
+@media (max-width: 1200px) {
+  .sps-overview { grid-template-columns: minmax(0, 1fr); }
+  .sps-plan-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 16px; }
+  .sponsor-workspace-shell .sps-benefits { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .sps-current-plan { grid-template-columns: minmax(0, 1fr); }
+  .sps-plan-facts { padding: 18px 0 0; border-left: 0; border-top: 1px solid #dfc6ff; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sps-plan-facts > div { align-items: start; gap: 8px; }
+  .sps-plan-facts svg { flex-basis: 17px; padding: 6px; }
+  .sps-plan-grid { grid-template-columns: minmax(0, 1fr); }
+  .sps-plan-description { min-height: auto; }
+  .sps-usage header { flex-wrap: wrap; }
+  .sponsor-workspace-shell .sps-benefits { grid-template-columns: minmax(0, 1fr); }
+  .sps-benefits h2 { border: 0; }
+}

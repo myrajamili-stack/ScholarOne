@@ -1,3 +1,4 @@
+import Icon from "../../components/advisor/AdvisorIcon";
 import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
 import { getApiErrorMessage } from "../../utils/apiError";
@@ -116,35 +117,35 @@ function SponsorStatisticsPage() {
 
   return (
     <div className="sponsor-page">
-      <section className="sponsor-statistics-hero">
+      <section className="sponsor-statistics-hero sponsor-hero sponsor-workspace-hero sponsor-learning-banner sponsor-statistics-banner">
         <div>
-          <p className="sponsor-kicker">Performance</p>
-          <h2>Statistics</h2>
+          <p className="sponsor-kicker"><Icon name="chart" />Performance</p>
+          <h2>Track Your Scholarship Performance</h2>
           <span>See how students apply to scholarships from {data.sponsor.organization_name || "your organization"}.</span>
         </div>
       </section>
 
       <section className="sponsor-stats-grid" aria-label="Scholarship application statistics">
         <article className="sponsor-stat-card purple">
-          <span>▣</span>
+          <span><Icon name="users" /></span>
           <p>Total Applications</p>
           <strong>{data.summary.total_applications}</strong>
           <small>Student applications received</small>
         </article>
         <article className="sponsor-stat-card green">
-          <span>✓</span>
+          <span><Icon name="graduation" /></span>
           <p>Awarded Students</p>
           <strong>{data.summary.awarded_students}</strong>
           <small>Approved scholarship outcomes</small>
         </article>
         <article className="sponsor-stat-card blue">
-          <span>%</span>
+          <span><Icon name="trend" /></span>
           <p>Award Rate</p>
           <strong>{formatPercent(Number(data.summary.success_rate || 0))}</strong>
           <small>Approved from total applications</small>
         </article>
         <article className="sponsor-stat-card blue">
-          <span>◇</span>
+          <span><Icon name="graduation" /></span>
           <p>Top Field</p>
           <strong>{data.summary.top_field || "No data"}</strong>
           <small>Most common applicant field</small>

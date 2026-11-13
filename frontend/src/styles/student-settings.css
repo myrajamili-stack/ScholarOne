@@ -1,0 +1,42 @@
+.student-settings { display: grid; gap: 20px; color: #211448; }
+.student-settings h1, .student-settings h2, .student-settings p { margin: 0; }
+.st-hero { position: relative; min-height: 220px; padding: 28px 34px; overflow: hidden; border-radius: 24px; background: #f2e6ff url('/images/student-calendar-waves.png') center / cover no-repeat; }
+.st-hero-copy { position: relative; z-index: 1; width: 49%; }
+.st-eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 7px 13px; border-radius: 22px; background: linear-gradient(110deg, #7525ee, #b477ff); color: white; font-size: 12px; font-weight: 800; text-transform: uppercase; box-shadow: 0 3px 6px #8a50cf1a; }
+.st-eyebrow svg { width: 19px; height: 19px; flex-shrink: 0; }
+.st-hero h1 { margin: 10px 0; font-size: clamp(34px,3.2vw,46px); font-weight: 850; line-height: 1.15; letter-spacing: -1.4px; }
+.st-hero h1 span { color: #ffbc00; font-size: .65em; }
+.st-hero p { max-width: 470px; font-size: 14px; line-height: 1.6; font-weight: 550; }
+.st-hero-art { position: absolute; right: 5px; bottom: 0; width: 62%; height: 100%; }
+.st-layout { display: grid; grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); gap: 18px; align-items: start; }
+.st-column { min-width: 0; display: grid; gap: 18px; }
+.st-card { min-width: 0; padding: 22px 19px; border: 1px solid #e8dcff; border-radius: 24px; background: #ffffffcc; box-shadow: 0 5px 12px #6d3bb51a; }
+.st-heading { display: flex; gap: 14px; margin-bottom: 20px; align-items: flex-start; }
+.st-heading > svg { flex-shrink: 0; width: 31px; height: 31px; color: #8035ef; }
+.st-heading h2 { font-size: 22px; font-weight: 800; letter-spacing: -.6px; line-height: 1.3; }
+.st-heading p { margin-top: 5px; font-size: 13px; line-height: 1.5; color: #72578e; }
+.st-rows { border: 1px solid #e9ddfc; border-radius: 17px; overflow: hidden; background: #fcf9ff; }
+.st-row { width: 100%; display: flex; align-items: center; gap: 14px; padding: 15px; border: 0; border-bottom: 1px solid #ece3fa; background: transparent; text-align: left; color: inherit; }
+.st-row:last-child { border-bottom: 0; }
+.st-icon { flex-shrink: 0; display: grid; place-items: center; width: 45px; height: 49px; border-radius: 13px; background: #f0e5ff; color: #8236ef; }
+.st-icon svg { width: 29px; height: 29px; }
+.st-copy { flex: 1; min-width: 0; }
+.st-copy strong, .st-copy label { display: block; color: #27194d; font-size: 13px; font-weight: 800; line-height: 1.5; }
+.st-copy p, .st-copy > span { display: block; margin-top: 3px; color: #735c8f; font-size: 12px; line-height: 1.5; }
+.st-row > svg { flex-shrink: 0; width: 19px; height: 19px; }
+.st-action { text-decoration: none; cursor: pointer; }
+.st-action:hover { background: #f2e9ff; color: #6b2bc8; }
+.st-switch { appearance: none; flex-shrink: 0; width: 43px; height: 25px; border: 0; border-radius: 20px; background: #ddd8e7; position: relative; }
+.st-switch::after { content: ''; position: absolute; left: 3px; top: 3px; width: 19px; height: 19px; border-radius: 50%; background: white; box-shadow: 0 1px 3px #66537f33; }
+.st-switch:disabled { cursor: not-allowed; }
+.st-note { margin-top: 13px !important; color: #8a739e; font-size: 11px; line-height: 1.6; }
+.st-note a { color: #7432c6; font-weight: 650; }
+.st-badge { flex-shrink: 0; padding: 4px 7px; border-radius: 12px; background: #efe9f7; color: #8a739e; font-size: 9px; }
+.st-visibility { flex-wrap: wrap; }
+.st-visibility select { max-width: 170px; padding: 9px 12px; border: 1px solid #dfd0f5; border-radius: 11px; background: #f9f5ff; color: #8b7b9c; font-size: 12px; }
+.st-logout .st-icon, .st-logout strong { color: #d62c4f; }
+.st-logout:hover { background: #fff0f4; }
+.student-settings button:focus-visible, .student-settings a:focus-visible { outline: 3px solid #ba91ee; outline-offset: 2px; }
+@media(max-width:1100px) { .st-layout { grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); } .st-card { padding: 20px 15px; } .st-row { padding: 13px 10px; gap: 10px; } .st-heading h2 { font-size: 20px; } .st-icon { width: 37px; height: 42px; } .st-icon svg { width: 25px; height: 25px; } }
+@media(max-width:850px) { .st-layout { grid-template-columns: 1fr; } }
+@media(max-width:650px) { .st-hero { padding: 23px; min-height: 340px; } .st-hero-copy { width: 100%; } .st-hero h1 { font-size: 35px; } .st-hero-art { width: 100%; height: 160px; right: 0; } .st-row { gap: 10px; } .st-visibility select { margin-left: 47px; } }

@@ -1,18 +1,19 @@
+import Icon from "../advisor/AdvisorIcon";
 import { NavLink } from "react-router-dom";
 import { getStoredUser } from "../../utils/authStorage";
 import { getInitials } from "../../utils/userDisplay";
 
 const sponsorNavItems = [
-  { label: "Dashboard", path: "/sponsor/dashboard", icon: "⌂" },
-  { label: "My Scholarships", path: "/sponsor/scholarships", icon: "◇" },
-  { label: "Add Scholarship", path: "/sponsor/add-scholarship", icon: "+" },
-  { label: "Applications", path: "/sponsor/applications", icon: "▣" },
-  { label: "Statistics", path: "/sponsor/statistics", icon: "▥" },
-  { label: "Subscriptions", path: "/sponsor/subscriptions", icon: "□" },
-  { label: "Appeals", path: "/sponsor/appeals", icon: "!" },
-  { label: "Messages", path: "/sponsor/messages", icon: "✉" },
-  { label: "Settings", path: "/sponsor/settings", icon: "⚙" },
-];
+  { label: "Dashboard", path: "/sponsor/dashboard", icon: "home" },
+  { label: "My Scholarships", path: "/sponsor/scholarships", icon: "layers" },
+  { label: "Add Scholarship", path: "/sponsor/add-scholarship", icon: "quiz" },
+  { label: "Applications", path: "/sponsor/applications", icon: "users" },
+  { label: "Statistics", path: "/sponsor/statistics", icon: "chart" },
+  { label: "Subscriptions", path: "/sponsor/subscriptions", icon: "layers" },
+  { label: "Appeals", path: "/sponsor/appeals", icon: "shield" },
+  { label: "Messages", path: "/sponsor/messages", icon: "message" },
+  { label: "Settings", path: "/sponsor/settings", icon: "settings" },
+] as const;
 
 function SponsorSidebar() {
   const user = getStoredUser();
@@ -32,7 +33,7 @@ function SponsorSidebar() {
       <nav className="sponsor-nav" aria-label="Sponsorship provider navigation">
         {sponsorNavItems.map((item) => (
           <NavLink key={item.path} to={item.path} className={({ isActive }) => `sponsor-nav-link${isActive ? " active" : ""}`}>
-            <span>{item.icon}</span>
+            <span><Icon name={item.icon} /></span>
             {item.label}
           </NavLink>
         ))}

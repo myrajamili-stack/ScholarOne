@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import Icon from "../../components/advisor/AdvisorIcon";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import "../../styles/sponsor-applications.css";
 import api from "../../api/axios";
 import { getApiErrorMessage } from "../../utils/apiError";
 import { getStoredUser } from "../../utils/authStorage";
@@ -36,289 +38,227 @@ type SponsorApplicationsData = {
 };
 
 const filters = [
-  { label: "All", value: "all" },
+  { label: "All Status", value: "all" },
   { label: "Pending", value: "pending" },
   { label: "Approved", value: "approved" },
   { label: "Rejected", value: "rejected" },
 ];
 
 function formatDate(value?: string | null) {
-  if (!value) {
-    return "Date not available";
-  }
-
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return "Date not available";
   return new Intl.DateTimeFormat("en-MY", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(value));
+    timeZone: "Asia/Kuala_Lumpur", day: "numeric", month: "short", year: "numeric",
+  }).format(date);
 }
 
 function normalizeStatus(status?: string | null) {
-  const normalized = (status || "pending").toLowerCase();
-
-  if (normalized === "approved" || normalized === "rejected") {
-    return normalized;
-  }
-
+  const normalized = (status || "pending").trim().toLowerCase();
+  if (normalized === "approved" || normalized === "rejected") return normalized;
   return "pending";
 }
 
 function SponsorApplicationsPage() {
-  const user = getStoredUser();
+  const sponsorId = getStoredUser()?.user_id;
   const [data, setData] = useState<SponsorApplicationsData | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
+  const [scholarshipFilter, setScholarshipFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [expandedId, setExpandedId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  async function loadApplications() {
-    if (!user?.user_id) {
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const response = await api.get<SponsorApplicationsData>(`/sponsors/${user.user_id}/applications`);
-      setData(response.data);
-      setError("");
-    } catch (error) {
-      setError(getApiErrorMessage(error, "Unable to load sponsor applications."));
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const [reloadKey, setReloadKey] = useState(0);
+  const decisionInFlight = useRef(false);
 
   useEffect(() => {
-    loadApplications();
-  }, [user?.user_id]);
+    let cancelled = false;
+    async function loadApplications() {
+      try {
+        if (!sponsorId) throw new Error("Please log in as a sponsorship provider to view applications.");
+        const response = await api.get<SponsorApplicationsData>(`/sponsors/${sponsorId}/applications`);
+        if (!cancelled) {
+          setData(response.data);
+          setError("");
+        }
+      } catch (loadError) {
+        if (!cancelled) setError(getApiErrorMessage(loadError, "Unable to load sponsor applications."));
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+    void loadApplications();
+    return () => { cancelled = true; };
+  }, [sponsorId, reloadKey]);
+
+  const scholarshipOptions = useMemo(() => {
+    const scholarships = new Map<number, string>();
+    for (const application of data?.applications || []) {
+      scholarships.set(application.scholarship_id, application.scholarship_title);
+    }
+    return [...scholarships].sort((a, b) => a[1].localeCompare(b[1]));
+  }, [data]);
 
   const filteredApplications = useMemo(() => {
-    if (!data) {
-      return [];
-    }
-
-    return data.applications.filter((application) => {
+    const query = searchTerm.trim().toLowerCase();
+    return (data?.applications || []).filter((application) => {
       const statusMatch = activeFilter === "all" || normalizeStatus(application.application_status) === activeFilter;
-      const searchValue = `${application.student_name} ${application.scholarship_title} ${application.student_email}`.toLowerCase();
-      const searchMatch = searchValue.includes(searchTerm.trim().toLowerCase());
-      return statusMatch && searchMatch;
+      const scholarshipMatch = scholarshipFilter === "all" || String(application.scholarship_id) === scholarshipFilter;
+      const searchValue = `${application.student_name} ${application.student_id} ${application.scholarship_title} ${application.student_email}`.toLowerCase();
+      return statusMatch && scholarshipMatch && searchValue.includes(query);
     });
-  }, [activeFilter, data, searchTerm]);
+  }, [activeFilter, scholarshipFilter, data, searchTerm]);
 
   async function updateApplicationStatus(applicationId: number, status: "approved" | "rejected") {
-    if (!user?.user_id) {
-      return;
-    }
-
+    if (!sponsorId || decisionInFlight.current) return;
+    decisionInFlight.current = true;
     setUpdatingId(applicationId);
     setStatusMessage("");
     setError("");
-
     try {
-      const response = await api.patch(`/sponsors/${user.user_id}/applications/${applicationId}`, { status });
-      setStatusMessage(response.data.message || `Application marked as ${status}.`);
-      await loadApplications();
-    } catch (error) {
-      setError(getApiErrorMessage(error, "Unable to update this application."));
+      const response = await api.patch(`/sponsors/${sponsorId}/applications/${applicationId}`, { status });
+      const savedStatus = normalizeStatus(response.data.application?.application_status || status);
+      setData((current) => {
+        if (!current) return current;
+        const previous = current.applications.find((application) => application.application_id === applicationId);
+        if (!previous) return current;
+        const previousStatus = normalizeStatus(previous.application_status);
+        const summary = { ...current.summary };
+        if (previousStatus !== savedStatus) {
+          summary[previousStatus] -= 1;
+          summary[savedStatus] += 1;
+        }
+        return {
+          ...current, summary,
+          applications: current.applications.map((application) => application.application_id === applicationId
+            ? { ...application, ...response.data.application, application_status: savedStatus }
+            : application),
+        };
+      });
+      setStatusMessage(response.data.message || `Application marked as ${savedStatus}.`);
+    } catch (updateError) {
+      setError(getApiErrorMessage(updateError, "Unable to update this application."));
     } finally {
+      decisionInFlight.current = false;
       setUpdatingId(null);
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="sponsor-page">
-        <section className="sponsor-empty-state">Loading student applications...</section>
-      </div>
-    );
+  function exportApplications() {
+    const rows = [
+      ["No.", "Student Name", "Student ID", "Scholarship", "Date Submitted", "Status"],
+      ...filteredApplications.map((application, index) => [
+        index + 1, application.student_name, application.student_id, application.scholarship_title,
+        formatDate(application.application_date), normalizeStatus(application.application_status),
+      ]),
+    ];
+    const csv = rows.map((row) => row.map((value) => {
+      const text = String(value);
+      const safeText = /^[\s]*[=+@-]/.test(text) ? `'${text}` : text;
+      return `"${safeText.replace(/"/g, '""')}"`;
+    }).join(",")).join("\r\n");
+    const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8;" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "scholarone-applications.csv";
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setStatusMessage(`Exported ${filteredApplications.length} application${filteredApplications.length === 1 ? "" : "s"}.`);
   }
 
-  if (error && !data) {
-    return (
-      <div className="sponsor-page">
-        <section className="sponsor-empty-state">{error}</section>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div className="sponsor-page">
-        <section className="sponsor-empty-state">Application data is not available.</section>
-      </div>
-    );
+  function clearFilters() {
+    setActiveFilter("all");
+    setScholarshipFilter("all");
+    setSearchTerm("");
   }
 
   return (
-    <div className="sponsor-page">
-      <section className="sponsor-applications-hero">
+    <div className="sponsor-page sponsor-applications-page">
+      <section className="sponsor-applications-hero sponsor-hero sponsor-workspace-hero sponsor-learning-banner">
         <div>
-          <p className="sponsor-kicker">Student Applications</p>
-          <h2>Applications</h2>
-          <span>Review student submissions for {data.sponsor.organization_name || "your organization"} and update their status.</span>
+          <p className="sponsor-kicker"><Icon name="users" />Student Applications</p>
+          <h2>Review and Manage Student Applications</h2>
+          <span>Review student submissions for your listed scholarships, check their details, and take action such as approve or reject.</span>
         </div>
       </section>
 
       <section className="sponsor-stats-grid" aria-label="Application summary">
-        <article className="sponsor-stat-card purple">
-          <span>▣</span>
-          <p>Total Applications</p>
-          <strong>{data.summary.total}</strong>
-          <small>Received across all listings</small>
-        </article>
-        <article className="sponsor-stat-card blue">
-          <span>□</span>
-          <p>Pending Review</p>
-          <strong>{data.summary.pending}</strong>
-          <small>Waiting for your decision</small>
-        </article>
-        <article className="sponsor-stat-card green">
-          <span>✓</span>
-          <p>Approved</p>
-          <strong>{data.summary.approved}</strong>
-          <small>Accepted applications</small>
-        </article>
-        <article className="sponsor-stat-card blue">
-          <span>✕</span>
-          <p>Rejected</p>
-          <strong>{data.summary.rejected}</strong>
-          <small>Applications not selected</small>
-        </article>
+        {([
+          { label: "Total Applications", value: data?.summary.total, icon: "users", color: "purple", note: "Received across all listings" },
+          { label: "Pending Review", value: data?.summary.pending, icon: "hourglass", color: "blue", note: "Waiting for your decision" },
+          { label: "Approved", value: data?.summary.approved, icon: "appointment", color: "green", note: "Accepted applications" },
+          { label: "Rejected", value: data?.summary.rejected, icon: "close", color: "pink", note: "Applications not selected" },
+        ] as const).map((stat) => <article className={`sponsor-stat-card ${stat.color}`} key={stat.label}>
+          <span><Icon name={stat.icon} /></span><p>{stat.label}</p><strong>{stat.value ?? "—"}</strong><small>{stat.note}</small>
+        </article>)}
       </section>
 
-      <section className="sponsor-panel sponsor-applications-panel">
-        <div className="sponsor-scholarship-toolbar">
-          <div>
-            <p className="sponsor-kicker">Application Review</p>
-            <h2>Student application list</h2>
-          </div>
-          <input
-            aria-label="Search applications"
-            placeholder="Search student or scholarship..."
-            type="search"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-          />
+      <section className="sponsor-panel spa-list-panel" aria-busy={isLoading}>
+        <header className="spa-list-header">
+          <h2><Icon name="quiz" />Student Application List</h2>
+          <button type="button" className="spa-export" disabled={isLoading || filteredApplications.length === 0} onClick={exportApplications}><Icon name="down" />Export</button>
+        </header>
+        <div className="spa-filters">
+          <select aria-label="Filter by scholarship" value={scholarshipFilter} onChange={(event) => setScholarshipFilter(event.target.value)}>
+            <option value="all">All Scholarships</option>
+            {scholarshipOptions.map(([id, title]) => <option key={id} value={String(id)}>{title}</option>)}
+          </select>
+          <select aria-label="Filter by status" value={activeFilter} onChange={(event) => setActiveFilter(event.target.value)}>
+            {filters.map((filter) => <option key={filter.value} value={filter.value}>{filter.label}</option>)}
+          </select>
+          <label className="spa-search"><Icon name="search" /><input aria-label="Search applications" placeholder="Search by student name, ID, or scholarship…" type="search" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} /></label>
         </div>
+        {error && <div role="alert" className="sponsor-form-error">{error} {!data && <button type="button" className="spa-link-button" onClick={() => { setIsLoading(true); setReloadKey((key) => key + 1); }}>Try again</button>}</div>}
+        {statusMessage && <div role="status" className="sponsor-form-success">{statusMessage}</div>}
 
-        <div className="sponsor-application-insights">
-          <div>
-            <span>New this week</span>
-            <strong>{data.summary.new_this_week}</strong>
-          </div>
-          <div>
-            <span>Most applied scholarship</span>
-            <strong>{data.summary.most_applied || "No applications yet"}</strong>
-          </div>
+        <div className="spa-table-scroll" tabIndex={0} role="region" aria-label="Student applications table">
+          <table className="spa-table">
+            <thead><tr><th scope="col">No.</th><th scope="col">Student Name</th><th scope="col">Student ID</th><th scope="col">Scholarship</th><th scope="col">Date Submitted</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead>
+            <tbody>
+              {filteredApplications.map((application, index) => {
+                const status = normalizeStatus(application.application_status);
+                const expanded = expandedId === application.application_id;
+                return <Fragment key={application.application_id}>
+                  <tr className={expanded ? "spa-selected-row" : ""}>
+                    <td>{index + 1}</td><td><strong>{application.student_name}</strong><span className="spa-student-email">{application.student_email}</span></td>
+                    <td>{application.student_id}</td><td>{application.scholarship_title}</td><td>{formatDate(application.application_date)}</td>
+                    <td><span className={`sponsor-status ${status}`}>{status}</span></td>
+                    <td><button type="button" className="spa-view-button" aria-expanded={expanded} aria-controls={`application-details-${application.application_id}`} onClick={() => setExpandedId(expanded ? null : application.application_id)}>{expanded ? "Hide Details" : "View Details"}<Icon name="chevron" /></button></td>
+                  </tr>
+                  {expanded && <tr><td colSpan={7} className="spa-expanded-cell">
+                    <section id={`application-details-${application.application_id}`} className="spa-application-detail" aria-label={`Application details for ${application.student_name}`}>
+                      <h3>{application.student_name} · {application.scholarship_title}</h3>
+                      <dl>
+                        <div><dt>Education Level</dt><dd>{application.education_level || "Not provided"}</dd></div>
+                        <div><dt>CGPA</dt><dd>{application.cgpa != null && application.cgpa !== "" ? `${application.cgpa} / 4.00` : "Not provided"}</dd></div>
+                        <div><dt>Field of Study</dt><dd>{application.field_of_study || "Not provided"}</dd></div>
+                        <div><dt>University</dt><dd>{application.university || "Not provided"}</dd></div>
+                        <div><dt>Funding Type</dt><dd>{application.funding_type || "Not provided"}</dd></div>
+                        <div><dt>Remarks</dt><dd>{application.remarks || "No remarks"}</dd></div>
+                      </dl>
+                      <div className="spa-decision-actions">
+                        <span>Current decision · {status}</span>
+                        <button type="button" className="spa-approve" disabled={status === "approved" || updatingId !== null} onClick={() => updateApplicationStatus(application.application_id, "approved")}>Approve</button>
+                        <button type="button" className="spa-reject" disabled={status === "rejected" || updatingId !== null} onClick={() => updateApplicationStatus(application.application_id, "rejected")}>Reject</button>
+                        {updatingId === application.application_id && <span role="status">Saving decision…</span>}
+                      </div>
+                    </section>
+                  </td></tr>}
+                </Fragment>;
+              })}
+              {filteredApplications.length === 0 && <tr><td colSpan={7} className="spa-empty-cell">
+                {isLoading ? <div className="spa-empty" role="status">Loading student applications…</div> : error && !data ? <div className="spa-empty">Applications could not be loaded.</div> : <div className="spa-empty">
+                  <img src="/images/pathway-quizzes-empty.png" alt="" />
+                  <h3>{data?.applications.length ? "No matching applications" : "No applications yet"}</h3>
+                  <p>{data?.applications.length ? "Try another student, scholarship, or status filter." : "Student applications will appear here once they apply to your approved scholarships."}</p>
+                  {data?.applications.length ? <button type="button" className="spa-link-button" onClick={clearFilters}>Clear filters</button> : null}
+                </div>}
+              </td></tr>}
+            </tbody>
+          </table>
         </div>
-
-        <div className="sponsor-filter-tabs" aria-label="Filter applications">
-          {filters.map((filter) => (
-            <button
-              className={activeFilter === filter.value ? "active" : ""}
-              key={filter.value}
-              type="button"
-              onClick={() => setActiveFilter(filter.value)}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
-
-        {error && <div className="sponsor-form-error">{error}</div>}
-        {statusMessage && <div className="sponsor-form-success">{statusMessage}</div>}
-
-        {data.applications.length === 0 ? (
-          <div className="sponsor-empty-state scholarship-empty">
-            <strong>No student applications yet.</strong>
-            <p>Applications will appear here after students apply to your approved scholarship listings.</p>
-          </div>
-        ) : filteredApplications.length > 0 ? (
-          <div className="sponsor-application-list">
-            {filteredApplications.map((application) => {
-              const status = normalizeStatus(application.application_status);
-              const isApproved = status === "approved";
-              const isRejected = status === "rejected";
-              const isUpdating = updatingId === application.application_id;
-
-              return (
-                <article className="sponsor-application-card" key={application.application_id}>
-                  <div className="sponsor-application-student">
-                    <div className="sponsor-avatar small">
-                      {application.student_name
-                        .split(" ")
-                        .map((name) => name[0])
-                        .join("")
-                        .slice(0, 2)
-                        .toUpperCase()}
-                    </div>
-                    <div>
-                      <span className={`sponsor-status ${status}`}>{status}</span>
-                      <h3>{application.student_name}</h3>
-                      <p>{application.student_email}</p>
-                    </div>
-                  </div>
-
-                  <div className="sponsor-application-details">
-                    <div>
-                      <span>Scholarship</span>
-                      <strong>{application.scholarship_title}</strong>
-                    </div>
-                    <div>
-                      <span>Applied on</span>
-                      <strong>{formatDate(application.application_date)}</strong>
-                    </div>
-                    <div>
-                      <span>CGPA</span>
-                      <strong>{application.cgpa ? `${application.cgpa} / 4.00` : "Not provided"}</strong>
-                    </div>
-                    <div>
-                      <span>Field of study</span>
-                      <strong>{application.field_of_study || "Not provided"}</strong>
-                    </div>
-                    <div>
-                      <span>University</span>
-                      <strong>{application.university || "Not provided"}</strong>
-                    </div>
-                    <div>
-                      <span>Remarks</span>
-                      <strong>{application.remarks || "No remarks"}</strong>
-                    </div>
-                  </div>
-
-                  <div className="sponsor-application-actions">
-                    <span className={`sponsor-decision-note ${status}`}>
-                      Current decision: {status}
-                    </span>
-                    <button
-                      className="approve"
-                      disabled={isApproved || isUpdating}
-                      title={isApproved ? "This application is already approved." : "Approve this application"}
-                      type="button"
-                      onClick={() => updateApplicationStatus(application.application_id, "approved")}
-                    >
-                      {isApproved ? "Approved" : "Approve"}
-                    </button>
-                    <button
-                      className="reject"
-                      disabled={isRejected || isUpdating}
-                      title={isRejected ? "This application is already rejected." : "Reject this application"}
-                      type="button"
-                      onClick={() => updateApplicationStatus(application.application_id, "rejected")}
-                    >
-                      {isRejected ? "Rejected" : "Reject"}
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="sponsor-empty-state">No applications match this search or filter.</div>
-        )}
+        {data && data.applications.length > 0 && <p className="spa-result-count" aria-live="polite">Showing {filteredApplications.length} of {data.applications.length} applications</p>}
       </section>
     </div>
   );

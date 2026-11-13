@@ -1,3 +1,4 @@
+import Icon from "../../components/advisor/AdvisorIcon";
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
@@ -78,7 +79,9 @@ function normalizeStatus(status?: string | null) {
 }
 
 function SponsorScholarshipsPage() {
-  const user = getStoredUser();
+  const sponsorId = getStoredUser()?.user_id;
+  const [retry, setRetry] = useState(0);
+  const [sortBy, setSortBy] = useState("latest");
   const [data, setData] = useState<SponsorScholarshipsData | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -87,13 +90,13 @@ function SponsorScholarshipsPage() {
 
   useEffect(() => {
     async function loadScholarships() {
-      if (!user?.user_id) {
+      if (!sponsorId) {
         setIsLoading(false);
         return;
       }
 
       try {
-        const response = await api.get<SponsorScholarshipsData>(`/sponsors/${user.user_id}/scholarships`);
+        const response = await api.get<SponsorScholarshipsData>(`/sponsors/${sponsorId}/scholarships`);
         setData(response.data);
       } catch (error) {
         setError(getApiErrorMessage(error, "Unable to load sponsor scholarship listings."));
@@ -103,7 +106,7 @@ function SponsorScholarshipsPage() {
     }
 
     loadScholarships();
-  }, [user?.user_id]);
+  }, [sponsorId, retry]);
 
   const filteredScholarships = useMemo(() => {
     if (!data) {
@@ -114,8 +117,12 @@ function SponsorScholarshipsPage() {
       const statusMatch = activeFilter === "all" || normalizeStatus(scholarship.status) === activeFilter;
       const searchMatch = scholarship.title.toLowerCase().includes(searchTerm.trim().toLowerCase());
       return statusMatch && searchMatch;
+    }).sort((a, b) => {
+      if (sortBy === "title") return a.title.localeCompare(b.title);
+      if (sortBy === "deadline") return (a.deadline ? new Date(a.deadline).getTime() : Infinity) - (b.deadline ? new Date(b.deadline).getTime() : Infinity);
+      return (b.created_at ? new Date(b.created_at).getTime() : 0) - (a.created_at ? new Date(a.created_at).getTime() : 0);
     });
-  }, [activeFilter, data, searchTerm]);
+  }, [activeFilter, data, searchTerm, sortBy]);
 
   if (isLoading) {
     return (
@@ -128,45 +135,45 @@ function SponsorScholarshipsPage() {
   if (error || !data) {
     return (
       <div className="sponsor-page">
-        <section className="sponsor-empty-state">{error || "Scholarship listing data is not available."}</section>
+        <section className="sponsor-empty-state" role="alert"><p>{error || "Scholarship listing data is not available."}</p><button type="button" className="sponsor-add-button" onClick={() => { setError(""); setIsLoading(true); setRetry(value => value + 1); }}>Try again</button></section>
       </div>
     );
   }
 
   return (
     <div className="sponsor-page">
-      <section className="sponsor-scholarships-hero">
+      <section className="sponsor-hero spl-hero spl-trophy-banner">
         <div>
-          <p className="sponsor-kicker">Scholarship Management</p>
-          <h2>My Scholarships</h2>
+          <p className="sponsor-kicker"><Icon name="graduation" />Scholarship Management</p>
+          <h2>Manage Your Scholarship Listings</h2>
           <span>View every scholarship advertisement listed by {data.sponsor.organization_name || "your organization"}.</span>
+          <Link className="sponsor-hero-action" to="/sponsor/add-scholarship">
+            <span aria-hidden="true">＋</span> Add Scholarship
+          </Link>
         </div>
-        <Link className="sponsor-hero-action" to="/sponsor/add-scholarship">
-          Add Scholarship
-        </Link>
       </section>
 
       <section className="sponsor-stats-grid" aria-label="Scholarship listing summary">
         <article className="sponsor-stat-card purple">
-          <span>▣</span>
+          <span><Icon name="graduation" /></span>
           <p>Total Listings</p>
           <strong>{data.summary.total}</strong>
           <small>All scholarships submitted</small>
         </article>
         <article className="sponsor-stat-card green">
-          <span>◉</span>
+          <span><Icon name="appointment" /></span>
           <p>Active Listings</p>
           <strong>{data.summary.active}</strong>
           <small>Visible or approved listings</small>
         </article>
-        <article className="sponsor-stat-card blue">
-          <span>□</span>
+        <article className="sponsor-stat-card amber">
+          <span><Icon name="hourglass" /></span>
           <p>Pending Review</p>
           <strong>{data.summary.pending}</strong>
           <small>Waiting for administrator approval</small>
         </article>
-        <article className="sponsor-stat-card blue">
-          <span>!</span>
+        <article className="sponsor-stat-card pink">
+          <span><Icon name="close" /></span>
           <p>Rejected</p>
           <strong>{data.summary.rejected}</strong>
           <small>May need revision or appeal</small>
@@ -177,7 +184,7 @@ function SponsorScholarshipsPage() {
         <div className="sponsor-scholarship-toolbar">
           <div>
             <p className="sponsor-kicker">Listing Directory</p>
-            <h2>Scholarship advertisements</h2>
+            <h2><Icon name="layers" />Your scholarship listings</h2>
           </div>
           <input
             aria-label="Search scholarship listings"
@@ -194,16 +201,21 @@ function SponsorScholarshipsPage() {
               className={activeFilter === filter.value ? "active" : ""}
               key={filter.value}
               type="button"
+              aria-pressed={activeFilter === filter.value}
               onClick={() => setActiveFilter(filter.value)}
             >
-              {filter.label}
+              {filter.label} <span>{data.summary[filter.value === "all" ? "total" : filter.value as "active" | "pending" | "rejected"]}</span>
             </button>
           ))}
         </div>
 
+        <div className="spl-results-toolbar">
+          <p role="status">Showing {filteredScholarships.length} of {data.summary.total} listings</p>
+          <label>Sort by <select value={sortBy} onChange={event => setSortBy(event.target.value)}><option value="latest">Newest first</option><option value="deadline">Nearest deadline</option><option value="title">Title A–Z</option></select></label>
+        </div>
         {data.scholarships.length === 0 ? (
           <div className="sponsor-empty-state scholarship-empty">
-            <strong>No scholarship listings yet.</strong>
+            <Icon name="graduation" /><strong>No scholarship listings yet.</strong>
             <p>Create your first scholarship advertisement so students can discover and apply after it is approved.</p>
             <Link to="/sponsor/add-scholarship">Add First Scholarship</Link>
           </div>
@@ -213,7 +225,7 @@ function SponsorScholarshipsPage() {
               <article className="sponsor-scholarship-card" key={scholarship.scholarship_id}>
                 <div className="sponsor-scholarship-main">
                   <span className={`sponsor-status ${normalizeStatus(scholarship.status)}`}>{scholarship.status || "Pending"}</span>
-                  <h3>{scholarship.title}</h3>
+                  <div className="spl-card-title"><span><Icon name="graduation" /></span><h3>{scholarship.title}</h3></div>
                   <p>{scholarship.description || "No description has been added yet."}</p>
                   <div className="sponsor-scholarship-tags">
                     <span>{scholarship.category || "Category not set"}</span>
@@ -222,15 +234,15 @@ function SponsorScholarshipsPage() {
                 </div>
                 <div className="sponsor-scholarship-meta">
                   <div>
-                    <strong>{formatCurrency(scholarship.amount)}</strong>
+                    <Icon name="layers" /><strong>{formatCurrency(scholarship.amount)}</strong>
                     <span>Scholarship amount</span>
                   </div>
                   <div>
-                    <strong>{formatDate(scholarship.deadline)}</strong>
+                    <Icon name="calendar" /><strong>{formatDate(scholarship.deadline)}</strong>
                     <span>Deadline</span>
                   </div>
                   <div>
-                    <strong>{scholarship.application_count}</strong>
+                    <Icon name="users" /><strong>{scholarship.application_count}</strong>
                     <span>Applications</span>
                   </div>
                 </div>
@@ -238,7 +250,7 @@ function SponsorScholarshipsPage() {
             ))}
           </div>
         ) : (
-          <div className="sponsor-empty-state">No scholarships match this search or filter.</div>
+<div className="sponsor-empty-state scholarship-empty"><Icon name="search" /><strong>No matching scholarships</strong><p>Try another title or reset the filters to see all your listings.</p><button type="button" className="sponsor-add-button" onClick={() => { setActiveFilter("all"); setSearchTerm(""); }}>Clear filters</button></div>
         )}
       </section>
     </div>

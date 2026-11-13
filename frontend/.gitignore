@@ -23,10 +23,23 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment variables
 .env
-.venv/
+.env.*
+!.env.example
+
+# Python
 venv/
+.venv/
 __pycache__/
+*.pyc
+
+# Node.js
 node_modules/
-dist/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
 .tmp/

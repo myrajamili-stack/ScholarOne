@@ -1,0 +1,211 @@
+.admin-home-shell { grid-template-columns: 242px minmax(0, 1fr); color: #21103e; background: radial-gradient(ellipse at top right, #eee1ff, transparent 65%), #faf7ff; }
+.admin-home-shell .admin-sidebar { padding: 25px 17px; gap: 25px; border-color: #e8dcfa; background: #ffffffb8; isolation: isolate; }
+.admin-home-shell .admin-sidebar::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: url('/images/student-calendar-waves.png') center bottom / cover;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 65%);
+  mask-image: linear-gradient(to bottom, transparent, #000 65%);
+  pointer-events: none;
+}
+.admin-home-shell .admin-brand { text-align: center; }
+.admin-home-shell .admin-logo { display: block; overflow-wrap: anywhere; color: #5218e7; font-size: 30px; letter-spacing: -1px; }
+.admin-home-shell .admin-logo > span:not(.adh-brand-cap) { color: #752aff; }
+.adh-brand-cap { display: block; margin-bottom: 8px; }
+.adh-brand-cap svg { width: 64px; height: 52px; color: #6320ed; fill: #ece2ff; }
+.admin-home-shell .admin-brand p { font-size: 11px; color: #241342; }
+.admin-home-shell .admin-role-label { color: #604387; font-size: 11px; padding-left: 10px; }
+.admin-home-shell .admin-nav { gap: 8px; padding: 2px 0 10px; }
+.admin-home-shell .admin-nav-link { padding: 10px 15px; border-radius: 14px; font-size: 13px; gap: 12px; min-height: 46px; color: #21103e; }
+.admin-home-shell .admin-nav-link.active { color: white; background: linear-gradient(105deg, #a05bff, #6412f3); box-shadow: 0 4px 9px #6e21cc25; }
+.admin-home-shell .admin-nav-link svg { width: 22px; height: 22px; }
+.admin-home-shell .admin-user-card { background: #f0e5ff; border-radius: 18px; padding: 14px; gap: 10px; border: 0; }
+.admin-home-shell .admin-user-card strong { font-size: 12px; }
+.admin-home-shell .admin-user-card span { font-size: 11px; color: #63488c; font-weight: 500; }
+.admin-home-shell .admin-main { padding: 22px; gap: 22px; }
+.admin-home-shell .admin-topbar { gap: 16px; align-items: flex-start; }
+.admin-home-shell .admin-topbar h1 { font-size: clamp(23px, 2.1vw, 31px); font-weight: 850; letter-spacing: -.8px; color: #21103e; }
+.adh-sparkle { color: #ffbd28; font-size: .85em; }
+.admin-home-shell .admin-topbar p { font-size: 13px; line-height: 1.5; font-weight: 500; color: #624785; margin-top: 6px; }
+.admin-home-shell .admin-top-actions { flex-shrink: 0; gap: 12px; }
+.admin-home-shell .admin-top-user strong { font-size: 12px; }
+.admin-home-shell .admin-top-user span { font-size: 12px; font-weight: 500; color: #624785; }
+.admin-home-shell .admin-avatar { width: 44px; height: 44px; background: linear-gradient(130deg, #ffca47, #ff951c); flex-shrink: 0; }
+.admin-home-shell .admin-icon-button { display: grid; place-items: center; width: 44px; height: 44px; min-height: 44px; border-radius: 50%; color: #26133f; border-color: #eadbff; box-shadow: 0 4px 8px #6320a811; }
+.admin-home-shell .admin-logout { padding: 10px 18px; min-height: 44px; font-size: 12px; border-radius: 16px; color: #6415eb; border-color: #e6d3ff; }
+.admin-home-page { display: grid; gap: 16px; }
+.adh-hero { position: relative; display: flex; align-items: center; min-height: 167px; border-radius: 24px; overflow: hidden; padding: 28px 34px; background: #ebddfd url('/images/student-calendar-waves.png') center / cover; }
+.adh-hero > div { width: 65%; z-index: 1; }
+.adh-hero h2 { font-size: clamp(23px, 2.2vw, 31px); line-height: 1.2; font-weight: 850; letter-spacing: -.6px; margin: 0 0 9px; }
+.adh-hero p { color: #634385; font-size: 13px; line-height: 1.6; margin: 0; }
+.adh-hero img { position: absolute; right: 2%; bottom: 0; height: 100%; width: 34%; object-fit: contain; object-position: bottom; }
+.adh-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.adh-metric { display: flex; align-items: flex-start; gap: 14px; padding: 19px; border: 1px solid #e0ccff; border-radius: 20px; background: linear-gradient(125deg, white, #f0e8ff); color: inherit; text-decoration: none; box-shadow: 0 3px 7px #6320a809; min-width: 0; }
+.adh-metric.amber { background: linear-gradient(125deg, white, #fff6e7); border-color: #f4e4cf; }
+.adh-metric.blue { background: linear-gradient(125deg, white, #edf0ff); }
+.adh-metric.green { background: linear-gradient(125deg, white, #ebf9f1); }
+.adh-icon { display: grid; place-items: center; width: 43px; height: 43px; flex: 0 0 43px; border-radius: 15px; color: #8437ff; background: #f0e5ff; }
+.adh-icon svg { width: 26px; height: 26px; }
+.amber .adh-icon { background: #fff0d0; color: #ffa600; }
+.blue .adh-icon { background: #e3edff; color: #2583ff; }
+.green .adh-icon { background: #e1f5e9; color: #1bb868; }
+.adh-metric h2 { font-size: 13px; font-weight: 750; margin: 0 0 4px; }
+.adh-metric strong { display: block; font-size: 31px; line-height: 1.15; font-weight: 850; margin-bottom: 9px; }
+.adh-metric small { display: inline-block; font-size: 10px; padding: 4px 8px; border-radius: 20px; background: #e7f7dc; color: #228036; line-height: 1.4; }
+.adh-middle { display: grid; grid-template-columns: 1.05fr 1fr; gap: 16px; align-items: stretch; }
+.adh-bottom { display: grid; grid-template-columns: 1.15fr .85fr 1.3fr; gap: 16px; align-items: stretch; }
+.adh-panel { min-width: 0; padding: 20px; background: #ffffffbc; border: 1px solid #e0ceff; border-radius: 21px; box-shadow: 0 3px 7px #6320a809; }
+.adh-panel-heading { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 18px; }
+.adh-panel-heading > div { min-width: 0; }
+.adh-panel-heading .adh-icon { width: 37px; height: 37px; flex-basis: 37px; border-radius: 12px; }
+.adh-panel-heading h2 { font-size: 18px; font-weight: 850; line-height: 1.2; letter-spacing: -.4px; margin: 0 0 3px; }
+.adh-panel-heading p { font-size: 11px; line-height: 1.5; color: #6c528b; margin: 0; }
+.adh-period { margin-left: auto; flex-shrink: 0; font-size: 11px; border: 1px solid #e0ceff; padding: 6px 10px; border-radius: 12px; color: #624785; }
+.adh-chart-content { display: flex; align-items: center; gap: 24px; }
+.adh-donut { display: grid; place-items: center; flex: 0 0 155px; width: 155px; height: 155px; border-radius: 50%; }
+.adh-donut > div { display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fdfaff; width: 72%; height: 72%; border-radius: 50%; }
+.adh-donut strong { font-size: 28px; line-height: 1.2; font-weight: 850; }
+.adh-donut span { font-size: 12px; font-weight: 650; }
+.adh-breakdown { flex: 1; min-width: 0; display: grid; gap: 13px; }
+.adh-breakdown > div { display: grid; grid-template-columns: 11px minmax(0, 1fr) auto auto; align-items: center; gap: 8px; font-size: 12px; }
+.adh-breakdown i { width: 11px; height: 11px; border-radius: 50%; }
+.adh-breakdown span { font-weight: 650; }
+.adh-breakdown small { color: #735496; min-width: 30px; text-align: right; }
+.adh-pending-list { display: grid; gap: 8px; margin-bottom: 15px; }
+.adh-pending-list a { display: flex; align-items: center; gap: 13px; padding: 8px 12px; background: #f5eeff; border: 1px solid #eee3ff; border-radius: 12px; color: #2a1645; text-decoration: none; font-size: 12px; font-weight: 700; }
+.adh-pending-list svg { color: #8437ff; flex-shrink: 0; width: 20px; height: 20px; }
+.adh-pending-list strong { margin-left: auto; background: #e9daff; color: #6b20e0; padding: 0 8px; border-radius: 20px; }
+.adh-primary { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 10px 15px; border: 0; border-radius: 12px; color: white; background: linear-gradient(110deg, #a456ff, #6514ed); font-weight: 650; font-size: 12px; }
+.adh-pending-summary { display: grid; gap: 8px; margin-top: 12px; font-size: 12px; }
+.adh-pending-summary a { display: flex; justify-content: space-between; align-items: center; color: #722be0; }
+.adh-pending-summary p { margin: 0; color: #6c528b; }
+.adh-roles .adh-chart-content { gap: 16px; }
+.adh-roles .adh-donut { flex-basis: 120px; width: 120px; height: 120px; }
+.adh-roles .adh-breakdown > div { font-size: 10px; gap: 5px; }
+.adh-health-body { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 12px 0; gap: 12px; }
+.adh-health-check { display: grid; place-items: center; width: 62px; height: 62px; border-radius: 20px; background: #e3f8dd; color: #27af3e; font-size: 42px; font-weight: 800; }
+.adh-health-body strong { padding: 6px 12px; color: #247e30; background: #e6f7df; border-radius: 18px; font-size: 12px; }
+.adh-health-body p { font-size: 11px; line-height: 1.5; color: #6c528b; margin: 0; }
+.adh-text-button { padding: 0; border: 0; background: none; color: #7124e2; font-size: 10px; font-weight: 750; margin-left: auto; white-space: nowrap; }
+.adh-activity-list { display: grid; gap: 10px; }
+.adh-activity-list a { display: flex; align-items: flex-start; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #f0e7fa; text-decoration: none; color: inherit; }
+.adh-activity-icon { display: grid; place-items: center; flex: 0 0 32px; height: 32px; border-radius: 11px; background: #efe4ff; color: #8227ed; font-size: 12px; font-weight: 750; }
+.adh-activity-icon.amber { background: #fff0d4; color: #e7a012; }
+.adh-activity-list a > div { flex: 1; min-width: 0; }
+.adh-activity-list strong { display: block; font-size: 10px; line-height: 1.5; overflow-wrap: anywhere; }
+.adh-activity-list small { display: block; color: #6c528b; font-size: 10px; line-height: 1.5; overflow-wrap: anywhere; }
+.adh-activity-list time { font-size: 9px; color: #755795; flex-shrink: 0; }
+.adh-empty { font-size: 12px; color: #755795; margin: 12px 0 0; }
+.admin-home-shell a:focus-visible, .admin-home-shell button:focus-visible { outline: 3px solid #b581ff; outline-offset: 3px; }
+.adh-metric:hover, .adh-pending-list a:hover { border-color: #ad7aff; }
+#admin-pending { scroll-margin-top: 20px; }
+@media (max-width: 1250px) {
+  .admin-home-shell { grid-template-columns: 220px minmax(0, 1fr); }
+  .admin-home-shell .admin-topbar { flex-wrap: wrap; }
+  .admin-home-shell .admin-top-actions { margin-left: auto; }
+  .adh-metric { padding: 15px 12px; gap: 10px; }
+  .adh-bottom { grid-template-columns: 1.2fr 1fr; }
+  .adh-activities { grid-column: 1 / -1; }
+  .adh-chart-content { gap: 16px; }
+  .adh-donut { flex-basis: 130px; width: 130px; height: 130px; }
+}
+@media (max-width: 1000px) {
+  .adh-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .adh-middle, .adh-bottom { grid-template-columns: minmax(0, 1fr); }
+  .adh-hero { min-height: 210px; padding: 24px; }
+  .adh-hero > div { width: 62%; }
+}
+@media (max-width: 700px) {
+  .admin-home-shell { grid-template-columns: minmax(0, 1fr); }
+  .admin-home-shell .admin-sidebar { position: static; height: auto; padding: 18px 14px; gap: 15px; }
+  .admin-home-shell .admin-nav { display: flex; overflow-x: auto; padding-bottom: 10px; }
+  .admin-home-shell .admin-nav-link { flex-shrink: 0; }
+  .admin-home-shell .admin-role-label, .admin-home-shell .admin-user-card, .admin-home-shell .admin-sidebar::after { display: none; }
+  .admin-home-shell .adh-brand-cap { display: none; }
+  .admin-home-shell .admin-main { padding: 18px 13px; }
+  .admin-home-shell .admin-top-actions { gap: 9px; }
+  .admin-home-shell .admin-top-user { max-width: 125px; }
+  .adh-hero { min-height: 280px; padding: 22px; align-items: flex-start; }
+  .adh-hero > div { width: 100%; }
+  .adh-hero img { width: 65%; height: 130px; }
+  .adh-panel { padding: 17px; }
+  .adh-panel-heading h2 { font-size: 17px; }
+  .adh-metric { flex-direction: column; }
+  .adh-metric h2 { font-size: 12px; }
+  .adh-roles .adh-chart-content { flex-wrap: wrap; }
+}
+
+.admin-home-page .adh-metrics .adh-metric { min-height: 132px; padding: 20px; gap: 16px; }
+.admin-home-page .adh-metrics .adh-icon { width: 49px; height: 49px; flex-basis: 49px; }
+.admin-home-page .adh-metrics .adh-metric strong { font-size: 35px; }
+.admin-home-page .adh-middle > .adh-panel { padding: 22px; }
+.admin-home-page .adh-middle .adh-chart-content { min-height: 190px; }
+.admin-home-page .adh-middle .adh-donut { width: 175px; height: 175px; flex-basis: 175px; }
+.admin-home-page .adh-bottom { grid-template-columns: 1.15fr .85fr 1.23fr; }
+.admin-home-page .adh-bottom > .adh-panel { padding: 20px; }
+.admin-home-page .adh-roles .adh-chart-content { min-height: 180px; }
+.admin-home-page .adh-roles .adh-donut { width: 135px; height: 135px; flex-basis: 135px; }
+.admin-home-page .adh-roles .adh-breakdown > div { font-size: 11px; }
+.adh-appeals { display: flex; flex-direction: column; gap: 15px; }
+.adh-appeals .adh-panel-heading { margin-bottom: 2px; }
+.adh-appeal-total {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 8px;
+  flex: 1;
+  min-height: 115px;
+  padding: 18px;
+  border-radius: 17px;
+  background: linear-gradient(125deg, #f5edff, #f0e5fc);
+}
+.adh-appeal-total strong { font-size: 36px; font-weight: 850; line-height: 1; }
+.adh-appeal-total > span:last-child { grid-column: 1 / -1; text-align: center; color: #8239ef; font-size: 14px; font-weight: 750; }
+.adh-appeal-link { display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid #c596ff; border-radius: 12px; padding: 9px 15px; text-decoration: none; color: #7824ed; font-size: 12px; font-weight: 750; }
+.adh-appeal-link:hover { background: #f3e9ff; }
+.adh-database-status { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; padding: 16px 22px; border: 1px solid #e0ceff; border-radius: 18px; background: #ffffffbc; box-shadow: 0 3px 7px #6320a809; font-size: 11px; }
+.adh-database-status > svg { color: #392064; width: 20px; height: 20px; }
+.adh-database-status > span { border-radius: 15px; padding: 4px 10px; color: #258336; background: #dcf8d4; font-weight: 700; }
+.adh-database-status small { margin-left: 15px; color: #775796; font-size: 10px; }
+@media (max-width: 1300px) {
+  .admin-home-page .adh-bottom { grid-template-columns: 1.2fr 1fr; }
+  .admin-home-page .adh-activities { grid-column: 1 / -1; }
+}
+@media (max-width: 1000px) {
+  .admin-home-page .adh-bottom { grid-template-columns: minmax(0, 1fr); }
+  .admin-home-page .adh-activities { grid-column: auto; }
+}
+@media (max-width: 700px) {
+  .admin-home-page .adh-metrics .adh-metric { padding: 15px; }
+  .admin-home-page .adh-middle .adh-chart-content { flex-wrap: wrap; justify-content: center; }
+  .admin-home-page .adh-middle .adh-breakdown { min-width: 160px; }
+  .adh-database-status small { margin-left: 0; width: 100%; }
+}
+
+/* Keep the banner palette consistent across the administrator workspace. */
+.admin-home-shell :is(.adh-hero, .aum-hero, .ast-hero, .admin-module-hero) {
+  color: #2c1048;
+  background: #ebddfd url('/images/student-calendar-waves.png') center / cover no-repeat;
+}
+.admin-home-shell :is(.adh-hero, .aum-hero, .ast-hero, .admin-module-hero) h2 {
+  color: #2c1048;
+}
+.admin-home-shell :is(.adh-hero, .aum-hero, .ast-hero, .admin-module-hero) p {
+  color: #624283;
+}
+.admin-home-shell :is(.apw-eyebrow, .asu-eyebrow, .aal-eyebrow),
+.admin-home-shell .ast-hero > div > span,
+.admin-home-shell .admin-module-hero > div > span {
+  color: #7324df;
+}
+.admin-home-shell :is(.ast-hero, .aal-hero)::after {
+  display: none;
+}

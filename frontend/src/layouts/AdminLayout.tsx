@@ -3,6 +3,7 @@ import AdminSidebar from "../components/admin/AdminSidebar";
 import AdminTopbar from "../components/admin/AdminTopbar";
 import { getStoredUser } from "../utils/authStorage";
 import "../styles/admin-dashboard.css";
+import "../styles/admin-home.css";
 
 function AdminLayout() {
   const user = getStoredUser();
@@ -24,7 +25,7 @@ function AdminLayout() {
   }
 
   return (
-    <main className="admin-shell">
+    <main className="admin-shell admin-home-shell">
       <AdminSidebar />
 
       <section className="admin-main">

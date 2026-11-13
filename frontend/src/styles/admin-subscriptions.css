@@ -1,0 +1,69 @@
+.asu-hero { background: linear-gradient(115deg,#7036ed,#6860ed 65%,#8172f3); }
+.asu-hero::before { background-image: url('/images/sponsor-subscriptions-banner.png'); background-position: right center; background-size: auto 125%; mask-image: linear-gradient(to right,transparent 45%,#000 78%); }
+.asu-hero h2,.asu-hero p { color: white; }
+.asu-eyebrow { display: block; color: white; text-transform: uppercase; font-size: 12px; font-weight: 750; letter-spacing: 1.1px; margin-bottom: 12px; }
+.asu-page .adh-metric.amber { background: linear-gradient(120deg,#fffaff,#fff6e6); }
+.asu-page .adh-metric.pink { background: linear-gradient(120deg,#fffaff,#fff0f5); }
+.asu-page .adh-metric.pink .adh-icon { color: #e64875; background: #ffe3ed; }
+.asu-columns { display: grid; grid-template-columns: minmax(0,1fr) 220px; gap: 18px; align-items: start; }
+.asu-directory { display: grid; grid-template-columns: minmax(0,1fr); gap: 16px; min-width: 0; }
+.asu-tabs { width: fit-content; max-width: 100%; }
+.asu-tabs button { padding: 10px 14px; font-size: 11px; }
+.asu-filters { grid-template-columns: minmax(170px,1.6fr) minmax(115px,1fr) minmax(115px,.9fr) auto; gap: 10px; }
+.asu-date-filters { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; color: #76588f; font-size: 11px; }
+.asu-date-filters label { display: flex; align-items: center; gap: 7px; }
+.asu-date-filters input { border: 1px solid #dfcefb; padding: 6px 9px; border-radius: 8px; color: #41245f; background: #fffaff; min-width: 0; }
+.asu-date-filters button { background: transparent; border: 0; color: #7a2be2; text-decoration: underline; }
+.asu-table { min-width: 820px; }
+.asu-table th,.asu-table td { font-size: 10px; padding: 13px 7px; }
+.asu-provider { display: flex; align-items: center; gap: 8px; min-width: 120px; max-width: 160px; }
+.asu-provider > span { display: grid; place-items: center; flex: 0 0 28px; width: 28px; height: 28px; border-radius: 50%; background: #e9dcff; color: #7d39d6; font-weight: 750; }
+.asu-provider strong { font-size: 11px; font-weight: 650; }
+.asu-details { border-radius: 10px; font-size: 11px; padding: 6px 10px; }
+.asu-page .admin-status-badge.active { background: #ddf6e6; color: #258349; }
+.asu-page .admin-status-badge.expiring { background: #fff0cd; color: #aa6a11; }
+.asu-page .admin-status-badge.expired { background: #eee6f2; color: #776183; }
+.asu-aside { display: grid; gap: 16px; min-width: 0; }
+.asu-aside h2 { font-size: 16px; font-weight: 800; margin: 14px 0 8px; }
+.asu-aside p { font-size: 12px; line-height: 1.7; color: #76588f; }
+.asu-aside .adh-panel { padding: 20px; }
+.asu-aside .adh-panel-heading h2 { margin: 0; }
+.asu-aside .aum-outline { white-space: normal; padding: 9px; font-size: 11px; width: 100%; }
+.asu-action { display: flex; align-items: center; gap: 9px; width: 100%; padding: 14px 0; background: transparent; color: #4b2869; border: 0; border-bottom: 1px solid #eee2fb; text-align: left; }
+.asu-action > svg { width: 20px; flex: 0 0 20px; color: #8c3dec; }
+.asu-action > svg:last-child { width: 15px; flex-basis: 15px; margin-left: auto; }
+.asu-action strong,.asu-action small { display: block; font-size: 11px; }
+.asu-action small { color: #876e9d; line-height: 1.5; margin-top: 5px; }
+.asu-renewal { display: block; width: 100%; text-align: left; background: #f6efff; color: #51306e; border: 0; padding: 12px; border-radius: 10px; margin-top: 10px; }
+.asu-renewal strong,.asu-renewal small { display: block; font-size: 11px; line-height: 1.5; }
+.asu-dialog { width: min(650px,calc(100vw - 30px)); }
+.asu-dialog h3 { font-size: 22px; font-weight: 800; }
+.asu-dialog p { font-size: 12px; color: #785992; overflow-wrap: anywhere; }
+.asu-dialog dl { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; padding: 20px; margin: 20px 0; border-radius: 14px; background: #f4edff; }
+.asu-dialog dt { font-size: 11px; color: #846799; margin-bottom: 4px; }
+.asu-dialog dd { font-size: 13px; margin: 0; overflow-wrap: anywhere; }
+.asu-note { line-height: 1.7; }
+@media(max-width:1250px) { .asu-columns { grid-template-columns: minmax(0,1fr); } .asu-aside { grid-template-columns: repeat(3,minmax(0,1fr)); } }
+@media(max-width:700px) { .asu-hero::before { background-size: auto 150px; background-position: right bottom; mask-image: linear-gradient(to bottom,transparent 50%,#000 70%); } .asu-hero { min-height: 330px; } .asu-filters { grid-template-columns: repeat(2,minmax(0,1fr)); } .asu-filters .aum-search { grid-column: 1 / -1; } .asu-aside { grid-template-columns: minmax(0,1fr); } .asu-tabs { width: 100%; } .asu-tabs button { padding: 10px 12px; } .asu-dialog dl { grid-template-columns: minmax(0,1fr); } }
+.asu-provider-directory { display: grid; gap: 16px; grid-template-columns: minmax(0,1fr); min-width: 0; }
+.asu-provider-table { min-width: 860px; }
+.asu-provider-table th:first-child,.asu-provider-table td:first-child { width: 25%; min-width: 230px; }
+.asu-provider-table .asu-provider { min-width: 210px; max-width: 280px; }
+.asu-provider small { display: block; color: #826998; font-size: 11px; margin-top: 4px; overflow-wrap: anywhere; }
+.asu-quota { min-width: 170px; display: grid; gap: 6px; }
+.asu-quota strong { font-size: 12px; }
+.asu-quota progress { width: 100%; height: 9px; accent-color: #9346ee; }
+.asu-quota small { font-size: 11px; color: #826998; }
+.asu-plan-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; }
+.asu-plan-grid article { border: 1px solid #e1cff8; border-radius: 18px; padding: 20px; background: #faf6ff; display: flex; flex-direction: column; gap: 12px; }
+.asu-plan-grid h3 { font-size: 20px; font-weight: 800; margin: 0; }
+.asu-plan-grid article > strong { font-size: 16px; color: #7538bb; }
+.asu-plan-grid p,.asu-plan-grid ul { font-size: 12px; line-height: 1.8; color: #71538d; margin: 0; }
+.asu-plan-grid ul { padding-left: 17px; }
+.asu-plan-grid button { margin-top: auto; }
+.asu-policy-note { font-size: 12px; color: #806595; line-height: 1.7; }
+.asu-history-item { display: grid; gap: 6px; width: 100%; margin-top: 10px; padding: 13px; border: 1px solid #dfc8f7; border-radius: 10px; text-align: left; color: #5d337e; background: #f6efff; font-size: 12px; }
+.asu-dialog textarea { width: 100%; border: 1px solid #dfccf9; border-radius: 10px; padding: 10px; color: #311744; background: white; resize: vertical; font-size: 13px; }
+.asu-dialog h4 { font-size: 16px; font-weight: 750; }
+@media(max-width:1100px) { .asu-plan-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:700px) { .asu-plan-grid { grid-template-columns: minmax(0,1fr); } }

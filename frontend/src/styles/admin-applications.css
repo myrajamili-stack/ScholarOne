@@ -1,0 +1,54 @@
+.aap-hero::before { background-image: url('/images/sponsor-dashboard-hero.png'); background-size: auto 96%; background-position: 96% center; mask-image: none; }
+.aap-page .adh-metric.amber { background: linear-gradient(120deg, #fffaff, #fff5e7); border-color: #f3dec6; }
+.aap-page .adh-metric.green { background: linear-gradient(120deg, #fffaff, #edf9ee); }
+.aap-page .adh-metric.pink { background: linear-gradient(120deg, #fffaff, #fff0f6); border-color: #edcfea; }
+.aap-page .adh-metric.pink .adh-icon { background: #ffe0ee; color: #eb3a72; }
+.aap-page .adh-metric.green small { background: #e5f7d9; color: #257c32; }
+.aap-page .adh-metric.amber small { background: #fff0cd; color: #995d16; }
+.aap-page .adh-metric.pink small { background: #ffdeeb; color: #b02a53; }
+.aap-charts { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; min-width: 0; }
+.aap-charts > article { min-width: 0; }
+.aap-trend .adh-panel-heading { margin-bottom: 6px; }
+.aap-trend .adh-panel-heading select { margin-left: auto; max-width: 145px; border: 1px solid #dfcefb; border-radius: 10px; padding: 8px; background: #fffaff; color: #40205d; font-size: 11px; }
+.aap-trend-chart { width: 100%; display: block; }
+.aap-trend-chart text { fill: #74598e; font-size: 11px; }
+.aap-chart-note { font-size: 11px; color: #806597; margin: 5px 0 0; text-align: center; }
+.aap-status-chart .adh-chart-content { padding: 5px 8px; }
+.aap-status-chart .adh-breakdown > div { padding-bottom: 9px; border-bottom: 1px solid #eee2ff; }
+.aap-directory { gap: 13px; margin-top: 0; }
+.aap-directory > .adh-panel-heading { margin: 0; }
+.aap-filters { grid-template-columns: minmax(210px, 2.1fr) minmax(130px, 1fr) minmax(130px, 1fr) minmax(130px, .9fr) auto; gap: 14px; }
+.aap-table { min-width: 1000px; }
+.aap-scholarship { min-width: 185px; max-width: 270px; font-weight: 650; }
+.aap-provider { display: flex; align-items: center; gap: 9px; min-width: 150px; max-width: 210px; font-size: 11px; }
+.aap-provider > span { display: grid; place-items: center; width: 34px; flex: 0 0 34px; height: 34px; border-radius: 50%; color: #976116; background: #fff0ce; font-weight: 700; }
+.aap-details { font-size: 11px; padding: 6px 11px; border-radius: 18px; }
+.aap-page .admin-status-badge.approved { background: #e2f7de; color: #218134; }
+.aap-page .admin-status-badge.rejected { background: #ffe3ee; color: #b72a4f; }
+.aap-page .admin-status-badge.pending { background: #fff0ce; color: #9b6013; }
+.aap-dialog { width: min(680px, calc(100vw - 30px)); }
+.aap-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: 20px; margin: 22px 0; background: #f4edff; border-radius: 14px; }
+.aap-detail-grid dt { font-size: 11px; color: #806499; margin-bottom: 5px; }
+.aap-detail-grid dd { font-size: 13px; font-weight: 650; margin: 0; overflow-wrap: anywhere; }
+.aap-detail-grid small { display: block; margin-top: 4px; font-size: 11px; font-weight: 400; }
+.aap-dialog h3 { font-size: 15px; font-weight: 750; }
+.aap-remarks { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; line-height: 1.7; }
+.aap-monitor-note { background: #eee4ff; color: #71518e; border-radius: 12px; padding: 12px; font-size: 12px; margin-bottom: 0; }
+@media(max-width:1250px) {
+  .aap-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .aap-filters .aum-search { grid-column: span 2; }
+  .aap-status-chart .adh-chart-content { flex-wrap: wrap; justify-content: center; }
+  .aap-status-chart .adh-breakdown { min-width: 160px; }
+}
+@media(max-width:900px) {
+  .aap-charts { grid-template-columns: minmax(0, 1fr); }
+}
+@media(max-width:700px) {
+  .aap-hero::before { background-size: auto 140px; background-position: right bottom; }
+  .aap-hero { min-height: 350px; }
+  .aap-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .aap-filters .aum-search { grid-column: 1 / -1; }
+  .aap-trend .adh-panel-heading { flex-wrap: wrap; }
+  .aap-trend .adh-panel-heading select { margin-left: 48px; }
+  .aap-detail-grid { grid-template-columns: minmax(0, 1fr); }
+}

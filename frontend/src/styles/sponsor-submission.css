@@ -1,0 +1,109 @@
+.sponsor-submission-page .submission-steps {
+  display: flex;
+  align-items: center;
+  padding: 14px 30px;
+  border: 1px solid #e5d6fb;
+  border-radius: 20px;
+  background: #ffffffb8;
+  gap: 20px;
+}
+.submission-steps button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: #706080;
+  font-size: 14px;
+  font-weight: 700;
+}
+.submission-steps button + button::before {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: #d9d0e7;
+  margin-right: 18px;
+}
+.submission-steps button span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #ebe6f2;
+  color: #30204f;
+}
+.submission-steps button[aria-current] { color: #6a16e6; }
+.submission-steps button[aria-current] span { background: linear-gradient(130deg, #9c52ff, #600de0); color: white; }
+.submission-layout { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(270px, 1fr); gap: 20px; align-items: start; }
+.sponsor-workspace-shell .submission-form { display: block; padding: 22px 26px; min-width: 0; }
+.submission-form fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.submission-section { padding: 0 0 20px; scroll-margin-top: 25px; }
+.submission-section + .submission-section { padding-top: 16px; border-top: 1px solid #eae0f6; }
+.submission-layout h3 { display: flex; align-items: center; gap: 12px; margin: 0 0 17px; color: #241440; font-size: 18px; font-weight: 800; }
+.submission-layout h3 > svg { box-sizing: content-box; padding: 9px; border-radius: 14px; background: #f2e7ff; color: #8a2cff; flex: 0 0 23px; }
+.submission-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px 22px; }
+.sponsor-workspace-shell .submission-form label { display: block; color: #302044; font-size: 13px; font-weight: 700; }
+.submission-form label b { color: #ec3761; }
+.sponsor-workspace-shell .submission-form :is(input, select, textarea),
+.sponsor-workspace-shell .submission-samples select {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 1px solid #e0cff8;
+  border-radius: 11px;
+  background: #fcf9ff;
+  color: #302044;
+  font: inherit;
+  font-weight: 400;
+}
+.submission-form textarea { resize: vertical; }
+.submission-form [aria-invalid=true] { border-color: #d82e54 !important; }
+.submission-field-error { display: block; color: #be2346; font-size: 12px; font-weight: 500; margin-top: 5px; }
+.submission-extra { margin-top: 14px; color: #75558e; font-size: 12px; }
+.submission-extra summary, .submission-samples summary { cursor: pointer; font-weight: 700; }
+.submission-extra label { margin-top: 12px; }
+.submission-description-label { font-size: 12px !important; }
+.submission-counter { display: block; text-align: right; color: #8d7b9b; margin-top: 5px; font-size: 12px; }
+.submission-actions { display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid #eae0f6; padding-top: 16px; }
+.sponsor-workspace-shell .submission-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 12px 20px; min-height: 44px; font-size: 13px; font-weight: 700; }
+.submission-actions svg { width: 19px; height: 19px; }
+.sponsor-workspace-shell .submission-actions .sponsor-secondary-link { border: 1px solid #d9c2f8; background: #faf6ff; box-shadow: 0 3px 8px #7b39c510; }
+.submission-sidebar { display: grid; gap: 18px; min-width: 0; }
+.submission-illustration { display: grid; place-items: center; padding: 18px; border: 1px solid #eadbfc; border-radius: 20px; background: #f0e3ff url('/images/student-calendar-waves.png') center/cover; }
+.submission-illustration img { display: block; width: 100%; height: 170px; object-fit: contain; }
+.sponsor-workspace-shell .submission-sidebar .sponsor-panel { padding: 20px; }
+.submission-guide ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.submission-guide li { display: flex; align-items: start; gap: 10px; color: #554366; font-size: 13px; line-height: 1.5; font-weight: 600; }
+.submission-guide li > span { display: grid; place-items: center; flex: 0 0 19px; height: 19px; border-radius: 50%; background: #51b878; color: white; }
+.submission-note p, .submission-samples p { font-size: 12px; color: #73578b; line-height: 1.7; margin: 8px 0 0; }
+.submission-note h3 { color: #721bce; margin-bottom: 8px; }
+.submission-samples { font-size: 12px; color: #73578b; }
+.submission-review { border: 1px solid #dac4f6; border-radius: 16px; padding: 18px; background: #f8f1ff; margin-bottom: 18px; }
+.submission-review dl { display: grid; gap: 12px; font-size: 13px; }
+.submission-review dl > div { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 12px; }
+.submission-review dt { color: #765a8c; }
+.submission-review dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.submission-review button { padding: 10px 14px; }
+@media (max-width: 1100px) {
+  .submission-layout { grid-template-columns: minmax(0, 1fr); }
+  .submission-sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .submission-steps button + button::before { margin-right: 0; }
+  .submission-steps { gap: 10px; }
+}
+@media (max-width: 700px) {
+  .sponsor-submission-page .submission-steps { padding: 12px; gap: 8px; }
+  .submission-steps button { flex-direction: column; gap: 5px; font-size: 11px; }
+  .submission-steps button + button::before { display: none; }
+  .submission-steps button span { flex-basis: auto; width: 30px; height: 30px; }
+  .submission-fields, .submission-sidebar { grid-template-columns: minmax(0, 1fr); }
+  .sponsor-workspace-shell .submission-form { padding: 18px; }
+  .submission-actions { flex-direction: column; }
+  .submission-review dl > div { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+}

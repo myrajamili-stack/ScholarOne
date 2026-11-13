@@ -72,7 +72,7 @@ function StudentRightPanel() {
       <section className="notification-card">
         <div className="side-heading">
           <h3>Latest Notifications</h3>
-          <Link to="/reminders">View All</Link>
+          <Link to="/calendar?section=reminders">View All</Link>
         </div>
         {remindersLoading ? <p className="dashboard-message">Loading notifications...</p>
           : remindersError ? <p className="dashboard-message error">{remindersError}</p>

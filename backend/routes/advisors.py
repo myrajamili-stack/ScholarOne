@@ -1,7 +1,13 @@
-from flask import Blueprint, jsonify, request
+from contextlib import closing
+from datetime import date, timedelta
+
+from flask import Blueprint, current_app, jsonify, request
 
 from db import get_db_connection
 from responses import error_response
+from advisor_scheduling import malaysia_now, read_schedule
+from .advisor_scheduling import active_advisor
+from security import advisor_access_required
 
 advisors_bp = Blueprint("advisors", __name__, url_prefix="/api/advisors")
 
@@ -21,7 +27,7 @@ def get_advisors():
                 a.specialization,
                 a.qualification,
                 a.experience_years,
-                a.average_rating
+                coalesce((SELECT round(avg(rating),1) FROM review WHERE advisor_id=a.advisor_id), a.average_rating, 0) AS average_rating, a.institution, a.professional_title, a.bio
             from advisor a
             join app_user u on u.user_id = a.advisor_id
             where coalesce(u.status, 'active') = 'active'
@@ -35,284 +41,15 @@ def get_advisors():
         return error_response(str(e), 500)
 
 
-@advisors_bp.route("/<int:advisor_id>/dashboard", methods=["GET"])
-def get_advisor_dashboard(advisor_id):
-    connection = None
-    cursor = None
-
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            select
-                u.user_id as advisor_id,
-                u.full_name,
-                u.email,
-                coalesce(a.specialization, '') as specialization,
-                coalesce(a.qualification, '') as qualification,
-                a.experience_years,
-                coalesce(a.average_rating, 0) as average_rating
-            from app_user u
-            left join advisor a on a.advisor_id = u.user_id
-            where u.user_id = %s
-              and u.role = 'advisor'
-        """, (advisor_id,))
-        advisor = cursor.fetchone()
-
-        if not advisor:
-            cursor.close()
-            connection.close()
-            return error_response("Advisor account not found", 404)
-
-        cursor.execute("""
-            select count(*) as total_students
-            from student
-        """)
-        total_students = cursor.fetchone()["total_students"]
-
-        cursor.execute("""
-            select count(*) as today_appointments
-            from appointment
-            where advisor_id = %s
-              and appointment_datetime::date = current_date
-        """, (advisor_id,))
-        today_appointments = cursor.fetchone()["today_appointments"]
-
-        cursor.execute("""
-            select count(*) as pending_requests
-            from appointment
-            where advisor_id = %s
-              and lower(coalesce(appointment_status, 'pending')) = 'pending'
-        """, (advisor_id,))
-        pending_requests = cursor.fetchone()["pending_requests"]
-
-        cursor.execute("""
-            select count(*) as total_quizzes
-            from quiz
-            where advisor_id = %s
-        """, (advisor_id,))
-        total_quizzes = cursor.fetchone()["total_quizzes"]
-
-        cursor.execute("""
-            select
-                count(qa.attempt_id) as total_attempts,
-                coalesce(round(avg(qa.score), 2), 0) as average_score
-            from quiz q
-            left join quiz_attempt qa on qa.quiz_id = q.quiz_id
-            where q.advisor_id = %s
-        """, (advisor_id,))
-        quiz_stats = cursor.fetchone()
-
-        cursor.execute("""
-            select
-                count(*) as total_reviews,
-                coalesce(round(avg(rating), 1), 0) as average_rating
-            from review
-            where advisor_id = %s
-        """, (advisor_id,))
-        review_stats = cursor.fetchone()
-
-        cursor.execute("""
-            select
-                appointment_id,
-                appointment_datetime,
-                appointment_status,
-                coalesce(u.full_name, 'Student') as student_name
-            from appointment ap
-            left join app_user u on u.user_id = ap.student_id
-            where ap.advisor_id = %s
-              and ap.appointment_datetime::date = current_date
-            order by ap.appointment_datetime asc
-        """, (advisor_id,))
-        today_schedule = cursor.fetchall()
-
-        cursor.execute("""
-            select
-                appointment_id,
-                appointment_datetime,
-                appointment_status,
-                coalesce(u.full_name, 'Student') as student_name
-            from appointment ap
-            left join app_user u on u.user_id = ap.student_id
-            where ap.advisor_id = %s
-              and ap.appointment_datetime >= current_timestamp
-            order by ap.appointment_datetime asc
-            limit 5
-        """, (advisor_id,))
-        upcoming_appointments = cursor.fetchall()
-
-        cursor.execute("""
-            select
-                appointment_id,
-                appointment_datetime,
-                appointment_status,
-                coalesce(u.full_name, 'Student') as student_name
-            from appointment ap
-            left join app_user u on u.user_id = ap.student_id
-            where ap.advisor_id = %s
-              and lower(coalesce(ap.appointment_status, 'pending')) = 'pending'
-            order by ap.appointment_datetime asc
-            limit 5
-        """, (advisor_id,))
-        recent_booking_requests = cursor.fetchall()
-
-        cursor.close()
-        connection.close()
-
-        return jsonify({
-            "advisor": advisor,
-            "summary": {
-                "today_appointments": today_appointments,
-                "pending_requests": pending_requests,
-                "total_students": total_students,
-                "average_rating": review_stats["average_rating"] or advisor["average_rating"] or 0,
-            },
-            "today_schedule": today_schedule,
-            "upcoming_appointments": upcoming_appointments,
-            "recent_booking_requests": recent_booking_requests,
-            "student_insights": [],
-            "quiz_overview": {
-                "total_quizzes": total_quizzes,
-                "total_attempts": quiz_stats["total_attempts"],
-                "average_score": quiz_stats["average_score"],
-            },
-            "feedback": {
-                "average_rating": review_stats["average_rating"],
-                "total_reviews": review_stats["total_reviews"],
-                "rating_distribution": [],
-            },
-        })
-    except Exception as e:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-        return error_response(str(e), 500)
-
-
-@advisors_bp.route("/<int:advisor_id>/profile", methods=["GET"])
-def get_advisor_profile(advisor_id):
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-        cursor.execute("""
-            select
-                u.user_id as advisor_id,
-                u.full_name,
-                u.email,
-                u.phone_number,
-                u.profile_picture,
-                u.status,
-                coalesce(a.specialization, '') as specialization,
-                coalesce(a.qualification, '') as qualification,
-                a.experience_years,
-                coalesce(a.average_rating, 0) as average_rating
-            from app_user u
-            left join advisor a on a.advisor_id = u.user_id
-            where u.user_id = %s
-              and u.role = 'advisor'
-        """, (advisor_id,))
-        profile = cursor.fetchone()
-        cursor.close()
-        connection.close()
-
-        if not profile:
-            return error_response("Advisor account not found", 404)
-
-        return jsonify(profile)
-    except Exception as e:
-        return error_response(str(e), 500)
-
-
-@advisors_bp.route("/<int:advisor_id>/profile", methods=["PUT"])
-def update_advisor_profile(advisor_id):
-    data = request.get_json() or {}
-    connection = None
-    cursor = None
-
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            update app_user
-            set
-                full_name = %s,
-                phone_number = %s,
-                profile_picture = %s
-            where user_id = %s
-            returning user_id
-        """, (
-            data.get("full_name"),
-            data.get("phone_number"),
-            data.get("profile_picture"),
-            advisor_id,
-        ))
-
-        if not cursor.fetchone():
-            connection.rollback()
-            cursor.close()
-            connection.close()
-            return error_response("Advisor profile not found", 404)
-
-        cursor.execute("""
-            insert into advisor (
-                advisor_id,
-                specialization,
-                qualification,
-                experience_years,
-                average_rating
-            )
-            values (%s, %s, %s, %s, 0)
-            on conflict (advisor_id) do update
-            set
-                specialization = excluded.specialization,
-                qualification = excluded.qualification,
-                experience_years = excluded.experience_years
-        """, (
-            advisor_id,
-            data.get("specialization"),
-            data.get("qualification"),
-            data.get("experience_years"),
-        ))
-
-        connection.commit()
-
-        cursor.execute("""
-            select
-                u.user_id as advisor_id,
-                u.full_name,
-                u.email,
-                u.phone_number,
-                u.profile_picture,
-                u.status,
-                coalesce(a.specialization, '') as specialization,
-                coalesce(a.qualification, '') as qualification,
-                a.experience_years,
-                coalesce(a.average_rating, 0) as average_rating
-            from app_user u
-            left join advisor a on a.advisor_id = u.user_id
-            where u.user_id = %s
-              and u.role = 'advisor'
-        """, (advisor_id,))
-        updated_profile = cursor.fetchone()
-        cursor.close()
-        connection.close()
-
-        return jsonify(updated_profile)
-    except Exception as e:
-        if connection:
-            connection.rollback()
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-        return error_response(str(e), 500)
-
-
 @advisors_bp.route("/<int:advisor_id>/schedule", methods=["GET"])
+@advisor_access_required
 def get_advisor_schedule(advisor_id):
+    try:
+        today = malaysia_now().date()
+        week_start = date.fromisoformat(request.args.get('week_start', (today - timedelta(days=today.weekday())).isoformat()))
+        week_end = week_start + timedelta(days=7)
+    except (ValueError, OverflowError):
+        return error_response("Choose a valid week start (YYYY-MM-DD).", 400)
     connection = None
     cursor = None
 
@@ -336,16 +73,18 @@ def get_advisor_schedule(advisor_id):
             select count(*) as count
             from appointment
             where advisor_id = %s
-              and appointment_datetime::date = current_date
-        """, (advisor_id,))
+              and appointment_datetime::date = %s
+              and lower(coalesce(appointment_status, 'pending')) <> 'cancelled'
+        """, (advisor_id, malaysia_now().date()))
         today_count = cursor.fetchone()["count"]
 
         cursor.execute("""
             select count(*) as count
             from appointment
             where advisor_id = %s
-              and appointment_datetime >= current_timestamp
-        """, (advisor_id,))
+              and appointment_datetime >= %s
+              and lower(coalesce(appointment_status, 'pending')) in ('pending', 'confirmed')
+        """, (advisor_id, malaysia_now()))
         upcoming_count = cursor.fetchone()["count"]
 
         cursor.execute("""
@@ -360,36 +99,36 @@ def get_advisor_schedule(advisor_id):
             select
                 ap.appointment_id,
                 ap.appointment_datetime,
+                ap.duration_minutes,
+                ap.consultation_topic, ap.student_message,
                 ap.appointment_status,
                 coalesce(u.full_name, 'Student') as student_name
             from appointment ap
             left join app_user u on u.user_id = ap.student_id
             where ap.advisor_id = %s
-            order by ap.appointment_datetime asc nulls last
-            limit 30
-        """, (advisor_id,))
+              and ap.appointment_datetime >= %s and ap.appointment_datetime < %s
+            order by ap.appointment_datetime asc
+        """, (advisor_id, week_start, week_end))
         appointments = cursor.fetchall()
+
+        saved_schedule = read_schedule(cursor, advisor_id)
+        for appointment in appointments:
+            if appointment["appointment_datetime"]:
+                appointment["appointment_datetime"] = appointment["appointment_datetime"].isoformat() + "+08:00"
 
         cursor.close()
         connection.close()
 
         return jsonify({
             "summary": {
+                "this_week_count": sum(1 for item in appointments if (item['appointment_status'] or 'pending').lower() != 'cancelled'),
                 "today_count": today_count,
                 "upcoming_count": upcoming_count,
                 "pending_count": pending_count,
             },
+            "week_start": week_start.isoformat(),
             "appointments": appointments,
-            "availability": [
-                {"day": "Monday", "enabled": True, "start_time": "09:00", "end_time": "17:00"},
-                {"day": "Tuesday", "enabled": True, "start_time": "09:00", "end_time": "17:00"},
-                {"day": "Wednesday", "enabled": True, "start_time": "09:00", "end_time": "17:00"},
-                {"day": "Thursday", "enabled": True, "start_time": "09:00", "end_time": "17:00"},
-                {"day": "Friday", "enabled": True, "start_time": "09:00", "end_time": "15:00"},
-                {"day": "Saturday", "enabled": False, "start_time": "", "end_time": ""},
-                {"day": "Sunday", "enabled": False, "start_time": "", "end_time": ""},
-            ],
-            "blocked_dates": [],
+            **saved_schedule,
         })
     except Exception as e:
         if cursor:
@@ -400,6 +139,7 @@ def get_advisor_schedule(advisor_id):
 
 
 @advisors_bp.route("/<int:advisor_id>/appointments", methods=["GET"])
+@advisor_access_required
 def get_advisor_appointments(advisor_id):
     connection = None
     cursor = None
@@ -435,6 +175,9 @@ def get_advisor_appointments(advisor_id):
             select
                 ap.appointment_id,
                 ap.appointment_datetime,
+                ap.duration_minutes,
+                ap.consultation_topic, ap.student_message, ap.student_id,
+                u.profile_picture AS student_photo,
                 coalesce(ap.appointment_status, 'pending') as appointment_status,
                 coalesce(u.full_name, 'Student') as student_name,
                 u.email as student_email,
@@ -449,6 +192,9 @@ def get_advisor_appointments(advisor_id):
             order by ap.appointment_datetime asc nulls last
         """, (advisor_id,))
         appointments = cursor.fetchall()
+        for appointment in appointments:
+            if appointment["appointment_datetime"]:
+                appointment["appointment_datetime"] = appointment["appointment_datetime"].isoformat() + "+08:00"
 
         cursor.close()
         connection.close()
@@ -466,6 +212,7 @@ def get_advisor_appointments(advisor_id):
 
 
 @advisors_bp.route("/<int:advisor_id>/appointments/<int:appointment_id>/status", methods=["PATCH"])
+@advisor_access_required
 def update_advisor_appointment_status(advisor_id, appointment_id):
     data = request.get_json() or {}
     status = data.get("status")
@@ -479,6 +226,33 @@ def update_advisor_appointment_status(advisor_id, appointment_id):
     try:
         connection = get_db_connection()
         cursor = connection.cursor()
+        # Coordinate status changes with new bookings so reactivating a cancelled
+        # appointment cannot reserve a slot that another student has since booked.
+        cursor.execute("SELECT user_id FROM app_user WHERE user_id = %s AND role = 'advisor' FOR UPDATE", (advisor_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            connection.close()
+            return error_response("Advisor account not found", 404)
+        cursor.execute("SELECT student_id, appointment_datetime, duration_minutes FROM appointment WHERE appointment_id = %s AND advisor_id = %s FOR UPDATE", (appointment_id, advisor_id))
+        current = cursor.fetchone()
+        if not current:
+            cursor.close()
+            connection.close()
+            return error_response("Appointment not found", 404)
+        if current["student_id"]:
+            cursor.execute("SELECT student_id FROM student WHERE student_id = %s FOR UPDATE", (current["student_id"],))
+        if status in ("pending", "confirmed") and current["appointment_datetime"]:
+            cursor.execute("""SELECT appointment_id FROM appointment
+                WHERE appointment_id <> %s AND (advisor_id = %s OR student_id = %s)
+                  AND lower(coalesce(appointment_status, 'pending')) <> 'cancelled'
+                  AND appointment_datetime < %s + (%s * interval '1 minute')
+                  AND appointment_datetime + (duration_minutes * interval '1 minute') > %s LIMIT 1""",
+                (appointment_id, advisor_id, current["student_id"], current["appointment_datetime"], current.get("duration_minutes", 30), current["appointment_datetime"]))
+            if cursor.fetchone():
+                connection.rollback()
+                cursor.close()
+                connection.close()
+                return error_response("This appointment overlaps an existing booking.", 409)
         cursor.execute("""
             update appointment
             set appointment_status = %s
@@ -508,193 +282,60 @@ def update_advisor_appointment_status(advisor_id, appointment_id):
         return error_response(str(e), 500)
 
 
-@advisors_bp.route("/<int:advisor_id>/students", methods=["GET"])
-def get_advisor_students(advisor_id):
-    connection = None
-    cursor = None
-
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            select user_id
-            from app_user
-            where user_id = %s
-              and role = 'advisor'
-        """, (advisor_id,))
-
-        if not cursor.fetchone():
-            cursor.close()
-            connection.close()
-            return error_response("Advisor account not found", 404)
-
-        cursor.execute("""
-            with guided_students as (
-                select distinct student_id
-                from appointment
-                where advisor_id = %s
-                  and student_id is not null
-            )
-            select count(*) as total_guided
-            from guided_students
-        """, (advisor_id,))
-        total_guided = cursor.fetchone()["total_guided"]
-
-        cursor.execute("""
-            select count(distinct student_id) as active_consultations
-            from appointment
-            where advisor_id = %s
-              and student_id is not null
-              and lower(coalesce(appointment_status, 'pending')) in ('pending', 'confirmed')
-        """, (advisor_id,))
-        active_consultations = cursor.fetchone()["active_consultations"]
-
-        cursor.execute("""
-            select count(distinct student_id) as completed_consultations
-            from appointment
-            where advisor_id = %s
-              and student_id is not null
-              and lower(coalesce(appointment_status, 'pending')) = 'completed'
-        """, (advisor_id,))
-        completed_consultations = cursor.fetchone()["completed_consultations"]
-
-        cursor.execute("""
-            select
-                s.student_id,
-                u.full_name,
-                u.email,
-                u.phone_number,
-                s.education_level,
-                s.cgpa,
-                s.field_of_study,
-                s.university,
-                count(ap.appointment_id) as appointment_count,
-                max(ap.appointment_datetime) as latest_appointment
-            from appointment ap
-            join student s on s.student_id = ap.student_id
-            join app_user u on u.user_id = s.student_id
-            where ap.advisor_id = %s
-            group by
-                s.student_id,
-                u.full_name,
-                u.email,
-                u.phone_number,
-                s.education_level,
-                s.cgpa,
-                s.field_of_study,
-                s.university
-            order by latest_appointment desc nulls last, u.full_name asc
-        """, (advisor_id,))
-        students = cursor.fetchall()
-
-        cursor.close()
-        connection.close()
-
-        return jsonify({
-            "summary": {
-                "total_guided": total_guided,
-                "active_consultations": active_consultations,
-                "completed_consultations": completed_consultations,
-            },
-            "students": students,
-        })
-    except Exception as e:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-        return error_response(str(e), 500)
-
-
 @advisors_bp.route("/<int:advisor_id>/feedback", methods=["GET"])
+@advisor_access_required
 def get_advisor_feedback(advisor_id):
-    connection = None
-    cursor = None
-
     try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            select user_id
-            from app_user
-            where user_id = %s
-              and role = 'advisor'
-        """, (advisor_id,))
-
-        if not cursor.fetchone():
-            cursor.close()
-            connection.close()
-            return error_response("Advisor account not found", 404)
-
-        cursor.execute("""
-            select
-                count(*) as total_reviews,
-                coalesce(round(avg(rating), 1), 0) as average_rating,
-                coalesce(
-                    round(
-                        100.0 * count(*) filter (where rating >= 4)
-                        / nullif(count(*), 0),
-                        0
-                    ),
-                    0
-                ) as satisfaction_rate
-            from review
-            where advisor_id = %s
-        """, (advisor_id,))
-        summary = cursor.fetchone()
-
-        cursor.execute("""
-            select
-                rating,
-                count(*) as total
-            from review
-            where advisor_id = %s
-            group by rating
-        """, (advisor_id,))
-        rating_rows = cursor.fetchall()
-        rating_lookup = {int(row["rating"]): row["total"] for row in rating_rows if row["rating"] is not None}
-        distribution = [
-            {"rating": rating, "total": rating_lookup.get(rating, 0)}
-            for rating in range(5, 0, -1)
-        ]
-
-        cursor.execute("""
-            select
-                r.review_id,
-                r.rating,
-                r.comment,
-                r.created_at,
-                coalesce(u.full_name, 'Student') as student_name,
-                s.education_level,
-                s.field_of_study
-            from review r
-            left join student s on s.student_id = r.student_id
-            left join app_user u on u.user_id = r.student_id
-            where r.advisor_id = %s
-            order by r.created_at desc nulls last
-            limit 12
-        """, (advisor_id,))
-        reviews = cursor.fetchall()
-
-        cursor.close()
-        connection.close()
-
-        return jsonify({
-            "summary": summary,
-            "rating_distribution": distribution,
-            "reviews": reviews,
-        })
-    except Exception as e:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-        return error_response(str(e), 500)
+        page = int(request.args.get('page', '1'))
+        if page < 1 or page > 1000000:
+            raise ValueError
+    except ValueError:
+        return error_response('Choose a valid review page.', 400)
+    page_size = 12
+    month_start = malaysia_now().date().replace(day=1)
+    try:
+        with closing(get_db_connection()) as connection, connection:
+            with connection.cursor() as cursor:
+                if not active_advisor(cursor, advisor_id):
+                    return error_response('Advisor account not found.', 404)
+                cursor.execute("""SELECT count(*) AS total_reviews,
+                    count(DISTINCT student_id) AS students_reviewed,
+                    coalesce(round(avg(rating),1),0) AS average_rating,
+                    coalesce(round(100.0 * count(*) FILTER (WHERE rating >= 4)
+                        / nullif(count(*),0),0),0) AS satisfaction_rate
+                    FROM review WHERE advisor_id=%s""", (advisor_id,))
+                summary = cursor.fetchone()
+                cursor.execute('SELECT rating,count(*) AS total FROM review WHERE advisor_id=%s GROUP BY rating', (advisor_id,))
+                counts = {row['rating']: row['total'] for row in cursor.fetchall()}
+                distribution = [{'rating': rating, 'total': counts.get(rating, 0)} for rating in range(5, 0, -1)]
+                cursor.execute("""SELECT r.review_id,r.rating,r.comment,r.created_at,
+                    coalesce(u.full_name,'Student') AS student_name,s.education_level,s.field_of_study
+                    FROM review r LEFT JOIN student s ON s.student_id=r.student_id
+                    LEFT JOIN app_user u ON u.user_id=r.student_id WHERE r.advisor_id=%s
+                    ORDER BY r.created_at DESC NULLS LAST,r.review_id DESC LIMIT %s OFFSET %s""",
+                    (advisor_id, page_size, (page - 1) * page_size))
+                reviews = [dict(row) for row in cursor.fetchall()]
+                for review in reviews:
+                    if review['created_at']:
+                        review['created_at'] = review['created_at'].isoformat() + '+08:00'
+                cursor.execute("""SELECT to_char(months.month,'YYYY-MM') AS month,
+                    to_char(months.month,'Mon') AS label,count(r.review_id) AS total_reviews,
+                    round(avg(r.rating),1) AS average_rating
+                    FROM generate_series(%s::date - interval '5 months',%s::date,interval '1 month') AS months(month)
+                    LEFT JOIN review r ON r.advisor_id=%s AND r.created_at>=months.month
+                        AND r.created_at<months.month+interval '1 month'
+                    GROUP BY months.month ORDER BY months.month""", (month_start, month_start, advisor_id))
+                trend = cursor.fetchall()
+        return jsonify(summary=summary, rating_distribution=distribution, reviews=reviews, trend=trend,
+                       pagination={'page': page, 'page_size': page_size, 'total': summary['total_reviews'],
+                                   'total_pages': max(1, (summary['total_reviews'] + page_size - 1) // page_size)})
+    except Exception:
+        current_app.logger.exception('Advisor feedback could not be loaded')
+        return error_response('Unable to load feedback. Please try again.', 503)
 
 
 @advisors_bp.route("/<int:advisor_id>/messages", methods=["GET"])
+@advisor_access_required
 def get_advisor_messages(advisor_id):
     connection = None
     cursor = None
@@ -817,50 +458,7 @@ def get_advisor_messages(advisor_id):
 
 
 @advisors_bp.route("/<int:advisor_id>/messages/<int:conversation_id>", methods=["POST"])
+@advisor_access_required
 def send_advisor_message(advisor_id, conversation_id):
-    data = request.get_json() or {}
-    message_text = (data.get("message_text") or "").strip()
-
-    if not message_text:
-        return error_response("Message text is required", 400)
-
-    connection = None
-    cursor = None
-
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            select participant_id
-            from conversation_participant
-            where conversation_id = %s
-              and user_id = %s
-        """, (conversation_id, advisor_id))
-
-        if not cursor.fetchone():
-            connection.rollback()
-            cursor.close()
-            connection.close()
-            return error_response("Conversation not found for this advisor", 404)
-
-        cursor.execute("""
-            insert into message (conversation_id, sender_id, message_text, is_read)
-            values (%s, %s, %s, false)
-            returning message_id, conversation_id, sender_id, message_text, sent_at, is_read
-        """, (conversation_id, advisor_id, message_text))
-        message = cursor.fetchone()
-
-        connection.commit()
-        cursor.close()
-        connection.close()
-
-        return jsonify({"message": message}), 201
-    except Exception as e:
-        if connection:
-            connection.rollback()
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-        return error_response(str(e), 500)
+    from .messaging import send_message
+    return send_message(conversation_id)

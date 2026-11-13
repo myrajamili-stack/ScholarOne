@@ -1,0 +1,165 @@
+.student-appointments {
+  display: grid;
+  gap: 18px;
+  color: #211448;
+}
+.student-appointments h1,
+.student-appointments h2,
+.student-appointments h3,
+.student-appointments p { margin: 0; }
+.student-appointments button { cursor: pointer; font: inherit; }
+.student-appointments button:disabled { opacity: .55; cursor: not-allowed; }
+.sa-hero {
+  position: relative;
+  min-height: 275px;
+  padding: 27px 38px;
+  overflow: hidden;
+  border: 1px solid #f6ecff;
+  border-radius: 25px;
+  background: radial-gradient(ellipse at 84% 55%, #d8b9f5 0, transparent 58%), linear-gradient(115deg, #f2e4ff, #eee0fc);
+  box-shadow: 0 4px 10px #6b36b719;
+}
+.sa-hero-copy { position: relative; z-index: 1; width: 44%; }
+.sa-eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 7px 13px; border-radius: 22px; background: linear-gradient(110deg, #7525ee, #b477ff); color: white; font-size: 12px; font-weight: 800; text-transform: uppercase; box-shadow: 0 3px 6px #8a50cf1a; }
+.sa-eyebrow svg { width: 19px; height: 19px; flex-shrink: 0; }
+.sa-hero h1 { margin: 12px 0; font-size: clamp(32px, 3vw, 45px); line-height: 1.1; font-weight: 850; letter-spacing: -1.4px; }
+.sa-hero h1 span { color: #ffbc00; font-size: .65em; vertical-align: top; }
+.sa-hero-copy > p:not(.sa-eyebrow) { max-width: 350px; font-size: 16px; line-height: 1.5; }
+.sa-hero .ss-button { margin-top: 16px; border: 0; border-radius: 22px; padding: 11px 21px; font-size: 14px; font-weight: 750; gap: 10px; }
+.sa-hero .ss-button svg { width: 19px; height: 19px; }
+.sa-hero-art { position: absolute; width: 62%; height: 100%; right: 0; bottom: 0; }
+.sa-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.sa-summary article { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 13px 16px; border: 4px solid white; border-radius: 22px; box-shadow: 0 4px 8px #6931b51a; }
+.sa-summary article > svg { width: 54px; height: 54px; flex-shrink: 0; }
+.sa-summary h2 { font-size: 14px; line-height: 1.3; font-weight: 750; }
+.sa-summary strong { display: block; margin-top: 4px; font-size: 27px; line-height: 1; font-weight: 850; }
+.sa-summary .purple { background: linear-gradient(110deg, #f7eaff, #edddff); }
+.sa-summary .blue { background: linear-gradient(110deg, #f0f8ff, #deebff); }
+.sa-summary .green { background: linear-gradient(110deg, #effbf4, #def5ed); }
+.sa-summary .gold { background: linear-gradient(110deg, #fff9ef, #fff0d7); }
+.sa-layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.sa-card { min-width: 0; padding: 22px 18px; border: 1px solid #e9dffe; border-radius: 23px; background: #ffffffcc; box-shadow: 0 5px 10px #6835b91a; }
+.sa-heading { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 18px; }
+.sa-heading > svg { color: #7931e7; width: 29px; height: 29px; flex-shrink: 0; }
+.sa-heading h2, .sa-booking-banner h2, .sa-booking h2 { font-size: 20px; line-height: 1.3; font-weight: 800; letter-spacing: -.6px; }
+.sa-heading p { margin-top: 5px; color: #685184; font-size: 12px; line-height: 1.5; }
+.sa-advisors { display: grid; gap: 10px; }
+.sa-advisor { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 15px 12px; border: 1px solid #e7d9ff; border-radius: 19px; background: linear-gradient(110deg, #fff, #faf5ff); }
+.sa-advisor.selected { border-color: #bc8df7; background: #f4eaff; }
+.sa-avatar { display: grid; place-items: center; width: 64px; height: 64px; background: #eee0ff; color: #7134d4; border-radius: 50%; font-size: 23px; font-weight: 800; }
+.sa-advisor-copy { min-width: 0; }
+.sa-advisor h3 { font-size: 17px; font-weight: 800; letter-spacing: -.4px; }
+.sa-advisor p { margin-top: 5px; font-size: 12px; color: #6b528a; line-height: 1.5; overflow-wrap: anywhere; }
+.sa-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.sa-tags:empty { display: none; }
+.sa-tags span { padding: 4px 9px; border-radius: 20px; background: #ebddff; color: #6130bb; font-size: 10px; font-weight: 700; }
+.sa-advisor details { margin-top: 8px; font-size: 11px; color: #79549e; }
+.sa-advisor summary { cursor: pointer; font-weight: 650; }
+.sa-advisor-actions { display: grid; justify-items: center; gap: 10px; }
+.sa-advisor-actions .ss-button { gap: 6px; border: 0; white-space: nowrap; padding: 9px 12px; font-size: 11px; }
+.sa-advisor-actions .ss-button svg { width: 15px; height: 15px; }
+.student-appointments .sa-text-button { display: inline-flex; align-items: center; gap: 4px; border: 0; background: transparent; color: #7130d4; padding: 0; font-size: 11px; font-weight: 750; }
+.sa-text-button svg { width: 15px; height: 15px; }
+.sa-side-column { display: grid; gap: 17px; }
+.sa-booking-banner { position: relative; min-height: 184px; padding: 24px; overflow: hidden; border-radius: 23px; color: #fff; background: linear-gradient(110deg, #a46aff, #6841df); box-shadow: 0 5px 10px #7335bf20; }
+.sa-booking-banner > div { position: relative; z-index: 1; width: 68%; }
+.sa-booking-banner h2 { display: flex; gap: 9px; align-items: center; }
+.sa-booking-banner h2 svg { width: 25px; height: 25px; flex-shrink: 0; }
+.sa-booking-banner p { margin-top: 10px; font-size: 12px; line-height: 1.6; color: #f9eeff; }
+.sa-booking-banner button { display: inline-flex; align-items: center; gap: 9px; margin-top: 14px; padding: 9px 16px; border: 0; border-radius: 12px; background: #fff; color: #6a2aca; font-size: 13px; font-weight: 750; box-shadow: 0 4px 7px #461c9b20; }
+.sa-booking-banner button svg { width: 17px; height: 17px; }
+.sa-banner-calendar { position: absolute; right: 8px; bottom: 10px; width: 32%; height: 150px; }
+.sa-upcoming .sa-heading { align-items: center; flex-wrap: wrap; gap: 8px; }
+.sa-upcoming .sa-heading h2 { flex: 1; }
+.sa-upcoming-row { display: grid; grid-template-columns: 53px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 15px 12px; border: 1px solid #e7dbff; border-radius: 19px; background: #fcf9ff; margin-top: 10px; }
+.sa-date-badge { display: grid; justify-items: center; align-content: center; min-height: 65px; padding: 8px; border-radius: 14px; background: #f2e8ff; color: #702bda; font-size: 13px; font-weight: 750; }
+.sa-date-badge strong { font-size: 25px; }
+.sa-upcoming-row h3 { font-size: 14px; font-weight: 800; }
+.sa-upcoming-row p { margin: 5px 0 8px; color: #6a5287; font-size: 12px; line-height: 1.5; }
+.sa-session-time { display: flex; align-items: center; gap: 5px; font-size: 11px; }
+.sa-session-time svg { width: 14px; height: 14px; color: #7741d9; }
+.sa-status { display: inline-flex; align-items: center; padding: 4px 9px; background: #efe5ff; color: #6c3baf; border-radius: 12px; font-size: 10px; font-weight: 750; text-transform: capitalize; }
+.sa-upcoming-row .sa-status { margin-top: 7px; }
+.student-appointments .sa-details-button { border: 1px solid #ede0ff; padding: 8px 10px; border-radius: 12px; background: #f1e6ff; color: #6930c1; font-size: 11px; font-weight: 750; }
+.sa-empty { display: grid; justify-items: center; gap: 10px; padding: 23px 10px; text-align: center; font-size: 13px; color: #81679b; }
+.sa-empty svg { width: 34px; height: 34px; color: #b38adf; }
+.sa-notice { padding: 14px 18px; border-radius: 14px; font-size: 13px; line-height: 1.6; }
+.sa-success { color: #1b6749; background: #eaf9f1; }
+.sa-error { color: #ad3155; background: #fff2f5; }
+.sa-booking { position: relative; scroll-margin-top: 20px; padding: 26px; }
+.sa-booking[hidden] { display: none; }
+.sa-close-booking { position: absolute; right: 17px; top: 16px; display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 50%; color: #6939aa; background: #f2e9ff; }
+.sa-booking h2 { padding-right: 40px; margin-bottom: 12px; }
+.sa-booking > p { color: #705b8a; line-height: 1.6; font-size: 13px; margin: 8px 0; }
+.sa-booking .appointment-date-label { font-size: 13px; color: #4a3168; }
+.sa-booking input, .sa-booking textarea { width: 100%; padding: 11px 13px; font: inherit; color: #342149; background: #fffcff; border: 1px solid #dfd1f2; border-radius: 11px; }
+.sa-booking h3 { margin-top: 18px; font-size: 16px; font-weight: 750; }
+.sa-booking .appointment-slots { grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); }
+.sa-booking .appointment-slots button[aria-pressed="true"] { background: #783ae1; color: #fff; }
+.sa-booking .appointment-book-button { background: linear-gradient(110deg, #995cff, #6027da); font-size: 14px; }
+.sa-booking details { color: #6b5286; font-size: 13px; }
+.sa-booking details li { overflow-wrap: anywhere; }
+.sa-directory, .sa-history { scroll-margin-top: 20px; }
+.sa-history-list article { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 15px 0; border-bottom: 1px solid #eee6fa; font-size: 13px; }
+.sa-history-list article:last-child { border-bottom: 0; }
+.sa-history-list strong { min-width: 130px; }
+.sa-history-list .sa-details-button { margin-left: auto; }
+.sa-details-dialog { width: min(460px, calc(100% - 32px)); padding: 24px; border: 1px solid #e2d0fa; border-radius: 22px; color: #251340; background: #fffaff; box-shadow: 0 20px 70px #25113b40; }
+.sa-details-dialog::backdrop { background: #23123a66; }
+.sa-details-dialog header { display: flex; gap: 15px; align-items: center; justify-content: space-between; }
+.sa-details-dialog h2 { font-size: 21px; font-weight: 800; }
+.sa-details-dialog header button { display: grid; place-items: center; border: 0; width: 30px; height: 30px; border-radius: 50%; background: #eee2ff; color: #6c3aa6; }
+.sa-details-dialog dl { margin: 20px 0; font-size: 13px; }
+.sa-details-dialog dt { margin-top: 14px; color: #8a6ca2; font-size: 11px; }
+.sa-details-dialog dd { margin: 5px 0 0; overflow-wrap: anywhere; }
+.sa-details-dialog > button { border: 0; }
+.sa-sidebar-art { width: 100%; height: 185px; margin-top: auto; padding-top: 25px; }
+.student-appointments button:focus-visible, .sa-directory:focus-visible, .sa-history:focus-visible, .sa-booking:focus-visible { outline: 3px solid #b88ce7; outline-offset: 3px; }
+@media (max-width: 1200px) {
+  .sa-summary article { padding: 12px; gap: 10px; }
+  .sa-summary article > svg { width: 46px; height: 46px; }
+  .sa-summary h2 { font-size: 12px; }
+  .sa-advisor { grid-template-columns: 54px minmax(0, 1fr); gap: 11px; }
+  .sa-avatar { width: 54px; height: 54px; font-size: 20px; }
+  .sa-advisor-actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 12px; }
+  .sa-hero h1 { font-size: 38px; }
+  .sa-heading h2 { font-size: 18px; }
+  .sa-upcoming-row { grid-template-columns: 45px minmax(0, 1fr); }
+  .sa-upcoming-row .sa-details-button { grid-column: 2; justify-self: start; }
+}
+@media (max-width: 1000px) {
+  .sa-layout { grid-template-columns: 1fr; }
+  .sa-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sa-hero { padding: 25px; min-height: 280px; }
+  .sa-hero-copy { width: 55%; }
+  .sa-hero-art { width: 54%; height: 85%; }
+  .sa-hero h1 { font-size: 34px; }
+  .sa-hero-copy > p:not(.sa-eyebrow) { font-size: 14px; }
+  .sa-advisor { grid-template-columns: 64px minmax(0, 1fr) auto; }
+  .sa-advisor-actions { grid-column: auto; display: grid; }
+}
+@media (max-width: 650px) {
+  .student-appointments { gap: 15px; }
+  .sa-hero { min-height: 440px; padding: 22px; }
+  .sa-hero-copy { width: 100%; }
+  .sa-hero h1 { font-size: 37px; }
+  .sa-hero-art { width: 100%; height: 185px; }
+  .sa-summary { gap: 10px; }
+  .sa-summary article { padding: 10px; border-width: 3px; gap: 8px; }
+  .sa-summary article > svg { width: 42px; height: 42px; }
+  .sa-summary h2 { font-size: 11px; }
+  .sa-summary strong { font-size: 24px; }
+  .sa-card { padding: 18px 14px; }
+  .sa-advisor { grid-template-columns: 50px minmax(0, 1fr); gap: 10px; }
+  .sa-avatar { width: 50px; height: 50px; font-size: 18px; }
+  .sa-advisor-actions { grid-column: 2; display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 11px; }
+  .sa-advisor h3 { font-size: 16px; }
+  .sa-booking-banner { padding: 20px; }
+  .sa-booking-banner h2 { font-size: 18px; }
+  .sa-banner-calendar { width: 30%; }
+  .sa-booking-banner > div { width: 72%; }
+  .sa-booking { padding: 20px; }
+  .sa-heading h2 { font-size: 18px; }
+  .sa-sidebar-art { display: none; }
+  .sa-history-list article { gap: 10px; }
+}

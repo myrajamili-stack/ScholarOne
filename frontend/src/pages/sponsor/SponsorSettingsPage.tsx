@@ -1,3 +1,4 @@
+import Icon from "../../components/advisor/AdvisorIcon";
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import api from "../../api/axios";
@@ -151,13 +152,15 @@ function SponsorSettingsPage() {
 
   return (
     <div className="sponsor-page">
-      <section className="sponsor-settings-hero">
+      <section className="sponsor-settings-hero sponsor-hero sponsor-workspace-hero sponsor-learning-banner sponsor-settings-banner">
         <div>
-          <p className="sponsor-kicker">Account Preferences</p>
-          <h2>Settings</h2>
+          <p className="sponsor-kicker"><Icon name="settings" />Account Preferences</p>
+          <h2>Manage Your Organization and Account</h2>
           <span>Manage provider profile details, scholarship workflow preferences, alerts, visibility, and account security.</span>
         </div>
-        <div className="sponsor-settings-account">
+      </section>
+
+        <div className="sponsor-settings-account sponsor-panel">
           <div className="sponsor-settings-avatar">{form.organization_name ? form.organization_name.slice(0, 2).toUpperCase() : "SP"}</div>
           <div>
             <strong>{form.organization_name || "Sponsorship Provider"}</strong>
@@ -165,7 +168,6 @@ function SponsorSettingsPage() {
             <small>{profileCompletion}% profile complete</small>
           </div>
         </div>
-      </section>
 
       {error && <div className="sponsor-form-error">{error}</div>}
       {success && <div className="sponsor-form-success">{success}</div>}

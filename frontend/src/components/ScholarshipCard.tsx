@@ -1,8 +1,10 @@
+import Icon from "./advisor/AdvisorIcon";
 import type { KeyboardEvent } from "react";
 import ReminderBell from "./ReminderBell";
 
 export type Scholarship = {
   scholarship_id: number;
+  created_at?: string | null;
   title: string;
   organization_name?: string | null;
   description?: string | null;
@@ -30,6 +32,7 @@ export type Scholarship = {
 };
 
 type ScholarshipCardProps = {
+  variant?: "default" | "search";
   scholarship: Scholarship;
   isSaving?: boolean;
   onToggleSaved: (scholarship: Scholarship) => void;
@@ -39,7 +42,7 @@ type ScholarshipCardProps = {
   onToggleReminder?: (scholarship: Scholarship) => void;
 };
 
-function ScholarshipCard({ scholarship, isSaving = false, onToggleSaved, onViewDetails, reminderEnabled = false, isUpdatingReminder = false, onToggleReminder }: ScholarshipCardProps) {
+function ScholarshipCard({ variant = "default", scholarship, isSaving = false, onToggleSaved, onViewDetails, reminderEnabled = false, isUpdatingReminder = false, onToggleReminder }: ScholarshipCardProps) {
   function handleCardKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (event.target !== event.currentTarget) return;
     if (event.key === "Enter" || event.key === " ") {
@@ -51,15 +54,15 @@ function ScholarshipCard({ scholarship, isSaving = false, onToggleSaved, onViewD
   return (
     <article
       className="scholarship-card"
-      role="button"
-      tabIndex={0}
-      onClick={() => onViewDetails(scholarship)}
-      onKeyDown={handleCardKeyDown}
-      aria-label={`View details for ${scholarship.title}`}
+      role={variant === "default" ? "button" : undefined}
+      tabIndex={variant === "default" ? 0 : undefined}
+      onClick={variant === "default" ? () => onViewDetails(scholarship) : undefined}
+      onKeyDown={variant === "default" ? handleCardKeyDown : undefined}
+      aria-label={variant === "default" ? `View details for ${scholarship.title}` : undefined}
     >
       <div className="card-top">
-        <span className="match listing-status">{scholarship.intake_status === "closed" ? "Closed intake"
-          : scholarship.intake_status === "unconfirmed" ? "Check official source" : scholarship.status || "Available"}</span>
+        {variant === "search" && scholarship.source_url ? <a className="match listing-status" href={scholarship.source_url} target="_blank" rel="noreferrer">{scholarship.intake_status === "closed" ? "Closed intake · Source ↗" : "Check Official Source ↗"}</a> : <span className="match listing-status">{scholarship.intake_status === "closed" ? "Closed intake"
+          : scholarship.intake_status === "unconfirmed" ? "Check official source" : scholarship.status || "Available"}</span>}
         <div className="scholarship-card-actions"><button
           type="button"
           className={`scholarship-save-button${scholarship.saved ? " is-saved" : ""}`}
@@ -71,7 +74,7 @@ function ScholarshipCard({ scholarship, isSaving = false, onToggleSaved, onViewD
             onToggleSaved(scholarship);
           }}
         >
-          {scholarship.saved ? "♥" : "♡"}
+          {variant === "search" ? <Icon name="heart" /> : scholarship.saved ? "♥" : "♡"}
         </button>
         {onToggleReminder && <button type="button"
           className={`scholarship-reminder-button${reminderEnabled ? " is-enabled" : ""}`}
@@ -86,7 +89,7 @@ function ScholarshipCard({ scholarship, isSaving = false, onToggleSaved, onViewD
       </div>
 
       <div className="scholarship-main">
-        <div className="crest crest-listing" aria-hidden="true"></div>
+        <div className="crest crest-listing" aria-hidden="true">{variant === "search" && <Icon name="graduation" />}</div>
         <div>
           <h3>{scholarship.title}</h3>
           <p>{scholarship.organization_name || "ScholarOne Partner"}</p>
@@ -100,12 +103,12 @@ function ScholarshipCard({ scholarship, isSaving = false, onToggleSaved, onViewD
       </div>
 
       <footer>
-        <small>Deadline: {scholarship.deadline || "Not confirmed"}</small>
-        <strong>{scholarship.amount_note ? scholarship.amount_note.length > 70 ? "See funding details" : scholarship.amount_note : scholarship.amount ? `RM ${scholarship.amount}` : "Amount TBA"}</strong>
+        <small>{variant === "search" && <Icon name="calendar" />}Deadline: {scholarship.deadline || "Not confirmed"}</small>
+        <strong>{variant === "search" && <Icon name="eye" />}{scholarship.amount_note ? scholarship.amount_note.length > 70 ? "See funding details" : scholarship.amount_note : scholarship.amount ? `RM ${scholarship.amount}` : "Amount TBA"}</strong>
       </footer>
       {scholarship.deadline_note && <p className="scholarship-source-note">{scholarship.deadline_note}</p>}
 
-      <span className="scholarship-card-hint">View full details</span>
+      {variant === "search" ? <button type="button" className="scholarship-card-hint" onClick={() => onViewDetails(scholarship)} aria-label={`View full details for ${scholarship.title}`}>View full details <Icon name="chevron" /></button> : <span className="scholarship-card-hint">View full details</span>}
     </article>
   );
 }

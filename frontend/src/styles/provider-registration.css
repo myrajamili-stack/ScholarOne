@@ -1,0 +1,27 @@
+.provider-registration { grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr); gap: 34px; padding: 38px clamp(24px, 3vw, 60px); }
+.provider-registration .registration-welcome { margin-top: 34px; }
+.provider-registration .registration-badge { font-size: 17px; padding: 12px 18px; }
+.provider-registration .registration-card { padding: 34px clamp(24px, 3vw, 54px); }
+.provider-registration .registration-card h2 { font-size: clamp(26px, 2.4vw, 38px); }
+.provider-registration .registration-form { gap: 15px; margin-top: 23px; }
+.provider-registration .registration-form label { font-size: 15px; }
+.provider-registration .registration-description { font-size: 18px; }
+.provider-registration .registration-form input, .provider-registration .registration-form select { height: 47px; font-size: 15px; }
+.provider-registration-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.provider-registration-art { width: 100%; height: 310px; overflow: hidden; margin-top: 18px; }
+.provider-registration-benefits { padding: 20px 24px; border: 1px solid #e4d4ff; background: #ffffffb8; border-radius: 25px; margin-top: 8px; box-shadow: 0 8px 20px #7130b710; }
+.provider-registration-benefits h2 { font-size: 23px; font-weight: 800; margin: 0 0 15px; color: #5d11cc; }
+.provider-registration-benefits > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.provider-registration-benefits p { font-size: 14px; line-height: 1.4; margin: 0; padding-right: 8px; }
+.provider-registration-benefits p + p { border-left: 1px solid #e5d7fc; padding-left: 12px; }
+.provider-registration-benefits svg { display: block; color: #8c32fa; width: 30px; height: 30px; margin-bottom: 7px; }
+.provider-verification-notice { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.5; background: #f0e7ff; border: 1px solid #dfcefb; border-radius: 12px; color: #5f428b; padding: 12px; margin: 0; }
+.provider-verification-notice svg { flex-shrink: 0; }
+.provider-registration .registration-submit { margin-top: 0; min-height: 54px; font-size: 19px; text-decoration: none; }
+.provider-registration .registration-login { margin-top: 25px; font-size: 16px; }
+.provider-registration-success { text-align: center; padding: 35px 0; }
+.provider-registration-success > svg { width: 64px; height: 64px; color: #7f22ef; margin-bottom: 20px; }
+.provider-registration-success > p { line-height: 1.6; color: #5b568a; }
+.provider-registration-success .registration-submit { margin-top: 28px; }
+@media (max-width: 1050px) { .provider-registration-grid { grid-template-columns: minmax(0, 1fr); gap: 15px; } .provider-registration .registration-badge { font-size: 14px; } }
+@media (max-width: 800px) { .provider-registration { grid-template-columns: minmax(0, 1fr); } .provider-registration-art, .provider-registration-benefits { display: none; } .provider-registration .registration-welcome { margin-top: 22px; } }

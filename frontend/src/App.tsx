@@ -1,4 +1,7 @@
-import { Route, Routes } from "react-router-dom";
+import AdminAuditLogsPage from "./pages/admin/AdminAuditLogsPage";
+import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+import AdminReportsPage from "./pages/admin/AdminReportsPage";
+import { Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleSelectionPage from "./pages/RoleSelectionPage";
 import AdminLayout from "./layouts/AdminLayout";
@@ -12,13 +15,13 @@ import MessagesPage from "./pages/student/MessagesPage";
 import PathwayQuizPage from "./pages/student/PathwayQuizPage";
 import ProfilePage from "./pages/student/ProfilePage";
 import RegisterPage from "./pages/student/RegisterPage";
-import RemindersPage from "./pages/student/RemindersPage";
 import ScholarshipsPage from "./pages/student/ScholarshipsPage";
 import SettingsPage from "./pages/student/SettingsPage";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import AdminApplicationsPage from "./pages/admin/AdminApplicationsPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminPlaceholderPage from "./pages/admin/AdminPlaceholderPage";
+import AdminPathwaysPage from "./pages/admin/AdminPathwaysPage";
+import AdminSubscriptionsPage from "./pages/admin/AdminSubscriptionsPage";
 import AdminScholarshipsPage from "./pages/admin/AdminScholarshipsPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdvisorAppointmentsPage from "./pages/advisor/AdvisorAppointmentsPage";
@@ -44,9 +47,9 @@ function App() {
   return (
     <Routes>
       <Route path="/choose-role" element={<RoleSelectionPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/sponsor-login" element={<LoginPage audience="sponsor" />} />
-      <Route path="/staff-login" element={<LoginPage audience="staff" />} />
+      <Route path="/login" element={<LoginPage key="student" />} />
+      <Route path="/sponsor-login" element={<LoginPage key="sponsor" audience="sponsor" />} />
+      <Route path="/staff-login" element={<LoginPage key="staff" audience="staff" />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<StudentLayout />}>
@@ -55,7 +58,7 @@ function App() {
           <Route path="/pathway-quiz" element={<PathwayQuizPage />} />
           <Route path="/appointments" element={<AppointmentsPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/reminders" element={<RemindersPage />} />
+          <Route path="/reminders" element={<Navigate to="/calendar?section=reminders" replace />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
@@ -87,81 +90,11 @@ function App() {
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/admin/scholarships" element={<AdminScholarshipsPage />} />
           <Route path="/admin/applications" element={<AdminApplicationsPage />} />
-          <Route
-            path="/admin/pathways"
-            element={
-              <AdminPlaceholderPage
-                eyebrow="Academic Pathway"
-                title="Academic Pathways"
-                description="Manage academic pathway options and advisor-created pathway quiz content."
-                metrics={[
-                  { label: "Pathway options", value: "Database", helper: "Academic pathways are stored centrally." },
-                  { label: "Quiz content", value: "Advisor-led", helper: "Advisor quizzes can be reviewed here." },
-                  { label: "Student guidance", value: "Connected", helper: "Pathway data supports recommendations." },
-                ]}
-              />
-            }
-          />
-          <Route
-            path="/admin/subscriptions"
-            element={
-              <AdminPlaceholderPage
-                eyebrow="Provider Billing"
-                title="Subscriptions"
-                description="Manage sponsorship provider plans, subscription usage, and payment records."
-                metrics={[
-                  { label: "Provider plans", value: "Monitored", helper: "Subscription plans connect to providers." },
-                  { label: "Usage limits", value: "Tracked", helper: "Listing quota can be managed here." },
-                  { label: "Renewals", value: "Pending", helper: "Payment workflow can be added later." },
-                ]}
-              />
-            }
-          />
-          <Route
-            path="/admin/reports"
-            element={
-              <AdminPlaceholderPage
-                eyebrow="System Insight"
-                title="Reports & Statistics"
-                description="View system-wide activity, user growth, scholarship performance, and generated reports."
-                metrics={[
-                  { label: "Reports", value: "Database", helper: "Generated admin reports will appear here." },
-                  { label: "Analytics", value: "System-wide", helper: "Summaries include all user roles." },
-                  { label: "Exports", value: "Planned", helper: "Report downloads can be added next." },
-                ]}
-              />
-            }
-          />
-          <Route
-            path="/admin/settings"
-            element={
-              <AdminPlaceholderPage
-                eyebrow="Configuration"
-                title="System Settings"
-                description="Manage system preferences, platform rules, and administrative configuration."
-                metrics={[
-                  { label: "Platform rules", value: "Ready", helper: "Global settings can be edited here." },
-                  { label: "Access control", value: "Admin", helper: "Only administrator users can enter." },
-                  { label: "System status", value: "Active", helper: "Settings module is connected to admin layout." },
-                ]}
-              />
-            }
-          />
-          <Route
-            path="/admin/audit-logs"
-            element={
-              <AdminPlaceholderPage
-                eyebrow="Activity Tracking"
-                title="Audit Logs"
-                description="Review important account actions, system changes, and administrative activity."
-                metrics={[
-                  { label: "Audit trail", value: "Available", helper: "Audit log records can be listed here." },
-                  { label: "Security review", value: "Supported", helper: "Track who changed what and when." },
-                  { label: "System action", value: "Logged", helper: "Administrative activities stay traceable." },
-                ]}
-              />
-            }
-          />
+          <Route path="/admin/pathways" element={<AdminPathwaysPage />} />
+          <Route path="/admin/subscriptions" element={<AdminSubscriptionsPage />} />
+          <Route path="/admin/reports" element={<AdminReportsPage />} />
+          <Route path="/admin/settings" element={<AdminSettingsPage />} />
+          <Route path="/admin/audit-logs" element={<AdminAuditLogsPage />} />
         </Route>
       </Route>
     </Routes>

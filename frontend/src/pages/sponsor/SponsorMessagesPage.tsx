@@ -1,3 +1,5 @@
+import Icon from "../../components/advisor/AdvisorIcon";
+import SponsorHeroArtwork from "../../components/sponsor/SponsorHeroArtwork";
 import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
 import { getApiErrorMessage } from "../../utils/apiError";
@@ -177,10 +179,10 @@ function SponsorMessagesPage() {
 
   return (
     <div className="sponsor-page">
-      <section className="sponsor-messages-hero">
+      <section className="sponsor-messages-hero sponsor-hero sponsor-workspace-hero">
         <div>
-          <p className="sponsor-kicker">Communication</p>
-          <h2>Messages</h2>
+          <p className="sponsor-kicker"><Icon name="message" />Communication</p>
+          <h2>Stay Updated on Your Provider Activity</h2>
           <span>
             Review administrator updates for scholarship submissions, subscription records, appeal decisions, and
             provider account notices.
@@ -191,29 +193,30 @@ function SponsorMessagesPage() {
             Mark All Read
           </button>
         )}
+        <SponsorHeroArtwork page="messages" />
       </section>
 
       <section className="sponsor-stats-grid" aria-label="Provider message summary">
         <article className="sponsor-stat-card purple">
-          <span>✉</span>
+          <span><Icon name="users" /></span>
           <p>Total Messages</p>
           <strong>{data.summary.total}</strong>
           <small>Admin updates received</small>
         </article>
         <article className="sponsor-stat-card blue">
-          <span>!</span>
+          <span><Icon name="bell" /></span>
           <p>Unread</p>
           <strong>{data.summary.unread}</strong>
           <small>Messages still needing review</small>
         </article>
         <article className="sponsor-stat-card green">
-          <span>✓</span>
+          <span><Icon name="appointment" /></span>
           <p>Read</p>
           <strong>{data.summary.read}</strong>
           <small>Messages already opened</small>
         </article>
         <article className="sponsor-stat-card blue">
-          <span>□</span>
+          <span><Icon name="message" /></span>
           <p>Latest Type</p>
           <strong>{formatMessageType(data.summary.latest_type)}</strong>
           <small>{data.summary.latest_sender}</small>

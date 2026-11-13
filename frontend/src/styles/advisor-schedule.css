@@ -1,0 +1,133 @@
+.consultation-schedule {
+  --schedule-purple: #6651e8;
+  --schedule-ink: #202333;
+  --schedule-muted: #747783;
+  --schedule-line: #e7e7ed;
+  padding: 30px;
+  border: 1px solid var(--schedule-line);
+  border-radius: 24px;
+  background: #fff;
+  color: var(--schedule-ink);
+  box-shadow: 0 5px 24px rgb(30 35 65 / 3%);
+}
+.consultation-schedule *, .consultation-schedule *::before, .consultation-schedule *::after { box-sizing: border-box; }
+.consultation-schedule button, .consultation-schedule select, .consultation-schedule input { font: inherit; }
+.consultation-schedule button { cursor: pointer; }
+.consultation-schedule button:disabled, .consultation-schedule input:disabled, .consultation-schedule select:disabled { opacity: .55; cursor: not-allowed; }
+.consultation-schedule :focus-visible { outline: 3px solid #8674f1; outline-offset: 3px; }
+.consultation-heading { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; }
+.consultation-eyebrow { margin: 0 0 12px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; color: var(--schedule-muted); }
+.consultation-heading h2 { margin: 0; font-size: clamp(23px, 2.3vw, 30px); font-weight: 750; letter-spacing: -.6px; }
+.consultation-heading > div > p:last-child { margin: 12px 0 0; color: var(--schedule-muted); font-size: 15px; line-height: 1.6; }
+.consultation-heading-icon { display: grid; place-items: center; flex-shrink: 0; width: 48px; height: 48px; border-radius: 15px; color: #4f62c9; background: #eeebff; }
+.consultation-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 36px 0 30px; }
+.consultation-stats > div { display: grid; justify-items: start; gap: 9px; padding: 8px 12px; }
+.consultation-stats svg { color: #7b7c86; width: 21px; height: 21px; }
+.consultation-stats strong { font-size: 29px; line-height: 1.2; font-weight: 700; }
+.consultation-stats span { color: var(--schedule-muted); font-size: 12px; }
+.consultation-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 28px; padding: 4px; border-radius: 30px; background: #fafafa; }
+.consultation-tabs button { display: flex; justify-content: center; align-items: center; gap: 9px; min-height: 42px; padding: 8px 18px; border: 0; border-radius: 26px; color: #90909a; background: transparent; font-weight: 650; }
+.consultation-tabs button[aria-selected="true"] { color: #242335; background: #efeff3; }
+.consultation-unsaved-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--schedule-purple); }
+.consultation-schedule [role="tabpanel"][hidden] { display: none; }
+.consultation-section-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 22px; }
+.consultation-schedule h3 { margin: 0 0 8px; font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
+.consultation-section-heading p, .consultation-blocked-dates > p, .consultation-selected-slot p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--schedule-muted); }
+.consultation-calendar-controls { display: flex; gap: 6px; }
+.consultation-calendar-controls button { min-width: 40px; height: 34px; padding: 0 13px; border: 1px solid #dedee5; border-radius: 24px; background: #fff; color: #646571; }
+.consultation-calendar-controls button:first-child, .consultation-calendar-controls button:nth-child(3) { font-size: 26px; line-height: 1; }
+.consultation-calendar-controls button:hover:enabled { background: #f5f3ff; color: var(--schedule-purple); }
+.consultation-calendar-scroll { overflow-x: auto; margin: 0 -6px; }
+.consultation-calendar { width: 100%; min-width: 780px; border-collapse: separate; border-spacing: 6px; table-layout: fixed; }
+.consultation-calendar th { font-weight: 500; }
+.consultation-calendar thead th { padding: 4px 0 10px; text-align: center; }
+.consultation-calendar thead th:first-child { width: 62px; text-align: left; color: var(--schedule-muted); font-size: 12px; }
+.consultation-calendar thead th span { display: block; color: var(--schedule-muted); font-size: 12px; margin-bottom: 7px; }
+.consultation-calendar thead th strong { display: inline-grid; place-items: center; width: 30px; height: 30px; font-size: 18px; font-weight: 550; border-radius: 50%; }
+.consultation-calendar thead th.is-today strong { background: var(--schedule-purple); color: #fff; }
+.consultation-calendar tbody th { vertical-align: top; padding: 16px 0; color: var(--schedule-muted); font-size: 12px; text-align: left; }
+.consultation-calendar td { vertical-align: top; padding: 0; height: 80px; }
+.consultation-calendar-cell { display: flex; flex-direction: column; justify-content: center; gap: 4px; height: 100%; min-height: 80px; border: 1px solid #ededf1; border-radius: 10px; background: #fff; }
+.consultation-calendar-cell.is-unavailable { background: #f5f5f7; border-color: #e9e9ee; text-align: center; color: #9c9ca6; }
+.consultation-booking { display: grid; gap: 3px; align-content: center; min-height: 78px; width: 100%; border: 1px solid #ddd8f6; border-radius: 9px; padding: 10px 6px; background: #ede9ff; color: #3e356b; overflow-wrap: anywhere; text-align: center; }
+.consultation-booking strong { font-size: 12px; font-weight: 650; }
+.consultation-booking span { font-size: 11px; }
+.consultation-booking small { font-size: 10px; opacity: .8; }
+.consultation-booking.pending { border-color: #f4dfc1; background: #fff0dc; color: #995f21; }
+.consultation-booking.completed { border-color: #c5e6df; background: #e9f5f1; color: #337565; }
+.consultation-booking.cancelled { border: 1px dashed #d9d9df; background: #f0f0f3; color: #74747f; }
+.consultation-booking.is-selected { outline: 2px solid #7c61ec; outline-offset: -2px; }
+.consultation-booking:hover { filter: brightness(.98); }
+.consultation-legend { display: flex; flex-wrap: wrap; gap: 18px; margin: 20px 0; color: var(--schedule-muted); font-size: 12px; }
+.consultation-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.consultation-legend i { width: 11px; height: 11px; border-radius: 50%; background: #f1f1f4; }
+.consultation-legend .confirmed { background: #b8aaf5; }
+.consultation-legend .pending { background: #f5cb92; }
+.consultation-legend .completed { background: #9ccfbd; }
+.consultation-legend .cancelled { background: #b9b9c4; }
+.consultation-selected-slot { margin-top: 20px; padding: 22px; border: 1px solid #e2e2e9; border-radius: 16px; background: #fdfdfe; }
+.consultation-selected-slot h3 { font-size: 17px; margin-bottom: 18px; }
+.consultation-selected-slot h4 { margin: 0 0 8px; font-size: 17px; font-weight: 650; }
+.consultation-selected-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 8px; }
+.consultation-status { padding: 5px 10px; border-radius: 20px; background: #ede9ff; color: #6651b4; font-size: 12px; white-space: nowrap; }
+.consultation-status.pending { background: #fff0dc; color: #995f21; }
+.consultation-status.completed { background: #e9f5f1; color: #337565; }
+.consultation-status.cancelled { background: #f0f0f3; color: #74747f; }
+.consultation-slot-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+.consultation-slot-actions:empty { display: none; }
+.consultation-slot-actions button, .consultation-blocked-dates button { min-height: 38px; padding: 8px 14px; border: 1px solid #dddde6; border-radius: 20px; background: #fff; color: #5a5968; font-size: 12px; font-weight: 650; }
+.consultation-calendar-loading { min-height: 380px; display: grid; place-items: center; color: var(--schedule-muted); }
+.consultation-availability-heading { align-items: flex-end; }
+.consultation-availability-heading > div { flex: 1 1 220px; }
+.consultation-duration { display: grid; gap: 7px; flex: 1 1 280px; color: var(--schedule-muted); font-size: 12px; }
+.consultation-duration select, .consultation-day-times select { height: 42px; padding: 0 14px; border: 1px solid #dcdce4; border-radius: 24px; background: #fff; color: #30313f; cursor: pointer; }
+.consultation-duration select { width: 100%; font-size: 14px; }
+.consultation-weekly-days { display: grid; gap: 10px; }
+.consultation-day-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; min-height: 65px; padding: 12px 16px; border: 1px solid #e1e1e8; border-radius: 16px; }
+.consultation-day-toggle { display: flex; align-items: center; gap: 11px; margin: 0; font-size: 14px; font-weight: 550; cursor: pointer; }
+.consultation-day-toggle input { position: absolute; opacity: 0; width: 24px; height: 24px; }
+.consultation-day-toggle > span { display: grid; place-items: center; width: 24px; height: 24px; border: 1.5px solid #d7d7df; border-radius: 50%; color: #fff; font-weight: 800; font-size: 15px; }
+.consultation-day-toggle input:checked + span { border-color: #6651e8; background: #6651e8; }
+.consultation-day-toggle input:focus-visible + span { outline: 3px solid #8674f1; outline-offset: 3px; }
+.consultation-day-times { display: flex; align-items: center; gap: 10px; color: var(--schedule-muted); font-size: 13px; }
+.consultation-day-times select { width: 108px; height: 36px; font-size: 13px; }
+.consultation-day-unavailable { color: #93939d; font-size: 13px; }
+.consultation-timezone { display: flex; align-items: center; gap: 7px; margin: 16px 0 26px; color: var(--schedule-muted); font-size: 12px; }
+.consultation-timezone svg { width: 16px; height: 16px; }
+.consultation-blocked-dates { padding-top: 22px; border-top: 1px solid var(--schedule-line); }
+.consultation-blocked-dates form { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin: 18px 0; }
+.consultation-blocked-dates form label { display: grid; gap: 7px; flex: 1 1 170px; color: #70717f; font-size: 12px; }
+.consultation-blocked-dates form label:nth-child(2) { flex-grow: 2; }
+.consultation-blocked-dates input { min-width: 0; width: 100%; height: 40px; padding: 8px 12px; border: 1px solid #dddde6; border-radius: 10px; color: var(--schedule-ink); background: #fff; }
+.consultation-blocked-dates form button { height: 40px; border-radius: 10px; }
+.consultation-blocked-dates ul { list-style: none; display: grid; gap: 8px; padding: 0; }
+.consultation-blocked-dates li { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 12px; background: #f8f8fb; border-radius: 10px; font-size: 12px; }
+.consultation-blocked-dates li span { flex: 1; color: var(--schedule-muted); overflow-wrap: anywhere; }
+.consultation-save-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; padding-top: 24px; margin-top: 24px; border-top: 1px solid var(--schedule-line); }
+.consultation-save-footer strong { font-size: 13px; }
+.consultation-save-footer p { margin: 6px 0 0; color: var(--schedule-muted); font-size: 12px; max-width: 500px; line-height: 1.5; }
+.consultation-schedule .consultation-save { min-height: 40px; border: 0; border-radius: 22px; padding: 10px 20px; color: #fff; background: var(--schedule-purple); font-size: 13px; font-weight: 650; }
+.consultation-schedule .schedule-feedback { margin: 16px 0; font-size: 13px; }
+.consultation-empty-note { color: var(--schedule-muted); font-size: 13px; line-height: 1.5; }
+.consultation-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+@media (max-width: 900px) {
+  .consultation-schedule { padding: 22px; }
+  .consultation-heading h2 { font-size: 24px; }
+  .consultation-section-heading { align-items: flex-start; }
+}
+@media (max-width: 600px) {
+  .consultation-schedule { padding: 18px 14px; border-radius: 18px; }
+  .consultation-heading { gap: 12px; }
+  .consultation-heading-icon { width: 38px; height: 38px; border-radius: 12px; }
+  .consultation-heading h2 { font-size: 21px; }
+  .consultation-heading > div > p:last-child { font-size: 13px; }
+  .consultation-stats { gap: 12px; margin: 24px 0; }
+  .consultation-stats > div { padding: 4px; }
+  .consultation-stats strong { font-size: 25px; }
+  .consultation-day-row { padding: 12px; }
+  .consultation-day-times { width: 100%; justify-content: flex-end; }
+  .consultation-day-times select { flex: 1; width: 100px; }
+  .consultation-selected-heading { align-items: flex-start; flex-wrap: wrap; }
+  .consultation-selected-slot { padding: 16px; }
+  .consultation-save-footer > button { width: 100%; }
+}

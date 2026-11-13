@@ -1,0 +1,78 @@
+.sponsor-home-shell {grid-template-columns:240px minmax(0,1fr);background:radial-gradient(ellipse at 75% 0,#eee3ff,transparent 55%),#faf7ff;color:#211448}
+.sponsor-home-shell .sponsor-main {min-width:0;padding:25px 20px}
+.sponsor-home-shell .sponsor-sidebar {min-width:0;padding:25px 15px 75px;gap:27px;background:#ffffffa6;border-color:#e7dcfa;isolation:isolate}
+.sponsor-home-shell .sponsor-sidebar::after {content:'';position:absolute;z-index:-1;bottom:0;left:0;width:100%;height:80px;background:url('/images/student-calendar-waves.png') right bottom/auto 190px no-repeat}
+.sponsor-home-shell .sponsor-brand {text-align:center}
+.sponsor-home-shell .sponsor-brand::before {content:'';display:block;width:64px;height:45px;margin:0 auto 8px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 44'%3E%3Cpath d='M3 13 30 2l27 11-27 12L3 13Z' fill='%237743ed'/%3E%3Cpath d='M14 21v13q16 14 32 0V21l-16 7-16-7Z' fill='%235c22d8'/%3E%3Cpath d='M53 15v17' stroke='%238c5dec' stroke-width='3'/%3E%3C/svg%3E") center/contain no-repeat}
+.sponsor-home-shell .sponsor-logo,.sponsor-home-shell .sponsor-logo span {color:#6020dc;font-size:27px;letter-spacing:-.8px}
+.sponsor-home-shell .sponsor-brand p {color:#2c1a51;font-size:10px}
+.sponsor-home-shell .sponsor-role-label {font-size:11px;color:#756191;padding:0 10px;letter-spacing:.03em}
+.sponsor-home-shell .sponsor-nav {gap:7px}
+.sponsor-home-shell .sponsor-nav-link {min-height:44px;padding:0 13px;border-radius:14px;font-size:13px;gap:10px;color:#241547}
+.sponsor-home-shell .sponsor-nav-link.active,.sponsor-home-shell .sponsor-nav-link:hover {color:white;background:linear-gradient(115deg,#9e58ff,#611be7);box-shadow:0 4px 10px #7039bf26}
+.sponsor-home-shell .sponsor-nav-link svg {width:22px;height:22px}
+.sponsor-home-shell .sponsor-user-card {margin-top:auto;padding:13px;border:0;border-radius:16px;background:#f0e5ff;gap:11px}
+.sponsor-home-shell .sponsor-user-card strong {font-size:11px;color:#2b184a}
+.sponsor-home-shell .sponsor-user-card span {font-size:10px;color:#78608d}
+.sponsor-home-shell .sponsor-avatar {background:linear-gradient(135deg,#ffd448,#ff861e);color:white;width:43px;height:43px;font-size:14px}
+.sponsor-home-shell .sponsor-topbar {gap:20px;margin-bottom:23px;align-items:center}
+.sponsor-home-shell .sponsor-topbar h1 {font-size:clamp(22px,2vw,29px);letter-spacing:-.7px;font-weight:850}
+.sph-title-spark {color:#ffbd00;font-size:.8em}
+.sponsor-home-shell .sponsor-topbar p {color:#73588e;font-size:12px;margin-top:5px}
+.sponsor-home-shell .sponsor-top-actions {gap:12px}
+.sponsor-home-shell .sponsor-top-user strong {font-size:12px}
+.sponsor-home-shell .sponsor-top-user span {font-size:11px;color:#755a92}
+.sponsor-home-shell .sponsor-icon-button {width:43px;height:43px;color:#2b184e;border:1px solid #eadcfe}
+.sponsor-home-shell .sponsor-logout {padding:10px 18px;border-radius:18px;border-color:#e2ceff;background:#ffffffb8;color:#7428de;font-size:12px}
+.sponsor-home-shell .sponsor-page {display:grid;gap:18px}
+.sponsor-home-shell .sponsor-hero {position:relative;min-height:205px;padding:26px 30px;overflow:hidden;border:1px solid #edddff;border-radius:24px;background:#f2e6ff url('/images/student-calendar-waves.png') center/cover no-repeat;color:#231449}
+.sponsor-home-shell .sponsor-hero>div {position:relative;z-index:1;max-width:43%}
+.sponsor-home-shell .sponsor-hero .sponsor-kicker {display:inline-flex;align-items:center;gap:7px;padding:5px 11px;margin:0 0 12px;border-radius:18px;color:#6926d0;background:#ddc3ff;font-size:12px;text-transform:none;letter-spacing:0}
+.sponsor-home-shell .sponsor-hero h2 {font-size:clamp(25px,2.8vw,39px);line-height:1.2;font-weight:850;letter-spacing:-1px;margin:0 0 12px}
+.sponsor-home-shell .sponsor-hero>div>span {color:#6a4f87;font-size:12px;line-height:1.7}
+.sph-hero-art {position:absolute;bottom:0;right:17%;width:43%;height:100%;object-fit:contain;object-position:center bottom}
+.sponsor-home-shell .sponsor-hero-action {position:relative;z-index:1;display:inline-flex;align-items:center;gap:7px;padding:12px 20px;border-radius:25px;background:linear-gradient(110deg,#a054ff,#6418e7);color:white;border:0;font-size:12px;white-space:nowrap}
+.sponsor-home-shell .sponsor-hero-action span {color:inherit;font-size:18px}
+.sponsor-home-shell .sponsor-stats-grid {gap:14px}
+.sponsor-home-shell .sponsor-stat-card {position:relative;isolation:isolate;overflow:hidden;min-width:0;padding:20px 14px 18px 75px;border:1px solid #e4d4fc;border-radius:21px;background:#ffffffc9;box-shadow:0 5px 10px #7843b412}
+.sponsor-home-shell .sponsor-stat-card::after {content:'';position:absolute;bottom:-28px;right:-25px;width:150px;height:75px;border-radius:70% 0 0 0;background:#b481f730;z-index:-1;transform:rotate(-15deg)}
+.sponsor-home-shell .sponsor-stat-card>span {position:absolute;top:17px;left:14px;width:47px;height:47px;display:grid;place-items:center;border-radius:50%;background:#eee0ff;color:#8438ed}
+.sponsor-home-shell .sponsor-stat-card>span svg {width:28px;height:28px}
+.sponsor-home-shell .sponsor-stat-card p {font-size:11px;font-weight:750;color:#30204b;margin:0 0 7px}
+.sponsor-home-shell .sponsor-stat-card strong {font-size:27px;line-height:1.2;color:#241547;margin:0 0 11px}
+.sponsor-home-shell .sponsor-stat-card small {display:inline-block;padding:5px 8px;border-radius:14px;background:#e8f8df;color:#2a8537;font-size:9px;line-height:1.4}
+.sponsor-home-shell .sponsor-stat-card.amber>span {color:#ffae00;background:#fff1d2}
+.sponsor-home-shell .sponsor-stat-card.amber::after {background:#ffdd8b55}
+.sponsor-home-shell .sponsor-stat-card.blue>span {color:#6389ff;background:#e7eeff}
+.sponsor-home-shell .sponsor-stat-card.blue::after {background:#99b9ff44}
+.sponsor-home-shell .sponsor-stat-card.pink>span {color:#e83eac;background:#ffe0f6}
+.sponsor-home-shell .sponsor-stat-card.pink::after {background:#f7a6e044}
+.sponsor-home-shell .sponsor-dashboard-grid {grid-template-columns:minmax(0,1.8fr) minmax(0,1fr);gap:18px;align-items:start}
+.sponsor-home-shell .sponsor-panel {border:1px solid #e5d6fc;border-radius:22px;background:#ffffffcf;box-shadow:0 5px 10px #7242ad10;overflow:hidden}
+.sponsor-home-shell .sponsor-panel-header {gap:12px;padding-bottom:17px;border-bottom:1px solid #eee2fa}
+.sponsor-home-shell .sponsor-panel-header h2 {display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;color:#2b194b}
+.sponsor-home-shell .sponsor-panel-header h2 svg {color:#8e3fee}
+.sponsor-home-shell .sponsor-panel-header a {display:inline-flex;align-items:center;gap:4px;color:#742be0;font-size:10px}
+.sponsor-home-shell .sponsor-panel-header a svg {width:15px;height:15px}
+.sph-panel-subtitle {margin:5px 0 0 33px;color:#7e639b;font-size:12px}
+.sponsor-home-shell .sponsor-empty-state.chart {display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:245px;padding:22px;background:none;border:0;text-align:center}
+.sph-application-art {position:relative;width:125px;height:100px;display:grid;place-items:center;margin-bottom:17px;border:6px solid #a869f9;border-radius:18px;background:linear-gradient(140deg,#fefaff,#e9dbff);transform:rotate(7deg);box-shadow:0 7px 0 #dcc3f377}
+.sph-application-art>svg:first-child {width:60px;height:60px;color:#a875ea}
+.sph-application-art>svg:last-child {position:absolute;right:-27px;bottom:-16px;width:58px;height:58px;color:#8a45e2}
+.sponsor-home-shell .sponsor-empty-state.chart h3 {margin:5px 0 8px;font-size:18px;font-weight:800;color:#29174d}
+.sponsor-home-shell .sponsor-empty-state.chart p {max-width:420px;margin:0;font-size:12px;line-height:1.6;color:#795d99}
+.sponsor-home-shell .sponsor-add-button {display:flex;align-items:center;justify-content:center;padding:13px 16px;border-radius:17px;background:linear-gradient(110deg,#a054ff,#6418e7);font-size:14px;font-weight:750}
+.sponsor-home-shell .subscription-panel .sponsor-kicker {display:flex;align-items:center;gap:9px;margin-bottom:14px;font-size:16px;font-weight:800;color:#2b194b;text-transform:none;letter-spacing:-.3px}
+.sponsor-home-shell .subscription-panel h2 {font-size:16px;margin:0}
+.sponsor-home-shell .subscription-panel .sponsor-panel-header {border:0;padding-bottom:12px}
+.sponsor-home-shell .sponsor-progress {height:12px;border-radius:10px;background:#e8def6}
+.sponsor-home-shell .sponsor-progress span {background:linear-gradient(90deg,#b080ff,#7529e6)}
+.sponsor-home-shell .sponsor-upgrade-box {position:relative;padding:19px 100px 19px 17px;margin-top:18px;border-radius:18px;background:#fff4e4}
+.sponsor-home-shell .sponsor-upgrade-box strong {font-size:14px;color:#30204b}
+.sponsor-home-shell .sponsor-upgrade-box p {font-size:12px;line-height:1.7;color:#79619a}
+.sponsor-home-shell .sponsor-upgrade-box a {display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:15px;background:linear-gradient(110deg,#a054ff,#6418e7);color:white;font-size:12px;text-decoration:none}
+.sph-slots-art {position:absolute;right:7px;bottom:18px;width:88px;height:100px}
+.sponsor-home-shell a:focus-visible,.sponsor-home-shell button:focus-visible {outline:3px solid #c096f3;outline-offset:3px}
+@media(max-width:1250px){.sponsor-home-shell .sponsor-topbar{flex-wrap:wrap}.sponsor-home-shell .sponsor-top-actions{margin-left:auto}.sponsor-home-shell .sponsor-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.sph-hero-art{right:0;width:52%}.sponsor-home-shell .sponsor-hero-action{align-self:flex-end}}
+@media(max-width:1000px){.sponsor-home-shell{grid-template-columns:215px minmax(0,1fr)}.sponsor-home-shell .sponsor-dashboard-grid{grid-template-columns:1fr}.sponsor-home-shell .sponsor-hero{min-height:270px}.sponsor-home-shell .sponsor-hero>div{max-width:60%}.sph-hero-art{width:48%;height:70%}}
+@media(max-width:700px){.sponsor-home-shell{grid-template-columns:minmax(0,1fr)}.sponsor-home-shell .sponsor-sidebar{position:static;height:auto;padding:20px 15px;gap:16px}.sponsor-home-shell .sponsor-sidebar::after,.sponsor-home-shell .sponsor-user-card{display:none}.sponsor-home-shell .sponsor-nav{display:flex;min-width:0;max-width:100%;overflow-x:auto;gap:8px}.sponsor-home-shell .sponsor-nav-link{flex-shrink:0}.sponsor-home-shell .sponsor-role-label{display:none}.sponsor-home-shell .sponsor-main{padding:20px 13px}.sponsor-home-shell .sponsor-topbar h1{font-size:24px}.sponsor-home-shell .sponsor-top-actions{flex-wrap:wrap;justify-content:flex-end}.sponsor-home-shell .sponsor-top-user{max-width:145px}.sponsor-home-shell .sponsor-hero{min-height:370px;padding:23px;display:block}.sponsor-home-shell .sponsor-hero>div{max-width:100%}.sponsor-home-shell .sponsor-hero h2{font-size:29px}.sph-hero-art{width:100%;right:0;height:155px}.sponsor-home-shell .sponsor-hero-action{display:inline-flex;margin-top:17px}.sponsor-home-shell .sponsor-stat-card{padding:15px 12px}.sponsor-home-shell .sponsor-stat-card>span{position:static;width:39px;height:39px;margin-bottom:10px}.sponsor-home-shell .sponsor-stat-card strong{font-size:23px}.sponsor-home-shell .sponsor-panel-header{flex-wrap:wrap}}
