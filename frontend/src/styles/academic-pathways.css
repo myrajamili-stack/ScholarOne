@@ -1,0 +1,58 @@
+.academic-pathways-page { display: grid; gap: 16px; }
+.academic-pathway-intro {
+  display: grid; grid-template-columns: minmax(0, 45fr) minmax(0, 55fr); align-items: center;
+  min-height: 280px; padding: 20px 34px; border: 1px solid #fff; border-radius: 25px;
+  color: #211448;
+  background: radial-gradient(ellipse at 18% 90%, #f9ecff, transparent 65%), linear-gradient(105deg, #f3e4ff, #ead5fa);
+}
+.academic-pathway-intro h1 {
+  margin: 12px 0 10px; font-size: clamp(30px, 3vw, 44px); font-weight: 850;
+  line-height: 1.12; letter-spacing: -1.3px;
+}
+.academic-pathway-hero-copy > p { margin: 0; max-width: 360px; font-size: 14px; line-height: 1.55; }
+.academic-pathway-hero-badge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 7px 13px; border-radius: 22px;
+  background: linear-gradient(110deg, #7525ee, #9a52ef); color: #fff;
+  font-size: 12px; font-weight: 800; text-transform: uppercase; box-shadow: 0 3px 6px #8a50cf1a;
+}
+.academic-pathway-intro :is(.academic-pathway-hero-badge, .academic-pathway-hero-button) svg { width: 19px; height: 19px; flex-shrink: 0; }
+.academic-pathway-intro .academic-pathway-hero-button {
+  cursor: pointer; border: 1px solid #6d29dd; border-radius: 24px; padding: 11px 22px;
+  font-size: 14px; font-weight: 750; gap: 10px; margin-top: 16px;
+  box-shadow: inset 0 -3px 0 #4914b438, 0 4px 10px #7c45c51a;
+}
+.academic-pathway-hero-art { position: relative; width: 100%; max-width: 620px; justify-self: end; }
+.academic-pathway-campus { display: block; width: 100%; height: auto; }
+.academic-pathway-books { position: absolute; width: 76%; height: auto; left: 0; bottom: 6%; }
+.academic-pathway-catalogue { scroll-margin-top: 16px; }
+@media (max-width: 850px) {
+  .academic-pathway-intro { padding-inline: 22px; }
+}
+@media (max-width: 650px) {
+  .academic-pathway-intro { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 22px; }
+  .academic-pathway-hero-art { justify-self: center; max-width: 440px; }
+}
+.academic-pathway-catalogue, .academic-pathway-recommendations { min-width: 0; }
+.academic-pathway-recommendations summary { cursor: pointer; color: #6935bc; font-weight: 700; }
+.academic-pathway-catalogue p, .academic-pathway-recommendations p, .pathway-progression p { line-height: 1.75; color: #5e647f; }
+.academic-pathway-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 18px; }
+.academic-pathway-card { border: 1px solid #e4def2; border-radius: 18px; padding: 24px; background: #fff; }
+.academic-pathway-card h3 { margin: 17px 0 12px; font-size: 21px; }
+.academic-pathway-card h4 { font-size: 16px; }
+.academic-pathway-card li { margin: 8px 0; color: #5b5b78; line-height: 1.6; }
+.pathway-tag { display: inline-block; padding: 7px 12px; border-radius: 30px; color: #6935bc; background: #efe7ff; font-weight: 700; font-size: 12px; }
+.academic-pathway-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 14px; margin: 0 0 12px; }
+.academic-pathway-filters label { display: grid; gap: 7px; flex: 1 1 180px; font-size: 14px; font-weight: 650; }
+.academic-pathway-filters input, .academic-pathway-filters select { min-width: 0; padding: 12px; border: 1px solid #dcd2f0; border-radius: 11px; background: white; }
+.academic-pathway-dialog { width: min(850px, calc(100vw - 24px)); max-height: 90vh; padding: 28px; border: 1px solid #dcd0f2; border-radius: 24px; color: #29234b; }
+.academic-pathway-dialog::backdrop { background: #1e164b80; backdrop-filter: blur(4px); }
+.academic-pathway-dialog > header { display: flex; align-items: start; justify-content: space-between; gap: 20px; }
+.academic-pathway-dialog > header button { border: 0; background: #f0e8ff; padding: 4px 12px; border-radius: 10px; color: #7438c7; font-size: 25px; }
+.pathway-progression h3 { font-size: 21px; margin: 24px 0 14px; }
+.pathway-stages { list-style: none; padding: 0; display: grid; gap: 14px; }
+.pathway-stages li { display: flex; gap: 16px; border: 1px solid #e5dcf6; border-radius: 17px; padding: 20px; background: #faf8ff; }
+.pathway-step-number { display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; background: #7541d8; color: white; border-radius: 50%; }
+.pathway-stages h4 { font-size: 19px; margin: 4px 0 12px; }
+.pathway-caution { padding: 16px; border-radius: 12px; background: #f1edfa; }
+.pathway-editor-stage { border: 1px solid #e0d6f1; border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+.academic-pathway-dialog textarea { width: 100%; resize: vertical; min-height: 90px; }

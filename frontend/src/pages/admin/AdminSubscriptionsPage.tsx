@@ -10,6 +10,8 @@ import "../../styles/admin-subscriptions.css";
 
 type Subscription = {
   subscription_id: number;
+  stripe_subscription_id?: string | null;
+  payment_status?: string | null;
   sponsor_id: number;
   start_date: string | null;
   end_date: string | null;
@@ -23,6 +25,7 @@ type Subscription = {
   auto_renew: string | boolean | null;
 };
 type Plan = {
+  is_active?: boolean;
   plan_id: number;
   plan_name: string;
   price: string | number;
@@ -193,12 +196,15 @@ export default function AdminSubscriptionsPage() {
     setSavingPlan(true);
     setPlanError("");
     try {
-      await api.patch(`/admin/subscription-plans/${editingPlan.plan_id}`, {
+      const payload = {
+        ...(editingPlan.plan_id ? {} : {plan_name:String(values.get("plan_name") || "").trim()}),
         price: String(values.get("price")),
         scholarship_limit: Number(values.get("scholarship_limit")),
         duration_month: Number(values.get("duration_month")),
         benefits,
-      });
+      };
+      if (editingPlan.plan_id) await api.patch(`/admin/subscription-plans/${editingPlan.plan_id}`,payload);
+      else await api.post("/admin/subscription-plans",payload);
       setMessage(`${editingPlan.plan_name} configuration saved.`);
       planDialog.current?.close();
       setLoading(true);
@@ -209,6 +215,11 @@ export default function AdminSubscriptionsPage() {
       planSavePending.current = false;
       setSavingPlan(false);
     }
+  }
+  async function togglePlan(plan: Plan) {
+    if (!window.confirm(`${plan.is_active === false ? "Restore" : "Archive"} ${plan.plan_name}? Existing subscriptions and invoices will be preserved.`)) return;
+    try { await api.patch(`/admin/subscription-plans/${plan.plan_id}/availability`,{is_active:plan.is_active === false}); setReloadKey(value=>value+1); setMessage("Plan availability updated."); }
+    catch (err) { setError(getApiErrorMessage(err,"Unable to update plan availability.")); }
   }
   function changeTab(next: Tab) {
     setSection("history");
@@ -296,7 +307,8 @@ export default function AdminSubscriptionsPage() {
       </tbody></table></div><footer className="aum-table-footer"><span>Showing {providerRows.length ? providerOffset + 1 : 0}–{Math.min(providerOffset + 8, providerRows.length)} of {providerRows.length} providers</span><nav aria-label="Provider subscription pagination"><button type="button" disabled={providerPage === 1} onClick={() => setPage(providerPage - 1)}>Previous</button><span>{providerPage} / {providerPages}</span><button type="button" disabled={providerPage === providerPages} onClick={() => setPage(providerPage + 1)}>Next</button></nav></footer></div>
     </section>}
     {section === "plans" && <section className="adh-panel asu-plan-section"><header className="adh-panel-heading"><span className="adh-icon"><Icon name="settings" /></span><div><h2>Subscription Plan Management</h2><p>Configure plan prices, duration, listing allowances, and displayed benefits.</p></div></header><p className="asu-policy-note">Prices and benefits update the provider plan catalogue. Listing limits also apply to providers already using a plan. New durations apply to future activations.</p>
-      <div className="asu-plan-grid">{plans.map(plan => <article key={plan.plan_id}><h3>{plan.plan_name}</h3><strong>{currency(plan.price)} / {plan.duration_month} month{plan.duration_month === 1 ? "" : "s"}</strong><p>{plan.scholarship_limit} scholarship listings</p><ul>{(plan.benefits ?? defaultBenefits).map(benefit => <li key={benefit}>{benefit}</li>)}</ul><button className="aum-outline" type="button" aria-label={`Configure ${plan.plan_name}`} onClick={() => editPlan(plan)}>Configure Plan</button></article>)}</div>
+      <button type="button" className="aum-primary" onClick={()=>editPlan({plan_id:0,plan_name:"",price:1,scholarship_limit:3,duration_month:1,benefits:[]})}>Create Subscription Plan</button>
+      <div className="asu-plan-grid">{plans.map(plan => <article key={plan.plan_id}><h3>{plan.plan_name}</h3>{plan.is_active===false && <p>Archived ? unavailable for new subscriptions</p>}<strong>{currency(plan.price)} / {plan.duration_month} month{plan.duration_month === 1 ? "" : "s"}</strong><p>{plan.scholarship_limit} scholarship listings</p><ul>{(plan.benefits ?? defaultBenefits).map(benefit => <li key={benefit}>{benefit}</li>)}</ul><button className="aum-outline" type="button" aria-label={`Configure ${plan.plan_name}`} onClick={() => editPlan(plan)}>Configure Plan</button>{plan.plan_name.toLowerCase()!=="free" && <button type="button" className="aum-outline" onClick={()=>void togglePlan(plan)}>{plan.is_active===false ? "Restore Plan" : "Archive Plan"}</button>}</article>)}</div>
       {!plans.length && <p>{loading ? "Loading plans…" : "No subscription plans have been configured."}</p>}
     </section>}
     {section === "payments" && <section className="adh-panel"><header className="adh-panel-heading"><span className="adh-icon"><Icon name="quiz" /></span><div><h2>Payment Records</h2><p>Subscription payments and monthly revenue</p></div></header><p>Stripe test-mode payments · This month {currency(monthlyRevenue)} MYR received</p><PaymentHistory payments={payments} /><button type="button" className="aum-outline" onClick={() => changeSection("history")}>View Subscription History →</button></section>}
@@ -324,7 +336,7 @@ export default function AdminSubscriptionsPage() {
           <thead><tr><th><input type="checkbox" aria-label="Select all subscriptions on this page" checked={allSelected} disabled={!visible.length} onChange={selectPage} /></th><th>Subscription ID</th><th>Provider</th><th>Plan</th><th>Start Date</th><th>End Date</th><th>Status</th><th>Auto Renew</th><th>Action</th></tr></thead>
           <tbody>{visible.map(item => <tr key={item.subscription_id} className={selectedIds.has(item.subscription_id) ? "aum-checked" : ""}>
             <td><input type="checkbox" aria-label={`Select ${subscriptionId(item.subscription_id)}`} checked={selectedIds.has(item.subscription_id)} onChange={() => selectRow(item.subscription_id)} /></td>
-            <td>{subscriptionId(item.subscription_id)}</td><td><div className="asu-provider"><span>{getInitials(item.provider_name)}</span><strong>{item.provider_name}</strong></div></td><td>{item.plan_name || "Not recorded"}</td>
+            <td>{subscriptionId(item.subscription_id)}</td><td><div className="asu-provider"><span>{getInitials(item.provider_name)}</span><strong>{item.provider_name}</strong></div></td><td>{item.plan_name || "Not recorded"}{Number(item.price)>0 && !item.stripe_subscription_id && <small>Payment evidence required</small>}</td>
             <td className="aum-date">{dateLabel(item.start_date)}</td><td className="aum-date">{dateLabel(item.end_date)}</td><td><span className={`admin-status-badge ${item.displayStatus}`}><i />{statusLabel(item.displayStatus)}</span></td><td>{autoRenewLabel(item.auto_renew)}</td>
             <td><button className="aum-outline asu-details" type="button" aria-label={`View ${subscriptionId(item.subscription_id)}`} onClick={() => openDetails(item)}>View Details</button></td>
           </tr>)}{(loading || !visible.length) && <tr><td colSpan={9} className="aum-empty">{loading ? "Loading subscriptions…" : error ? "Subscription records could not be loaded." : "No subscriptions match your search or filters."}</td></tr>}</tbody>
@@ -353,6 +365,7 @@ export default function AdminSubscriptionsPage() {
     <dialog className="aum-dialog asu-dialog" ref={planDialog} aria-labelledby="asu-plan-title" onCancel={event => { if (planSavePending.current) event.preventDefault(); }}><header><h2 id="asu-plan-title">Configure {editingPlan?.plan_name}</h2><button type="button" aria-label="Close plan configuration" disabled={savingPlan} onClick={() => planDialog.current?.close()}><Icon name="close" /></button></header>
       {planError && <p className="aum-form-error" role="alert">{planError}</p>}
       {editingPlan && <form key={`${editingPlan.plan_id}:${editingPlan.price}:${editingPlan.scholarship_limit}:${editingPlan.duration_month}:${editingPlan.benefits?.join("|")}`} onSubmit={savePlan}>
+        {!editingPlan.plan_id && <label>Plan Name<input name="plan_name" required maxLength={100} /></label>}
         <label>Price (MYR)<input name="price" type="number" required min="0" max="99999999.99" step="0.01" defaultValue={editingPlan.price} /></label>
         <label>Scholarship Listing Limit<input name="scholarship_limit" type="number" required min="1" max="1000000" step="1" defaultValue={editingPlan.scholarship_limit} /></label>
         <label>Duration (months)<input name="duration_month" type="number" required min="1" max="120" step="1" defaultValue={editingPlan.duration_month} /></label>
@@ -363,6 +376,7 @@ export default function AdminSubscriptionsPage() {
     </dialog>
     <dialog className="aum-dialog asu-dialog" ref={dialog} aria-labelledby="asu-dialog-title"><header><h2 id="asu-dialog-title">Subscription Details</h2><button type="button" aria-label="Close subscription details" onClick={() => dialog.current?.close()}><Icon name="close" /></button></header>
       {selected && <div><h3>{selected.provider_name}</h3><p>{selected.provider_email || "No contact email recorded"}</p><dl>
+        <div><dt>Payment Verification</dt><dd>{Number(selected.price)===0 ? "Free plan" : !selected.stripe_subscription_id ? "Legacy record: no Stripe subscription linked. Payment evidence requires review." : selected.payment_status === "paid" ? "Stripe invoice recorded as paid" : "Stripe invoice payment is not confirmed"}</dd></div>
         <div><dt>Subscription ID</dt><dd>{subscriptionId(selected.subscription_id)}</dd></div><div><dt>Plan</dt><dd>{selected.plan_name || "Not recorded"}</dd></div>
         <div><dt>Status</dt><dd>{statusLabel(selected.displayStatus)}</dd></div><div><dt>Auto Renew</dt><dd>{autoRenewLabel(selected.auto_renew)}</dd></div>
         <div><dt>Start Date</dt><dd>{dateLabel(selected.start_date)}</dd></div><div><dt>End Date</dt><dd>{dateLabel(selected.end_date)}</dd></div>

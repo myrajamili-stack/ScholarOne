@@ -7,6 +7,7 @@ import { getStoredUser, storeUser } from "../../utils/authStorage";
 import { getInitials } from "../../utils/userDisplay";
 import AdvisorIcon, { type AdvisorIconName } from "../../components/advisor/AdvisorIcon";
 import AdvisorAccountMenu from "../../components/advisor/AdvisorAccountMenu";
+import AccountNotifications from "../../components/AccountNotifications";
 import "../../styles/advisor-home.css";
 import "../../styles/advisor-profile.css";
 type Draft = {
@@ -156,10 +157,11 @@ export default function AdvisorProfilePage() {
             setSaving(false);
         }
     }
+    const header = <header className="ap-heading"><div><h1>My Profile <span aria-hidden="true">✦</span></h1><p>Manage your personal details, expertise, and professional profile<br className="ap-desktop"/> shown to students.</p></div><div className="ap-header-actions"><AccountNotifications /><AdvisorAccountMenu name={profile?.full_name} imageUrl={profile?.profile_picture} /></div></header>;
     if (loading)
-        return <section className="advisor-empty-state">Loading your profile…</section>;
+        return <div className="ap-page">{header}<section className="advisor-empty-state">Loading your profile…</section></div>;
     if (!profile || !draft)
-        return <section className="advisor-empty-state" role="alert">{error || "Please sign in to view your profile."}<button onClick={() => window.location.reload()}>Try again</button></section>;
+        return <div className="ap-page">{header}<section className="advisor-empty-state" role="alert">{error || "Please sign in to view your profile."}<button onClick={() => window.location.reload()}>Try again</button></section></div>;
     const completion = [{ label: "Personal Information", done: !!(profile.full_name && profile.email && profile.institution && profile.professional_title), tab: "about" as Tab }, { label: "Expertise & Specialization", done: !!profile.specialization, tab: "expertise" as Tab }, { label: "Qualifications", done: !!profile.qualification, tab: "qualifications" as Tab }, { label: "Profile Introduction", done: !!profile.bio, tab: "about" as Tab }];
     const percent = completion.filter(item => item.done).length * 25;
     const dirty = JSON.stringify(draft) !== JSON.stringify(toDraft(profile));
@@ -172,7 +174,7 @@ export default function AdvisorProfilePage() {
         return <label className={key === "bio" ? "ap-field wide" : "ap-field"} key={key} htmlFor={props.id}><span>{labels[key]} {required.includes(key) && <b aria-label="required">*</b>}</span>{key === "bio" ? <><textarea {...props} rows={4}/><small className="ap-counter">{draft.bio.length} / 300</small></> : <input {...props} type={key === "email" ? "email" : key === "phone_number" ? "tel" : "text"} inputMode={key === "experience_years" ? "numeric" : undefined} autoComplete={key === "full_name" ? "name" : key === "email" ? "email" : key === "phone_number" ? "tel" : undefined} placeholder={key === "phone_number" ? "+60 12-345 6789" : undefined}/>} {errors[key] && <small id={`ap-error-${key}`} className="ap-field-error">{errors[key]}</small>}</label>;
     }
     return <div className="ap-page">
-    <header className="ap-heading"><div><h1>My Profile <span aria-hidden="true">✦</span></h1><p>Manage your personal details, expertise, and professional profile<br className="ap-desktop"/> shown to students.</p></div><div className="ap-header-actions"><Link to="/advisor/messages" className="ap-messages-link" aria-label="Open messages"><AdvisorIcon name="bell"/></Link><AdvisorAccountMenu name={profile.full_name} imageUrl={profile.profile_picture} /></div></header>
+    {header}
     <section className="ap-banner"><div className="ap-photo"><Avatar profile={profile} large/><button type="button" aria-label="Choose profile photo" disabled={saving || uploadingPhoto} onClick={() => photoInput.current?.click()}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="m8 5 2-3h4l2 3h5v16H3V5h5Z"/><circle cx="12" cy="12" r="4"/></svg></button></div><div className="ap-identity"><h2>{profile.full_name}</h2><span className="ap-role">{profile.professional_title || "Academic Advisor"}</span><p><AdvisorIcon name="graduation"/>{profile.specialization || "Add your specialization"}</p><p><AdvisorIcon name="home"/>{profile.institution || "Add your institution"}</p></div><Link to="/advisor/feedback" className="ap-stat"><AdvisorIcon name="star"/><div><strong>{Number(profile.average_rating).toFixed(1)} / 5</strong><span>Average Rating</span></div></Link><Link to="/advisor/students" className="ap-stat"><AdvisorIcon name="users"/><div><strong>{profile.students_guided}</strong><span>Students Guided</span></div></Link></section>
     <div className="ap-tabs" role="tablist" aria-label="Profile sections">{tabs.map((item, index) => <button key={item.id} id={`ap-tab-${item.id}`} role="tab" aria-selected={tab === item.id} aria-controls={`ap-panel-${item.id}`} tabIndex={tab === item.id ? 0 : -1} className={tab === item.id ? "active" : ""} onClick={() => selectTab(item.id)} onKeyDown={event => { let next: number; if (event.key === "ArrowRight")
         next = (index + 1) % tabs.length;

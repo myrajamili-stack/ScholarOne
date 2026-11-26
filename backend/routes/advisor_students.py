@@ -3,6 +3,7 @@ from contextlib import closing
 from datetime import date, datetime, timedelta
 from flask import Blueprint, jsonify, request, current_app
 from advisor_scheduling import read_schedule, available_slots, malaysia_now
+from appointment_workflows import appointment_notifications
 from db import get_db_connection
 from responses import error_response
 from security import advisor_access_required
@@ -98,6 +99,7 @@ def student_consultations(advisor_id,student_id):
                     VALUES(%s,%s,%s,'confirmed',%s,%s) RETURNING appointment_id''',
                     (student_id,advisor_id,selected,schedule['slot_minutes'],topic.strip()))
                 appointment_id=cursor.fetchone()['appointment_id']
+                appointment_notifications(cursor, appointment_id, student_id, advisor_id, 'Advisor scheduled a confirmed consultation', selected)
         return jsonify(appointment_id=appointment_id,appointment_status='confirmed',appointment_datetime=selected.isoformat()+'+08:00',message='Consultation scheduled and visible to the student.'),201
     except Exception:
         current_app.logger.exception('Unable to schedule student consultation')

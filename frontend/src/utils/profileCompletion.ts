@@ -10,7 +10,6 @@ const requiredProfileFields: Array<keyof StudentProfile> = [
   "gender",
   "nationality",
   "education_level",
-  "cgpa",
   "field_of_study",
   "university",
 ];
@@ -25,7 +24,11 @@ export function getProfileCompletion(profile: StudentProfile | null) {
     return value !== null && value !== undefined && String(value).trim() !== "";
   }).length;
 
-  return Math.round((completedFields / requiredProfileFields.length) * 100);
+  const hasResults = (profile.cgpa != null && String(profile.cgpa).trim() !== "") ||
+    Object.values(profile.academic_qualifications ?? {}).some(result =>
+      (result.cgpa != null && String(result.cgpa).trim() !== "") || Boolean(result.subjects?.length),
+    );
+  return Math.round(((completedFields + Number(hasResults)) / (requiredProfileFields.length + 1)) * 100);
 }
 
 export function isProfileComplete(profile: StudentProfile | null) {

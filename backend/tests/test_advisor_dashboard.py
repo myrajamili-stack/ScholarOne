@@ -10,6 +10,8 @@ from security import issue_access_token
 
 class AdvisorDashboardTests(unittest.TestCase):
     def setUp(self):
+        # Business-logic tests assume an active account; restriction tests cover the real lookup.
+        self.enterContext(patch("security.verify_active_account", return_value=None))
         self.client = create_app().test_client()
         self.headers = {'Authorization': 'Bearer ' + issue_access_token({'user_id': 7, 'role': 'advisor'})}
 

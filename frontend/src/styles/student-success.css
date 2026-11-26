@@ -81,6 +81,49 @@
 .ss-scholarship { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border: 1px solid #e8ddff; border-radius: 15px; }
 .ss-list-icon { display: grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; background: #f1eaff; color: #7443e7; }
 .ss-scholarship > div { flex: 1; min-width: 0; }
+.ss-scholarship-recommendations { background: linear-gradient(155deg, #faf6ff, #fff 70%); }
+.ss-scholarship-recommendations .ss-heading { flex-wrap: wrap; margin-bottom: 6px; }
+.ss-heading > .ss-recommendation-catalogue {
+  display: inline-flex; align-items: center; gap: 4px; padding: 6px 9px;
+  border-radius: 9px; background: #f0e7ff; color: #5926ad; font-size: 12px;
+}
+.ss-recommendation-catalogue svg,
+.ss-scholarship-recommendations summary svg { width: 15px; height: 15px; flex-shrink: 0; }
+.ss-recommendation-intro { color: #655477; line-height: 1.5; font-size: 13px; }
+.ss-recommendation-context { margin: 12px 0 14px; }
+.ss-scholarship-recommendations summary {
+  display: flex; align-items: center; gap: 6px; width: fit-content; max-width: 100%;
+  list-style: none; color: #5926ad; cursor: pointer; font-size: 12px; font-weight: 750;
+}
+.ss-scholarship-recommendations summary::-webkit-details-marker { display: none; }
+.ss-scholarship-recommendations details[open] > summary > svg:last-child { transform: rotate(180deg); }
+.ss-recommendation-context summary { padding: 7px 9px; border: 1px solid #e6d9f8; border-radius: 9px; background: #fff; }
+.ss-recommendation-context p { margin: 9px 0; color: #655477; font-size: 12px; }
+.ss-recommendation-context form { display: grid; justify-items: start; gap: 8px; }
+.ss-recommendation-context .eligibility-inputs { width: 100%; margin-bottom: 0; }
+.ss-scholarship-recommendations .ss-list { gap: 9px; }
+.ss-recommendation p { margin: 6px 0; }
+.ss-scholarship-recommendations .ss-recommendation {
+  align-items: flex-start; padding: 12px; background: #fff;
+  box-shadow: 0 2px 6px #4c207507; transition: border-color .15s ease;
+}
+.ss-scholarship-recommendations .ss-recommendation:is(:focus-within, :hover) { border-color: #cbb0f3; }
+.ss-recommendation .ss-list-icon { width: 34px; height: 34px; border-radius: 10px; }
+.ss-recommendation .ss-list-icon svg { width: 19px; height: 19px; }
+.ss-recommendation-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 6px 10px; }
+.ss-recommendation-header h3 { margin: 0; overflow-wrap: anywhere; font-size: 15px; font-weight: 800; line-height: 1.35; }
+.ss-recommendation-header h3 a { color: #2c1950; }
+.ss-recommendation-header h3 a:hover { text-decoration: underline; }
+.ss-recommendation-status { border-radius: 20px; padding: 4px 8px; background: #f0e7ff; color: #5926ad; font-size: 11px; font-weight: 750; }
+.ss-recommendation-status.eligible { background: #def4e9; color: #205b47; }
+.ss-recommendation-status.insufficient_information { background: #f0edf4; color: #574967; }
+.ss-recommendation .ss-recommendation-reason { margin: 8px 0 6px; color: #57486b; font-size: 13px; line-height: 1.5; }
+.ss-recommendation-reasons ul { padding-inline-start: 18px; margin: 8px 0 0; font-size: 12px; }
+.ss-recommendation-reasons li + li { margin-top: 6px; }
+.ss-scholarship-recommendations .ss-recommendation-state {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  padding: 12px; border-radius: 12px; background: #f5efff; color: #57486b;
+}
 .ss-scholarship small, .ss-deadline small { display: block; color: #6a578e; font-size: 11px; margin-top: 4px; }
 .ss-scholarship > svg { color: #7133ed; width: 18px; flex-shrink: 0; }
 .ss-deadline { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 12px; border-radius: 13px; background: #f9f5ff; margin-top: 10px; }
@@ -190,3 +233,12 @@
 .ss-page-heading [aria-current="page"] { color: #6f508e; }
 .ss-page-heading a:focus-visible { outline: 3px solid #c39af1; outline-offset: 3px; border-radius: 3px; }
 @media (max-width: 650px) { .ss-page-heading { width: 100%; } }
+
+.ss-priority { display: flex; flex-wrap: wrap; gap: 8px; }
+.ss-priority a { display: flex; align-items: center; gap: 8px; overflow-wrap: anywhere; }
+.ss-priority a { padding: 8px 12px; border-radius: 11px; border: 1px solid #efd8b5; color: #593910; background: #fff5e6; font-size: 12px; }
+.ss-priority strong { display: block; }
+.ss-priority svg { width: 16px; height: 16px; flex-shrink: 0; }
+.ss-refine-active { color: #433170; background: #eee4fd; padding: 2px 5px; border-radius: 5px; }
+.ss-pathway-details { font-size: 12px; }
+.ss-pathway-details summary { cursor: pointer; }

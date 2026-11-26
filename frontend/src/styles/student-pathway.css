@@ -132,3 +132,12 @@
   .spq-empty > .spq-empty-art, .spq-results > .spq-results-art { width: 46px; height: 46px; }
   .spq-empty strong, .spq-results h3 { font-size: 15px; }
 }
+.advisor-student-quiz { margin-top: 24px; padding: 28px; }
+.advisor-quiz-questions { border: 0; padding: 0; display: grid; gap: 20px; }
+.advisor-quiz-questions fieldset { border: 1px solid #e0d6f3; border-radius: 15px; padding: 20px; min-width: 0; }
+.advisor-quiz-questions legend { font-size: 18px; font-weight: 700; padding: 0 8px; }
+.advisor-quiz-questions label { display: flex; align-items: start; gap: 12px; padding: 12px; margin: 8px 0; border-radius: 10px; background: #f6f2ff; }
+.advisor-quiz-questions input[type=radio] { margin-top: 4px; flex-shrink: 0; }
+.advisor-quiz-result details { margin: 22px 0; }
+.advisor-quiz-result li { line-height: 1.7; margin: 12px 0; }
+.advisor-likert-navigation { display: flex; flex-wrap: wrap; gap: 8px; }

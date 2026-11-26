@@ -1,9 +1,13 @@
 from flask import Blueprint, jsonify, request
 
 from db import get_db_connection
-from responses import error_response
+from notification_delivery import notify, notify_admins, change_application_status
+from responses import error_response, internal_error_response
 from security import sponsor_access_required
-from scholarship_filters import validate_filter_metadata
+from listing_information import validate_listing_submission
+from scholarship_availability import PUBLISHED_SCHOLARSHIP, intake_status, malaysia_now, scholarship_deadline
+from subscription_entitlements import ACTIVE_ENTITLEMENT
+import json
 
 sponsors_bp = Blueprint("sponsors", __name__, url_prefix="/api/sponsors")
 
@@ -13,6 +17,22 @@ sponsors_bp = Blueprint("sponsors", __name__, url_prefix="/api/sponsors")
 def verify_provider_access():
     """Check current approval on every provider request, including existing tokens."""
     return None
+
+
+def read_current_subscription(cursor, sponsor_id):
+    cursor.execute(f"""
+        select sub.subscription_id, sub.stripe_subscription_id, sub.plan_id,
+               sub.start_date, sub.end_date,
+               coalesce(sub.subscription_status, 'inactive') as subscription_status,
+               sp.plan_name, sp.price, sp.scholarship_limit, sp.duration_month
+        from subscription sub
+        left join subscription_plan sp on sp.plan_id = sub.plan_id
+        where sub.sponsor_id = %s
+          and {ACTIVE_ENTITLEMENT}
+        order by sub.start_date desc nulls last, sub.subscription_id desc
+        limit 1
+    """, (sponsor_id,))
+    return cursor.fetchone()
 
 
 def ensure_default_subscription_plans(cursor):
@@ -76,6 +96,7 @@ def get_sponsor_dashboard(sponsor_id):
                 count(*) as total_scholarships,
                 count(*) filter (where lower(coalesce(status, 'pending')) in ('active', 'approved')) as active_scholarships,
                 count(*) filter (where lower(coalesce(status, 'pending')) = 'pending') as pending_scholarships,
+                coalesce(sum((select count(*) from scholarship_view v where v.scholarship_id=scholarship.scholarship_id)),0) as total_views,
                 count(*) filter (where lower(coalesce(status, 'pending')) = 'rejected') as rejected_scholarships
             from scholarship
             where sponsor_id = %s
@@ -128,27 +149,7 @@ def get_sponsor_dashboard(sponsor_id):
         """, (sponsor_id,))
         application_trend = cursor.fetchall()
 
-        cursor.execute("""
-            select
-                sub.subscription_id,
-                sub.start_date,
-                sub.end_date,
-                coalesce(sub.subscription_status, 'inactive') as subscription_status,
-                sp.plan_name,
-                sp.scholarship_limit,
-                sp.price,
-                sp.duration_month
-            from subscription sub
-            left join subscription_plan sp on sp.plan_id = sub.plan_id
-            where sub.sponsor_id = %s
-              and lower(coalesce(sub.subscription_status, 'inactive')) = 'active'
-              and (sub.start_date is null or sub.start_date <= current_date)
-              and (sub.end_date is null or sub.end_date >= current_date)
-              and (sub.stripe_subscription_id is null or sub.end_date > (now() at time zone 'UTC'))
-            order by sub.start_date desc nulls last, sub.subscription_id desc
-            limit 1
-        """, (sponsor_id,))
-        subscription = cursor.fetchone()
+        subscription = read_current_subscription(cursor, sponsor_id)
 
         cursor.execute("""
             select
@@ -181,13 +182,13 @@ def get_sponsor_dashboard(sponsor_id):
                 "pending_scholarships": scholarship_summary["pending_scholarships"],
                 "rejected_scholarships": scholarship_summary["rejected_scholarships"],
                 "total_applications": total_applications,
-                "total_views": 0,
+                "total_views": int(scholarship_summary["total_views"] or 0),
             },
             "subscription": {
                 "plan_name": plan_name,
                 "scholarship_limit": scholarship_limit,
                 "used_scholarships": scholarship_summary["total_scholarships"],
-                "status": subscription["subscription_status"] if subscription else sponsor["subscription_status"],
+                "status": subscription["subscription_status"] if subscription else "free",
                 "end_date": subscription["end_date"] if subscription else None,
             },
             "scholarships": scholarships,
@@ -199,7 +200,7 @@ def get_sponsor_dashboard(sponsor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @sponsors_bp.route("/<int:sponsor_id>/settings", methods=["GET"])
@@ -228,6 +229,7 @@ def get_sponsor_settings(sponsor_id):
               and u.role = 'sponsor'
         """, (sponsor_id,))
         sponsor = cursor.fetchone()
+        subscription = read_current_subscription(cursor, sponsor_id) if sponsor else None
 
         cursor.close()
         connection.close()
@@ -235,13 +237,16 @@ def get_sponsor_settings(sponsor_id):
         if not sponsor:
             return error_response("Sponsor account not found", 404)
 
-        return jsonify({"sponsor": sponsor})
+        return jsonify({
+            "sponsor": sponsor,
+            "subscription_plan_name": subscription["plan_name"] if subscription else None,
+        }), 200, {"Cache-Control": "no-store"}
     except Exception as e:
         if cursor:
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @sponsors_bp.route("/<int:sponsor_id>/settings", methods=["PATCH"])
@@ -324,7 +329,7 @@ def update_sponsor_settings(sponsor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @sponsors_bp.route("/<int:sponsor_id>/scholarships", methods=["GET"])
@@ -367,6 +372,7 @@ def get_sponsor_scholarships(sponsor_id):
             select
                 s.scholarship_id,
                 s.title,
+                s.rejection_reason,
                 s.description,
                 s.amount,
                 s.category,
@@ -382,6 +388,7 @@ def get_sponsor_scholarships(sponsor_id):
             group by
                 s.scholarship_id,
                 s.title,
+                s.rejection_reason,
                 s.description,
                 s.amount,
                 s.category,
@@ -407,57 +414,31 @@ def get_sponsor_scholarships(sponsor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @sponsors_bp.route("/<int:sponsor_id>/scholarships", methods=["POST"])
 def create_sponsor_scholarship(sponsor_id):
-    data = request.get_json() or {}
-    required_fields = [
-        "title",
-        "description",
-        "amount",
-        "category",
-        "eligibility_criteria",
-        "deadline",
-        "funding_type",
-    ]
-    missing_fields = [
-        field for field in required_fields
-        if data.get(field) is None or str(data.get(field)).strip() == ""
-    ]
-
-    if missing_fields:
-        return error_response(f"Missing required fields: {', '.join(missing_fields)}", 400)
-
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return error_response("Send listing information as a JSON object.", 400)
     try:
-        filter_metadata = validate_filter_metadata(data)
+        amount, filter_metadata, listing_metadata, description, deadline = validate_listing_submission(data)
     except ValueError as error:
         return error_response(str(error), 400)
-
-    try:
-        amount = float(data["amount"])
-    except (TypeError, ValueError):
-        return error_response("Scholarship amount must be a valid number", 400)
-
-    if amount < 0:
-        return error_response("Scholarship amount cannot be negative", 400)
 
     connection = None
     cursor = None
 
     try:
         connection = get_db_connection()
+        connection.set_session(isolation_level="READ COMMITTED")
         cursor = connection.cursor()
 
         cursor.execute("""
-            select
-                u.user_id,
-                coalesce(s.organization_name, u.full_name) as organization_name
-            from app_user u
-            left join sponsor s on s.sponsor_id = u.user_id
-            where u.user_id = %s
-              and u.role = 'sponsor'
+            select s.sponsor_id from sponsor s join app_user u on u.user_id = s.sponsor_id
+            where s.sponsor_id = %s and u.role = 'sponsor' and lower(u.status) = 'active'
+            for update of s
         """, (sponsor_id,))
         sponsor = cursor.fetchone()
 
@@ -466,17 +447,17 @@ def create_sponsor_scholarship(sponsor_id):
             connection.close()
             return error_response("Sponsor account not found", 404)
 
-        cursor.execute("""
-            select sp.scholarship_limit
-            from subscription sub
-            left join subscription_plan sp on sp.plan_id = sub.plan_id
-            where sub.sponsor_id = %s
-              and lower(coalesce(sub.subscription_status, 'inactive')) = 'active'
-              and (sub.start_date is null or sub.start_date <= current_date)
-              and (sub.end_date is null or sub.end_date >= current_date)
-              and (sub.stripe_subscription_id is null or sub.end_date > (now() at time zone 'UTC'))
-            order by sub.start_date desc nulls last, sub.subscription_id desc
-            limit 1
+        cursor.execute(f"""
+            select coalesce(
+                (select sp.scholarship_limit
+                 from subscription sub join subscription_plan sp on sp.plan_id = sub.plan_id
+                 where sub.sponsor_id = %s and {ACTIVE_ENTITLEMENT}
+                 order by sub.start_date desc nulls last, sub.subscription_id desc limit 1),
+                (select scholarship_limit from subscription_plan
+                 where lower(plan_name) = 'free' and price = 0 and is_active
+                 order by plan_id limit 1),
+                3
+            ) as scholarship_limit
         """, (sponsor_id,))
         subscription = cursor.fetchone()
 
@@ -509,9 +490,10 @@ def create_sponsor_scholarship(sponsor_id):
                 funding_type,
                 study_level,
                 eligible_state,
+                import_metadata,
                 status
             )
-            values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+            values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::jsonb, 'pending')
             returning
                 scholarship_id,
                 sponsor_id,
@@ -529,16 +511,18 @@ def create_sponsor_scholarship(sponsor_id):
         """, (
             sponsor_id,
             data["title"].strip(),
-            data["description"].strip(),
+            description,
             amount,
             data["category"].strip(),
             data["eligibility_criteria"].strip(),
-            data["deadline"],
+            deadline,
             data["funding_type"].strip(),
             filter_metadata["study_level"],
             filter_metadata["eligible_state"],
+            json.dumps(listing_metadata),
         ))
         scholarship = cursor.fetchone()
+        notify_admins(cursor, f"New scholarship #{scholarship['scholarship_id']} requires review: {scholarship['title']}")
         connection.commit()
 
         cursor.close()
@@ -555,7 +539,7 @@ def create_sponsor_scholarship(sponsor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return error_response('Unable to submit this scholarship. No changes were saved. Please retry.', 503)
 
 
 @sponsors_bp.route("/<int:sponsor_id>/applications", methods=["GET"])
@@ -654,74 +638,48 @@ def get_sponsor_applications(sponsor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @sponsors_bp.route("/<int:sponsor_id>/applications/<int:application_id>", methods=["PATCH"])
 def update_sponsor_application(sponsor_id, application_id):
-    data = request.get_json() or {}
-    status = (data.get("status") or "").strip().lower()
-    remarks = data.get("remarks")
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict): return error_response('Send an application status object.', 400)
+    status = data.get('status')
+    remarks = data.get('remarks')
+    if status not in ('pending','approved','rejected'): return error_response('Status must be pending, approved, or rejected.', 400)
+    if remarks is not None and (not isinstance(remarks,str) or len(remarks)>2000): return error_response('Remarks must be text of at most 2000 characters.', 400)
+    return change_application_status(application_id, status, remarks, actor_id=sponsor_id, sponsor_id=sponsor_id)
 
-    if status not in {"approved", "rejected", "pending"}:
-        return error_response("Status must be pending, approved, or rejected", 400)
 
-    connection = None
-    cursor = None
-
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            update application a
-            set
-                application_status = %s,
-                remarks = coalesce(%s, a.remarks)
-            from scholarship s
-            where s.scholarship_id = a.scholarship_id
-              and s.sponsor_id = %s
-              and a.application_id = %s
-            returning
-                a.application_id,
-                a.student_id,
-                a.scholarship_id,
-                a.application_date,
-                a.application_status,
-                a.remarks
-        """, (status, remarks, sponsor_id, application_id))
-        application = cursor.fetchone()
-
-        if not application:
-            cursor.close()
-            connection.close()
-            return error_response("Application not found for this sponsor", 404)
-
-        connection.commit()
-        cursor.close()
-        connection.close()
-
-        return jsonify({
-            "message": f"Application marked as {status}.",
-            "application": application,
-        })
-    except Exception as e:
-        if connection:
-            connection.rollback()
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-        return error_response(str(e), 500)
+def listing_lifecycle(listing, now):
+    if not listing["published"]:
+        return "unpublished"
+    status = intake_status(listing, now)
+    if status in ("dated", "open"):
+        return "active"
+    if status == "closed":
+        try:
+            deadline, cutoff = scholarship_deadline(listing)
+        except (ValueError, TypeError, OverflowError):
+            return "closed"
+        if (cutoff and cutoff <= now) or (not cutoff and deadline and deadline < now.date()):
+            return "expired"
+    return status
 
 
 @sponsors_bp.route("/<int:sponsor_id>/statistics", methods=["GET"])
 def get_sponsor_statistics(sponsor_id):
+    lifecycle = request.args.get("lifecycle", "all")
+    lifecycle_counts = dict.fromkeys(("active", "expired", "closed", "unconfirmed", "unpublished"), 0)
+    if lifecycle != "all" and lifecycle not in lifecycle_counts:
+        return error_response("Choose a valid listing lifecycle filter.", 400)
     connection = None
     cursor = None
 
     try:
         connection = get_db_connection()
+        connection.set_session(readonly=True, isolation_level="REPEATABLE READ")
         cursor = connection.cursor()
 
         cursor.execute("""
@@ -740,6 +698,18 @@ def get_sponsor_statistics(sponsor_id):
             connection.close()
             return error_response("Sponsor account not found", 404)
 
+        cursor.execute(f"""select s.scholarship_id, s.deadline, s.import_metadata,
+                         coalesce({PUBLISHED_SCHOLARSHIP}, false) as published
+                         from scholarship s where s.sponsor_id=%s""", (sponsor_id,))
+        now = malaysia_now()
+        selected_ids = []
+        for listing in cursor.fetchall():
+            status = listing_lifecycle(listing, now)
+            lifecycle_counts[status] += 1
+            if lifecycle == "all" or status == lifecycle:
+                selected_ids.append(listing["scholarship_id"])
+        scope = (sponsor_id, selected_ids)
+
         cursor.execute("""
             select
                 count(a.application_id) as total_applications,
@@ -749,25 +719,30 @@ def get_sponsor_statistics(sponsor_id):
                 count(a.application_id) filter (where lower(coalesce(a.application_status, 'pending')) = 'rejected') as rejected_applications
             from scholarship s
             left join application a on a.scholarship_id = s.scholarship_id
-            where s.sponsor_id = %s
-        """, (sponsor_id,))
+            where s.sponsor_id = %s and s.scholarship_id = any(%s)
+        """, scope)
         summary = cursor.fetchone()
+        cursor.execute('''select count(*) as total_views,count(distinct v.student_id) as unique_viewers
+            from scholarship_view v join scholarship s on s.scholarship_id=v.scholarship_id
+            where s.sponsor_id=%s and s.scholarship_id=any(%s)''',scope)
+        views=cursor.fetchone()
 
         cursor.execute("""
             select
                 s.scholarship_id,
                 s.title,
+                (select count(*) from scholarship_view v where v.scholarship_id=s.scholarship_id) as total_views,
                 count(a.application_id) as total_applications,
                 count(a.application_id) filter (where lower(coalesce(a.application_status, 'pending')) = 'approved') as awarded_students,
                 count(a.application_id) filter (where lower(coalesce(a.application_status, 'pending')) = 'pending') as pending_applications,
                 count(a.application_id) filter (where lower(coalesce(a.application_status, 'pending')) = 'rejected') as rejected_applications
             from scholarship s
             left join application a on a.scholarship_id = s.scholarship_id
-            where s.sponsor_id = %s
+            where s.sponsor_id = %s and s.scholarship_id = any(%s)
             group by s.scholarship_id, s.title
             order by total_applications desc, s.created_at desc nulls last
             limit 8
-        """, (sponsor_id,))
+        """, scope)
         scholarship_breakdown = cursor.fetchall()
 
         cursor.execute("""
@@ -778,11 +753,11 @@ def get_sponsor_statistics(sponsor_id):
             from application a
             join scholarship s on s.scholarship_id = a.scholarship_id
             left join student st on st.student_id = a.student_id
-            where s.sponsor_id = %s
+            where s.sponsor_id = %s and s.scholarship_id = any(%s)
             group by coalesce(nullif(st.field_of_study, ''), 'Not provided')
             order by total_applications desc
             limit 6
-        """, (sponsor_id,))
+        """, scope)
         field_breakdown = cursor.fetchall()
 
         cursor.execute("""
@@ -792,13 +767,19 @@ def get_sponsor_statistics(sponsor_id):
                 count(a.application_id) filter (where lower(coalesce(a.application_status, 'pending')) = 'approved') as awarded_students
             from application a
             join scholarship s on s.scholarship_id = a.scholarship_id
-            where s.sponsor_id = %s
+            where s.sponsor_id = %s and s.scholarship_id = any(%s)
               and a.application_date is not null
             group by date_trunc('month', a.application_date)
             order by date_trunc('month', a.application_date) asc
             limit 12
-        """, (sponsor_id,))
+        """, scope)
         monthly_trend = cursor.fetchall()
+        cursor.execute('''select s.scholarship_id,s.title,count(v.student_id) as total_views,
+            count(distinct v.student_id) as unique_viewers from scholarship s
+            left join scholarship_view v on v.scholarship_id=s.scholarship_id
+            where s.sponsor_id=%s and s.scholarship_id=any(%s)
+            group by s.scholarship_id,s.title order by total_views desc,s.title''',scope)
+        view_breakdown=cursor.fetchall()
 
         cursor.close()
         connection.close()
@@ -810,7 +791,11 @@ def get_sponsor_statistics(sponsor_id):
 
         return jsonify({
             "sponsor": sponsor,
+            "listing_totals": {"total": sum(lifecycle_counts.values()), **lifecycle_counts},
+            "matched_listings": len(selected_ids),
             "summary": {
+                "total_views": views["total_views"] or 0,
+                "unique_viewers": views["unique_viewers"] or 0,
                 "total_applications": total_applications,
                 "unique_students": summary["unique_students"] or 0,
                 "awarded_students": awarded_students,
@@ -819,6 +804,7 @@ def get_sponsor_statistics(sponsor_id):
                 "success_rate": success_rate,
                 "top_field": top_field,
             },
+            "view_breakdown": view_breakdown,
             "scholarship_breakdown": scholarship_breakdown,
             "field_breakdown": field_breakdown,
             "monthly_trend": monthly_trend,
@@ -828,7 +814,7 @@ def get_sponsor_statistics(sponsor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @sponsors_bp.route("/<int:sponsor_id>/subscriptions", methods=["GET"])
@@ -869,33 +855,12 @@ def get_sponsor_subscriptions(sponsor_id):
                 duration_month,
                 to_jsonb(subscription_plan)->'benefits' AS benefits
             from subscription_plan
+            where is_active=true
             order by price asc, scholarship_limit asc
         """)
         plans = cursor.fetchall()
 
-        cursor.execute("""
-            select
-                sub.subscription_id,
-                sub.stripe_subscription_id,
-                sub.plan_id,
-                sub.start_date,
-                sub.end_date,
-                coalesce(sub.subscription_status, 'inactive') as subscription_status,
-                sp.plan_name,
-                sp.price,
-                sp.scholarship_limit,
-                sp.duration_month
-            from subscription sub
-            left join subscription_plan sp on sp.plan_id = sub.plan_id
-            where sub.sponsor_id = %s
-              and lower(coalesce(sub.subscription_status, 'inactive')) = 'active'
-              and (sub.start_date is null or sub.start_date <= current_date)
-              and (sub.end_date is null or sub.end_date >= current_date)
-              and (sub.stripe_subscription_id is null or sub.end_date > (now() at time zone 'UTC'))
-            order by sub.start_date desc nulls last, sub.subscription_id desc
-            limit 1
-        """, (sponsor_id,))
-        current_subscription = cursor.fetchone()
+        current_subscription = read_current_subscription(cursor, sponsor_id)
 
         cursor.execute("""
             select count(*) as used_scholarships
@@ -936,7 +901,7 @@ def get_sponsor_subscriptions(sponsor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @sponsors_bp.route("/<int:sponsor_id>/subscriptions", methods=["POST"])
@@ -979,7 +944,7 @@ def create_sponsor_subscription(sponsor_id):
                 duration_month,
                 to_jsonb(subscription_plan)->'benefits' AS benefits
             from subscription_plan
-            where plan_id = %s
+            where plan_id = %s and is_active=true
         """, (plan_id,))
         plan = cursor.fetchone()
 
@@ -1051,7 +1016,7 @@ def create_sponsor_subscription(sponsor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
     finally:
         if cursor:
             cursor.close()
@@ -1115,6 +1080,7 @@ def get_sponsor_appeals(sponsor_id):
             select
                 scholarship_id,
                 title,
+                rejection_reason,
                 description,
                 amount,
                 category,
@@ -1178,7 +1144,7 @@ def get_sponsor_appeals(sponsor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @sponsors_bp.route("/<int:sponsor_id>/appeals", methods=["POST"])
@@ -1264,6 +1230,7 @@ def create_sponsor_appeal(sponsor_id):
             f"Your appeal for {scholarship['title']} has been submitted for administrator review.",
         ))
 
+        notify_admins(cursor,f"Appeal requires review for scholarship #{scholarship_id}: {scholarship['title']}")
         connection.commit()
         cursor.close()
         connection.close()
@@ -1280,7 +1247,7 @@ def create_sponsor_appeal(sponsor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @sponsors_bp.route("/<int:sponsor_id>/messages", methods=["GET"])
@@ -1345,7 +1312,7 @@ def get_sponsor_messages(sponsor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @sponsors_bp.route("/<int:sponsor_id>/messages/read-all", methods=["PATCH"])
@@ -1381,7 +1348,7 @@ def mark_all_sponsor_messages_read(sponsor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @sponsors_bp.route("/<int:sponsor_id>/messages/<int:notification_id>", methods=["PATCH"])
@@ -1431,4 +1398,4 @@ def update_sponsor_message_status(sponsor_id, notification_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)

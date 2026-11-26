@@ -13,6 +13,7 @@ const navItems: Array<[AdvisorIconName, string, string]> = [
   ["home", "Dashboard", "/dashboard"],
   ["layers", "Scholarships", "/scholarships"],
   ["appointment", "Pathway Quiz", "/pathway-quiz"],
+  ["layers", "Academic Pathways", "/academic-pathways"],
   ["calendar", "Appointments", "/appointments"],
   ["calendar", "Calendar & Reminders", "/calendar"],
   ["message", "Messages", "/messages"],

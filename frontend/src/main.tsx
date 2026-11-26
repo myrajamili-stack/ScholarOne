@@ -44,7 +44,7 @@ function HomePage({ about = false }: { about?: boolean }) {
           <Link to="/" aria-current={!about ? 'page' : undefined}>Home</Link>
           <Link to="/about" aria-current={about ? 'page' : undefined}>About Us</Link>
           <Link to="/scholarships">Scholarships</Link>
-          <Link to="/pathway-quiz">Academic Pathways</Link>
+          <Link to="/academic-pathways">Academic Pathways</Link>
           <a href={about ? '/#faq' : '#faq'}>FAQ</a>
         </nav>
         <div className="home-account">

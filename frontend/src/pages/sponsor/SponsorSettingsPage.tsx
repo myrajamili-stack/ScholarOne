@@ -6,6 +6,7 @@ import { getApiErrorMessage } from "../../utils/apiError";
 import { getStoredUser, storeUser } from "../../utils/authStorage";
 
 type SponsorSettingsData = {
+  subscription_plan_name: string | null;
   sponsor: {
     sponsor_id: number;
     full_name: string;
@@ -15,7 +16,6 @@ type SponsorSettingsData = {
     organization_name: string;
     organization_type?: string | null;
     website?: string | null;
-    subscription_status?: string | null;
   };
 };
 
@@ -149,6 +149,11 @@ function SponsorSettingsPage() {
       </div>
     );
   }
+
+  const assignedPlan = data.subscription_plan_name?.trim();
+  const subscriptionLabel = assignedPlan
+    ? /\bplan$/i.test(assignedPlan) ? assignedPlan : `${assignedPlan} Plan`
+    : "Free Plan";
 
   return (
     <div className="sponsor-page">
@@ -380,7 +385,7 @@ function SponsorSettingsPage() {
               </div>
               <div>
                 <span>Subscription</span>
-                <strong>{data.sponsor.subscription_status || "free"}</strong>
+                <strong>{subscriptionLabel}</strong>
               </div>
             </div>
           </article>

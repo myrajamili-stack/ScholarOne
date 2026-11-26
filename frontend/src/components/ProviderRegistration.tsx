@@ -5,9 +5,9 @@ import RoleIllustration from "./RoleIllustration";
 import "../styles/student-registration.css";
 import "../styles/provider-registration.css";
 
-type Props = { onSubmit: (event: FormEvent<HTMLFormElement>) => void; error: string; isSubmitting: boolean; submitted: boolean };
+type Props = { resubmitting?: boolean; onSubmit: (event: FormEvent<HTMLFormElement>) => void; error: string; isSubmitting: boolean; submitted: boolean };
 
-export default function ProviderRegistration({ onSubmit, error, isSubmitting, submitted }: Props) {
+export default function ProviderRegistration({ onSubmit, error, isSubmitting, submitted, resubmitting = false }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   return (
@@ -25,7 +25,7 @@ export default function ProviderRegistration({ onSubmit, error, isSubmitting, su
       <section className="registration-form-panel">
         <div className="registration-card">
           {submitted ? <div className="provider-registration-success" role="status"><Icon name="shield" /><p className="registration-eyebrow">Registration submitted</p><h2>Pending administrator verification</h2><p>Your registration has been submitted successfully! Your account is pending administrator verification. You will be notified once your account has been reviewed.</p><p>Check your account status by logging in. Review updates will appear in your provider notifications once access is approved.</p><Link className="registration-submit" to="/sponsor-login">Go to Provider Login<Icon name="chevron" /></Link></div> : <>
-            <p className="registration-eyebrow">Create account</p><h2>Register as Sponsorship Provider</h2><p className="registration-description">Create your organisation account to advertise scholarships on ScholarOne.</p>
+            <p className="registration-eyebrow">Create account</p><h2>{resubmitting ? "Correct and Resubmit Provider Registration" : "Register as Sponsorship Provider"}</h2>{resubmitting && <p>Use your registered email and current password. Update your organisation details; your account will return to pending administrator review.</p>}<p className="registration-description">Create your organisation account to advertise scholarships on ScholarOne.</p>
             <form className="registration-form" onSubmit={onSubmit}>
               <label><span><Icon name="home" />Organisation / Institution Name *</span><input name="organization_name" placeholder="Enter your organisation or institution name" autoComplete="organization" required maxLength={200} /></label>
               <div className="provider-registration-grid">
@@ -37,11 +37,11 @@ export default function ProviderRegistration({ onSubmit, error, isSubmitting, su
                 <label><span><Icon name="layers" />Organisation Type *</span><select name="organization_type" required defaultValue=""><option value="" disabled>Select organisation type</option>{['Government Agency', 'Foundation', 'Private Company', 'NGO', 'Educational Institution'].map(type => <option key={type}>{type}</option>)}</select></label>
                 <label><span><Icon name="home" />Official Website (Optional)</span><input name="website" type="url" pattern="https?://.+" placeholder="https://www.organisation.com" autoComplete="url" maxLength={500} /></label>
               </div>
-              <label><span><Icon name="lock" />Password *</span><span className="registration-password"><input name="password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="Create a password" minLength={8} required /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}><Icon name="eye" /></button></span></label>
+              <label><span><Icon name="lock" />{resubmitting ? "Current Password *" : "Password *"}</span><span className="registration-password"><input name="password" type={showPassword ? 'text' : 'password'} autoComplete={resubmitting ? "current-password" : "new-password"} placeholder={resubmitting ? "Enter your current password" : "Create a password"} minLength={8} required /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}><Icon name="eye" /></button></span></label>
               <label><span><Icon name="lock" />Confirm Password *</span><span className="registration-password"><input name="confirm_password" type={showConfirmation ? 'text' : 'password'} autoComplete="new-password" placeholder="Confirm your password" required /><button type="button" aria-label={showConfirmation ? 'Hide confirmed password' : 'Show confirmed password'} aria-pressed={showConfirmation} onClick={() => setShowConfirmation(!showConfirmation)}><Icon name="eye" /></button></span></label>
               <p className="provider-verification-notice"><Icon name="shield" />Provider accounts require administrator approval before they can publish scholarships. Use at least 8 characters for your password.</p>
               {error && <p className="auth-error" role="alert">{error}</p>}
-              <button className="registration-submit" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Submitting registration...' : 'Create Provider Account'}<Icon name="chevron" /></button>
+              <button className="registration-submit" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Submitting registration...' : resubmitting ? 'Resubmit for Review' : 'Create Provider Account'}<Icon name="chevron" /></button>
             </form><p className="registration-login">Already have an account? <Link to="/sponsor-login">Log In</Link></p>
           </>}
         </div>

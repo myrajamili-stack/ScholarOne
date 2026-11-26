@@ -43,17 +43,19 @@ class ScholarshipFilterTests(unittest.TestCase):
         cursor = connection.cursor.return_value
         cursor.fetchone.side_effect = [
             {'user_id': 1, 'organization_name': 'Provider'}, None, {'total': 0},
-            {'scholarship_id': 99, 'study_level': 'Diploma', 'eligible_state': 'Johor'},
+            {'scholarship_id': 99, 'title': 'Award', 'study_level': 'Diploma', 'eligible_state': 'Johor'},
         ]
         connect.return_value = connection
         response = create_app().test_client().post('/api/sponsors/1/scholarships', headers={'Authorization':'Bearer '+issue_access_token({'user_id':1,'role':'sponsor'})}, json={
             'title': 'Award', 'description': 'Description', 'amount': 1,
             'category': 'General', 'eligibility_criteria': 'Eligibility', 'deadline': '2027-01-01',
             'funding_type': 'Scholarship', 'study_level': 'Diploma', 'eligible_state': 'Johor',
+            'source_url': 'https://example.com/programme',
         })
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(cursor.execute.call_args.args[1][-2:], ('Diploma', 'Johor'))
-        self.assertIn('study_level', cursor.execute.call_args.args[0])
+        insert = next(call for call in cursor.execute.call_args_list if 'insert into scholarship' in call.args[0])
+        self.assertEqual(insert.args[1][-3:-1], ('Diploma', 'Johor'))
+        self.assertIn('study_level', insert.args[0])
         connection.commit.assert_called_once()
 
 

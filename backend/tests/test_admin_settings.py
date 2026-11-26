@@ -8,6 +8,8 @@ from security import issue_access_token
 
 class AdminSettingsTests(unittest.TestCase):
     def setUp(self):
+        # Business-logic tests assume an active account; restriction tests cover the real lookup.
+        self.enterContext(patch("security.verify_active_account", return_value=None))
         self.client = create_app().test_client()
         self.headers = {'Authorization': 'Bearer ' + issue_access_token({'user_id': 12, 'role': 'admin'})}
         self.general = {'section':'general','platform_name':'ScholarOne','platform_tagline':'Your future',
@@ -32,15 +34,18 @@ class AdminSettingsTests(unittest.TestCase):
         self.assertEqual(result.status_code,200)
         self.assertEqual(result.get_json()['general']['platform_name'],'ScholarOne')
         connect.return_value.commit.assert_called_once()
-        self.assertIn('on conflict',connect.return_value.cursor.return_value.execute.call_args.args[0])
+        settings, audit = connect.return_value.cursor.return_value.execute.call_args_list[-2:]
+        self.assertIn('on conflict', settings.args[0])
+        self.assertEqual(audit.args[1], (12, 'update_admin_settings', 'Updated general settings'))
 
     @patch('routes.admin_settings.get_db_connection')
     def test_account_update_uses_token_identity_not_request_identity(self, connect):
         connect.return_value.cursor.return_value.fetchone.return_value = {'user_id':12,'full_name':'Admin','email':'admin@example.com','role':'admin'}
         result=self.client.patch('/api/admin/settings',json={'section':'account','user_id':999,'full_name':'Admin','phone_number':'0123456789'},headers=self.headers)
         self.assertEqual(result.status_code,200)
-        args=connect.return_value.cursor.return_value.execute.call_args.args[1]
-        self.assertEqual(args[2],12)
+        settings, audit = connect.return_value.cursor.return_value.execute.call_args_list
+        self.assertEqual(settings.args[1][2], 12)
+        self.assertEqual(audit.args[1][0], 12)
 
     @patch('routes.admin_settings.get_db_connection')
     def test_load_combines_defaults_with_saved_configuration(self, connect):
@@ -50,6 +55,8 @@ class AdminSettingsTests(unittest.TestCase):
         self.assertEqual(result.status_code,200)
         self.assertEqual(result.get_json()['general']['platform_name'],'Saved Name')
         self.assertFalse(result.get_json()['notification_preferences_available'])
+        self.assertEqual(cursor.execute.call_count, 2)
+        self.assertIn('select configuration_value', cursor.execute.call_args_list[0].args[0])
 
     @patch('routes.admin_settings.get_db_connection')
     def test_failed_save_rolls_back(self, connect):

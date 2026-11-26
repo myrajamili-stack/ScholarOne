@@ -110,7 +110,6 @@ export default function SubscriptionBilling() {
     <header className="billing-heading"><div><h2>Subscription &amp; Payments</h2><p>Monthly billing, payment methods, invoices, and automatic renewal.</p></div><span className="billing-test-badge">Stripe test mode</span></header>
     {error && <p className="sponsor-form-error" role="alert">{error}</p>}
     {notice && <p role="status">{notice}</p>}
-    {data && !data.enabled && <p role="status">Stripe test payments are awaiting backend configuration.</p>}
     <dl className="billing-summary">
       <div><dt>Subscription</dt><dd>{subscription?.plan_name || "Free"}</dd></div>
       <div><dt>Status</dt><dd>{subscription?.stripe_status.replaceAll("_", " ") || "Free plan"}</dd></div>
@@ -121,7 +120,6 @@ export default function SubscriptionBilling() {
     {(subscription?.stripe_status === "past_due" || (subscription?.stripe_status === "active" && subscription.payment_status !== "paid")) && <p role="alert">Your payment needs attention. Update your payment method in Manage Billing to restore your paid listing allowance.</p>}
     {subscription?.cancel_at_period_end && <p>Your subscription is scheduled to end at the displayed date. You can resume automatic renewal in Manage Billing.</p>}
     <div className="billing-actions"><button type="button" className="sponsor-primary-button" disabled={busy || !data?.enabled || !data.portal_available} onClick={openPortal}>Manage Billing</button><button type="button" className="billing-secondary" disabled={busy} onClick={refresh}>{busy ? "Please wait…" : "Refresh Billing"}</button></div>
-    <p className="billing-help">Manage Billing opens Stripe’s portal to change plans, update payment methods, download invoices, or cancel renewal. Plan changes may include prorated charges.</p>
     <h3>Payment History</h3><PaymentHistory payments={data?.payments || []} />
   </section>;
 }

@@ -4,6 +4,9 @@ import api from "../../api/axios";
 import { getApiErrorMessage } from "../../utils/apiError";
 import "../../styles/admin-users.css";
 import "../../styles/admin-pathways.css";
+import AdminPathwayEditor from "../../components/admin/AdminPathwayEditor";
+import PathwayProgression from "../../components/PathwayProgression";
+import type { AcademicPathway } from "../../types/pathways";
 
 type PathwayRecord = Record<string, unknown>;
 type Quiz = { quiz_id: number; title: string; description: string | null; status: string; created_at: string | null; advisor_name: string | null; question_count: number; attempt_count: number; pathway_results: string[] };
@@ -27,6 +30,9 @@ export default function AdminPathwaysPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [details, setDetails] = useState<Pathway | Quiz | null>(null);
+  const [editorId, setEditorId] = useState<number | null | undefined>(undefined);
+  const [revision, setRevision] = useState(0);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     let active = true;
@@ -40,7 +46,14 @@ export default function AdminPathwaysPage() {
     }
     void load();
     return () => { active = false; };
-  }, []);
+  }, [revision]);
+  async function deletePathway(item: Pathway) {
+    if (deletingId || !window.confirm(`Permanently delete ${item.name}? Linked pathways cannot be deleted; use Draft to hide them.`)) return;
+    setDeletingId(item.id); setError("");
+    try { await api.delete(`/admin/pathways/${item.id}`, { data: { confirm_pathway_id: Number(item.id) } }); setRevision(value => value + 1); }
+    catch (err) { setError(getApiErrorMessage(err, "Unable to delete pathway.")); }
+    finally { setDeletingId(null); }
+  }
   const pathways = useMemo(() => records.pathways.map((record, index): Pathway => {
     const name = field(record, ["pathway_name", "name", "title", "pathway_title"], `Pathway ${index + 1}`);
     return { id: field(record, ["pathway_id", "id"], String(index)), name, description: field(record, ["description", "pathway_description"]), status: normalize(field(record, ["status"], "active")), updated: field(record, ["updated_at", "last_updated", "created_at"]) || null,
@@ -64,7 +77,10 @@ export default function AdminPathwaysPage() {
   function openDetails(item: Pathway | Quiz) { setDetails(item); dialog.current?.showModal(); }
   const selectedPathway = details && "name" in details ? details : null;
   const selectedQuiz = details && "quiz_id" in details ? details : null;
+  const selectedProgression = selectedPathway ? records.pathways.find(record => String(record.pathway_id) === selectedPathway.id) as AcademicPathway | undefined : undefined;
   return <div className="admin-page aum-page apw-page">
+    <button className="aum-primary" type="button" onClick={() => setEditorId(null)}>Create Academic Pathway</button>
+    {editorId !== undefined && <AdminPathwayEditor pathwayId={editorId} onClose={() => setEditorId(undefined)} onSaved={() => { setEditorId(undefined); setError(""); setRevision(value => value + 1); }} />}
     {error && <p className="admin-alert" role="alert">{error}</p>}
     <section className="adh-metrics" aria-label="Academic pathway summary">{([
       { title: "Total Pathways", value: pathways.length, note: "Pathway options on platform", icon: "layers", color: "purple" },
@@ -78,7 +94,7 @@ export default function AdminPathwaysPage() {
     <div className="apw-columns">
       <section className="adh-panel apw-directory"><header className="apw-directory-heading"><div><h2>{tab === "pathways" ? "Academic Pathway Directory" : tab === "pending" ? "Quizzes Pending Review" : "Advisor Quiz Directory"}</h2><p>{tab === "pathways" ? "Academic pathway options and quizzes linked through their answer outcomes." : "Monitor advisor-created quiz content and publication status."}</p></div><label className="aum-search"><Icon name="search" /><input type="search" aria-label="Search pathway directory" placeholder={tab === "pathways" ? "Search pathway name..." : "Search quiz or advisor..."} value={search} onChange={event => { setSearch(event.target.value); setPage(1); }} /></label></header>
         <div className="aum-table-panel"><div className="aum-table-scroll"><table className="aum-table apw-table"><thead><tr>{tab === "pathways" ? <><th>Pathway Name</th><th>Related Quizzes</th><th>Status</th><th>Last Updated</th></> : <><th>Quiz / Advisor</th><th>Questions</th><th>Status</th><th>Created On</th></>}<th>Action</th></tr></thead><tbody>
-          {tab === "pathways" ? filteredPathways.slice(start, start + 4).map(item => <tr key={item.id}><td><strong>{item.name}</strong></td><td>{item.quizzes.length}</td><td><span className={`admin-status-badge ${item.status}`}><i />{label(item.status)}</span></td><td className="aum-date">{dateLabel(item.updated)}</td><td><button className="aum-outline apw-details" type="button" aria-label={`View pathway ${item.name}`} onClick={() => openDetails(item)}>View Details</button></td></tr>) : filteredQuizzes.slice(start, start + 4).map(item => <tr key={item.quiz_id}><td><strong>{item.title || "Untitled Quiz"}</strong><small>By {item.advisor_name || "Academic Advisor"}</small></td><td>{item.question_count}</td><td><span className={`admin-status-badge ${normalize(item.status)}`}><i />{label(item.status)}</span></td><td className="aum-date">{dateLabel(item.created_at)}</td><td><button className="aum-outline apw-details" type="button" aria-label={`View quiz ${item.title}`} onClick={() => openDetails(item)}>View Details</button></td></tr>)}
+          {tab === "pathways" ? filteredPathways.slice(start, start + 4).map(item => <tr key={item.id}><td><strong>{item.name}</strong></td><td>{item.quizzes.length}</td><td><span className={`admin-status-badge ${item.status}`}><i />{label(item.status)}</span></td><td className="aum-date">{dateLabel(item.updated)}</td><td><button className="aum-outline apw-details" type="button" aria-label={`View pathway ${item.name}`} onClick={() => openDetails(item)}>View Details</button> <button type="button" className="aum-outline" onClick={() => setEditorId(Number(item.id))}>Edit</button> <button type="button" className="aum-outline" disabled={deletingId !== null} onClick={() => void deletePathway(item)}>{deletingId === item.id ? "Deleting?" : "Delete"}</button></td></tr>) : filteredQuizzes.slice(start, start + 4).map(item => <tr key={item.quiz_id}><td><strong>{item.title || "Untitled Quiz"}</strong><small>By {item.advisor_name || "Academic Advisor"}</small></td><td>{item.question_count}</td><td><span className={`admin-status-badge ${normalize(item.status)}`}><i />{label(item.status)}</span></td><td className="aum-date">{dateLabel(item.created_at)}</td><td><button className="aum-outline apw-details" type="button" aria-label={`View quiz ${item.title}`} onClick={() => openDetails(item)}>View Details</button></td></tr>)}
           {(loading || !total) && <tr><td colSpan={5} className="aum-empty">{loading ? "Loading academic records…" : error ? "Academic records could not be loaded." : query ? "No records match your search." : tab === "pending" ? "No quizzes are currently awaiting review." : tab === "pathways" ? "No academic pathways have been added yet." : "No advisor quizzes have been created yet."}</td></tr>}
         </tbody></table></div><footer className="aum-table-footer"><span>Showing {total ? start + 1 : 0}–{Math.min(start + 4, total)} of {total} {tab === "pathways" ? "pathways" : "quizzes"}</span><nav aria-label="Academic pathway pagination"><button type="button" aria-label="Previous page" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>‹</button>{Array.from({ length: pageCount }, (_, i) => i + 1).filter(n => n === 1 || n === pageCount || Math.abs(n - currentPage) <= 1).map((n, i, numbers) => <span key={n}>{i > 0 && n - numbers[i - 1] > 1 && <span className="aum-page-gap">…</span>}<button type="button" aria-label={`Page ${n}`} aria-current={currentPage === n ? "page" : undefined} onClick={() => setPage(n)}>{n}</button></span>)}<button type="button" aria-label="Next page" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>›</button></nav></footer></div>
       </section>
@@ -87,7 +103,7 @@ export default function AdminPathwaysPage() {
       </aside>
     </div>
     <dialog className="aum-dialog apw-dialog" ref={dialog} aria-labelledby="apw-dialog-title"><header><h2 id="apw-dialog-title">{selectedPathway ? "Pathway Details" : "Quiz Details"}</h2><button type="button" aria-label="Close academic details" onClick={() => dialog.current?.close()}><Icon name="close" /></button></header>
-      {selectedPathway && <div><h3>{selectedPathway.name}</h3><p className="apw-copy">{selectedPathway.description || "No description recorded."}</p><dl><div><dt>Status</dt><dd>{label(selectedPathway.status)}</dd></div><div><dt>Last Updated</dt><dd>{dateLabel(selectedPathway.updated)}</dd></div></dl><h4>Related Quizzes ({selectedPathway.quizzes.length})</h4><p className="apw-detail-note">Linked by matching this pathway name to quiz answer outcomes.</p>{selectedPathway.quizzes.length ? selectedPathway.quizzes.map(quiz => <button type="button" className="apw-related" key={quiz.quiz_id} onClick={() => setDetails(quiz)}>{quiz.title} <span>{label(quiz.status)} →</span></button>) : <p>No quizzes currently reference this pathway.</p>}</div>}
+      {selectedPathway && <div><h3>{selectedPathway.name}</h3>{selectedProgression ? <PathwayProgression pathway={selectedProgression} /> : <p className="apw-copy">{selectedPathway.description || "No description recorded."}</p>}<dl><div><dt>Status</dt><dd>{label(selectedPathway.status)}</dd></div><div><dt>Last Updated</dt><dd>{dateLabel(selectedPathway.updated)}</dd></div></dl><h4>Related Quizzes ({selectedPathway.quizzes.length})</h4><p className="apw-detail-note">Linked by matching this pathway name to quiz answer outcomes.</p>{selectedPathway.quizzes.length ? selectedPathway.quizzes.map(quiz => <button type="button" className="apw-related" key={quiz.quiz_id} onClick={() => setDetails(quiz)}>{quiz.title} <span>{label(quiz.status)} →</span></button>) : <p>No quizzes currently reference this pathway.</p>}</div>}
       {selectedQuiz && <div><h3>{selectedQuiz.title}</h3><p className="apw-copy">{selectedQuiz.description || "No description recorded."}</p><dl><div><dt>Advisor</dt><dd>{selectedQuiz.advisor_name || "Not recorded"}</dd></div><div><dt>Status</dt><dd>{label(selectedQuiz.status)}</dd></div><div><dt>Questions</dt><dd>{selectedQuiz.question_count}</dd></div><div><dt>Student Attempts</dt><dd>{selectedQuiz.attempt_count}</dd></div><div><dt>Created On</dt><dd>{dateLabel(selectedQuiz.created_at)}</dd></div></dl><h4>Pathway Outcomes</h4>{selectedQuiz.pathway_results.length ? <ul>{selectedQuiz.pathway_results.map(result => <li key={result}>{result}</li>)}</ul> : <p>No pathway outcomes recorded.</p>}<p className="apw-detail-note">Quiz content and publication are managed by the academic advisor.</p></div>}
     </dialog>
   </div>;

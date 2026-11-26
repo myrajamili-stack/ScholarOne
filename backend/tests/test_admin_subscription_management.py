@@ -10,6 +10,8 @@ from security import issue_access_token
 
 class AdminSubscriptionManagementTests(unittest.TestCase):
     def setUp(self):
+        # Business-logic tests assume an active account; restriction tests cover the real lookup.
+        self.enterContext(patch("security.verify_active_account", return_value=None))
         self.client = create_app().test_client()
         self.headers = {'Authorization': 'Bearer ' + issue_access_token({'user_id': 1, 'role': 'admin'})}
         self.payload = {'price': '49.50', 'scholarship_limit': 10, 'duration_month': 1,
@@ -38,7 +40,7 @@ class AdminSubscriptionManagementTests(unittest.TestCase):
         cursor.fetchone.side_effect = [{'plan_id': 1}, {'plan_id': 1, 'plan_name': 'Growth', **self.payload}]
         result = self.client.patch('/api/admin/subscription-plans/1', json=self.payload, headers=self.headers)
         self.assertEqual(result.status_code, 200)
-        saved_values = cursor.execute.call_args.args[1]
+        saved_values = next(call.args[1] for call in cursor.execute.call_args_list if "UPDATE subscription_plan SET" in call.args[0])
         self.assertEqual(saved_values[3], '["Application management"]')
         connect.return_value.commit.assert_called_once()
         connect.return_value.close.assert_called_once()

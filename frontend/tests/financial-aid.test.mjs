@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { financialAidTypes, getFinancialAidType, matchesFinancialAid } from '../src/utils/financialAid.ts'
+import { financialAidTypes, eligibilityStates, studyLevels, getFinancialAidType, matchesFinancialAid } from '../src/utils/financialAid.ts'
 
 test('all five aid types match their English and Malay funding labels', () => {
   for (const type of financialAidTypes) {
@@ -61,4 +61,20 @@ test('PDF listings preserve multiple eligible levels and federal territories', (
   assert.equal(matchesFinancialAid(listing, 'all', '', 'PhD', 'Kuala Lumpur'), true)
   assert.equal(matchesFinancialAid(listing, 'all', '', 'Diploma', 'Kuala Lumpur'), false)
   assert.equal(matchesFinancialAid(listing, 'all', '', 'PhD', 'Johor'), false)
+})
+
+test('every aid type, study level, and state works together without admitting mismatches', () => {
+  for (const type of financialAidTypes) {
+    for (const level of studyLevels) {
+      for (const state of eligibilityStates) {
+        const listing = { title: 'Test Award', funding_type: type.value, study_levels: [level], eligible_states: [state] }
+        assert.equal(matchesFinancialAid(listing, type.id, ' TEST ', level, state), true)
+        const differentState = eligibilityStates.find(value => value !== state)
+        const differentLevel = studyLevels.find(value => value !== level)
+        assert.equal(matchesFinancialAid(listing, type.id, '', level, differentState), false)
+        assert.equal(matchesFinancialAid(listing, type.id, '', differentLevel, state), false)
+        assert.equal(matchesFinancialAid(listing, 'all', '', 'all', 'all'), true)
+      }
+    }
+  }
 })

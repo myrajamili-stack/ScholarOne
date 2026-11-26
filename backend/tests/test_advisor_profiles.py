@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch
 from flask import Flask
 from routes.advisor_profiles import profiles_bp, validate_profile
+from security import issue_access_token
 VALID = dict(full_name='Dr. Emily', email='emily@example.com', phone_number='+60 12-345 6789', institution='Example University', professional_title='Academic Advisor', bio='I help students plan their academic pathway.', specialization='Scholarships', qualification='PhD in Education', experience_years=8, profile_picture='https://example.com/photo.jpg')
 class ProfileValidationTests(unittest.TestCase):
     def test_normalization(self):
@@ -24,3 +25,45 @@ class ProfileValidationTests(unittest.TestCase):
         with patch('routes.advisor_profiles.get_db_connection') as db:
             self.assertEqual(app.test_client().put('/api/advisors/1/profile',json=VALID).status_code,401)
             db.assert_not_called()
+
+
+class AdvisorProfileUpdateTests(unittest.TestCase):
+    def setUp(self):
+        self.enterContext(patch('security.verify_active_account', return_value=None))
+        self.connect = self.enterContext(patch('routes.advisor_profiles.get_db_connection'))
+        self.read = self.enterContext(patch('routes.advisor_profiles.read_profile', return_value={'advisor_id': 7, **VALID}))
+        self.cursor = self.connect.return_value.cursor.return_value.__enter__.return_value
+        self.cursor.fetchone.return_value = None
+        app = Flask(__name__)
+        app.register_blueprint(profiles_bp)
+        self.client = app.test_client()
+        self.headers = {'Authorization': 'Bearer ' + issue_access_token({'user_id': 7, 'role': 'advisor'})}
+
+    def update(self, payload):
+        return self.client.put('/api/advisors/7/profile', json=payload, headers=self.headers)
+
+    def test_valid_update_writes_both_profiles_and_reloads(self):
+        response = self.update(VALID)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.read.call_count, 2)
+        self.assertEqual(self.cursor.execute.call_count, 3)
+        self.assertIn('UPDATE app_user', self.cursor.execute.call_args_list[1].args[0])
+        self.assertIn('INSERT INTO advisor', self.cursor.execute.call_args_list[2].args[0])
+
+    def test_invalid_update_does_not_write(self):
+        response = self.update({**VALID, 'full_name': 'Emily123'})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('full_name', response.json['fields'])
+        self.cursor.execute.assert_not_called()
+
+    def test_duplicate_email_does_not_write(self):
+        self.cursor.fetchone.return_value = {'user_id': 12}
+        self.assertEqual(self.update(VALID).status_code, 409)
+        self.assertEqual(self.cursor.execute.call_count, 1)
+
+    def test_failed_write_exits_transaction_with_error(self):
+        self.cursor.execute.side_effect = [None, RuntimeError('private connection details')]
+        response = self.update(VALID)
+        self.assertEqual(response.status_code, 503)
+        self.assertNotIn('private connection details', response.get_data(as_text=True))
+        self.assertIs(self.connect.return_value.__exit__.call_args.args[0], RuntimeError)

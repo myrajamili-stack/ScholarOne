@@ -86,7 +86,7 @@ def create_checkout(sponsor_id):
                 subscriptions = client.v1.subscriptions.list({'customer': customer_id, 'status': 'all', 'limit': 100})
                 if any(sub['status'] not in ('canceled', 'incomplete_expired') for sub in subscriptions.data):
                     return error_response('You already have a Stripe subscription. Use Manage Billing to change your plan or payment method.', 409)
-                cursor.execute('SELECT * FROM subscription_plan WHERE plan_id=%s FOR UPDATE', (data['plan_id'],))
+                cursor.execute('SELECT * FROM subscription_plan WHERE plan_id=%s AND is_active=true FOR UPDATE', (data['plan_id'],))
                 plan = cursor.fetchone()
                 if not plan:
                     return error_response('Subscription plan not found.', 404)
@@ -132,7 +132,7 @@ def create_portal(sponsor_id):
                 sponsor = cursor.fetchone()
                 if not sponsor or not sponsor['stripe_customer_id']:
                     return error_response('Complete your first checkout to manage billing.', 400)
-                cursor.execute('SELECT * FROM subscription_plan WHERE price>0 AND duration_month=1 ORDER BY plan_id FOR UPDATE')
+                cursor.execute('SELECT * FROM subscription_plan WHERE price>0 AND duration_month=1 AND is_active=true ORDER BY plan_id FOR UPDATE')
                 products = []
                 for plan in cursor.fetchall():
                     product, price = sync_plan_price(cursor, client, plan)

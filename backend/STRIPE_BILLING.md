@@ -49,6 +49,8 @@ Plan prices are read from ScholarOne's existing `subscription_plan` table. Paid 
 
 Listing quotas activate only when canonical Stripe subscription status is active and its latest invoice is paid. Failed/incomplete/cancelled subscriptions use the free allowance. Database updates and invoice upserts are transactional, serialized per provider, and safe for duplicate or reordered deliveries. Billing periods end at the exact UTC timestamp. Historical manually activated subscriptions are preserved, and their matching plan can be purchased through Checkout to begin recurring billing.
 
+The opt-in integration tests use a fresh fixture schema on local PostgreSQL and simulate Stripe API responses. From `backend`, set `SCHOLARONE_TEST_POSTGRES_DSN` to a disposable PostgreSQL target on `127.0.0.1`, with permission to create and remove a test schema, and run `python -m unittest discover -s tests -p test_provider_admin_postgres.py`.
+
 Secret keys, full card numbers, and CVCs are excluded from frontend code and database records. Card details remain with Stripe. The application stores customer/subscription references and invoice/payment metadata.
 
 Official references are [Checkout subscriptions](https://docs.stripe.com/payments/checkout/build-subscriptions), [webhooks](https://docs.stripe.com/webhooks), [Customer Portal](https://docs.stripe.com/customer-management), and [test cards](https://docs.stripe.com/testing).

@@ -25,7 +25,7 @@ def messaging_endpoint(function):
                 with connection.cursor() as cursor:
                     user = g.messaging_user
                     cursor.execute("""SELECT user_id FROM app_user WHERE user_id = %s AND role = %s
-                        AND coalesce(status, 'active') = 'active'""", (user['user_id'], user['role']))
+                        AND lower(status) = 'active'""", (user['user_id'], user['role']))
                     if not cursor.fetchone():
                         return error_response('Your account is unavailable. Please sign in again.', 403)
                     g.messaging_cursor = cursor
@@ -63,6 +63,8 @@ def conversation_for_user(conversation_id):
         JOIN app_user other ON other.user_id = theirs.user_id AND other.role = %s
         LEFT JOIN advisor a ON a.advisor_id = other.user_id
         LEFT JOIN student s ON s.student_id = other.user_id
+            AND EXISTS (SELECT 1 FROM appointment ap
+                        WHERE ap.student_id = s.student_id AND ap.advisor_id = mine.user_id)
         WHERE c.conversation_id = %s
           AND (SELECT count(*) FROM conversation_participant WHERE conversation_id = c.conversation_id) = 2""",
         (g.messaging_user['user_id'], g.messaging_user['user_id'], opposite_role(), conversation_id))

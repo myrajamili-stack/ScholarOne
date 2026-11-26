@@ -24,6 +24,8 @@
 .student-scholarships .scholarship-card { display: flex; flex-direction: column; gap: 0; padding: 17px; min-width: 0; min-height: 365px; border: 1px solid #ece2fc; border-radius: 24px; background: #ffffffd6; box-shadow: 0 5px 12px #6e3bb51a; cursor: default; }
 .student-scholarships .card-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 19px; }
 .student-scholarships .listing-status { margin: 0; padding: 6px 10px; border-radius: 18px; background: #efe4ff; color: #6c23db; font-size: 10px; line-height: 1.4; font-weight: 750; text-decoration: none; }
+.listing-status.is-closed,
+.student-scholarships .listing-status.is-closed { background: #ffe4e8; color: #a51c38; border: 1px solid #f4b6c2; font-weight: 800; }
 .student-scholarships .scholarship-card-actions { gap: 6px; }
 .student-scholarships .scholarship-save-button, .student-scholarships .scholarship-reminder-button { display: grid; place-items: center; flex-shrink: 0; width: 30px; height: 30px; padding: 5px; border: 0; border-radius: 50%; background: #f5eaff; color: #7c3be4; }
 .student-scholarships .scholarship-save-button { background: #ffedf3; color: #d94d7e; font-size: 22px; }
@@ -56,6 +58,36 @@
 .student-scholarships .scholarship-save-button svg { display: block; width: 19px; height: 19px; flex-shrink: 0; }
 .student-scholarships .scholarship-save-button.is-saved svg { fill: currentColor; }
 
+/* Scoped to the student details modal; cards and other account views are unchanged. */
+.student-scholarships .scholarship-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.student-scholarships .scholarship-detail-grid p,
+.student-scholarships .scholarship-source-note { white-space: pre-line; }
+.student-scholarships .scholarship-detail-section { border-color: #e8ddf8; background: #fdfbff; }
+.student-scholarships .scholarship-detail-section h3 { color: #442270; }
+.student-scholarships .scholarship-detail-subheading { color: #442270; font-size: 16px; margin: 22px 0 10px; }
+.student-scholarships .scholarship-detail-section > * + * { margin-top: 14px; }
+.student-scholarships .scholarship-detail-copy { white-space: pre-line; overflow-wrap: anywhere; }
+.student-scholarships .scholarship-detail-list { margin-bottom: 0; padding-left: 24px; color: var(--muted); font-size: 15px; line-height: 1.7; }
+.student-scholarships .scholarship-detail-list li + li { margin-top: 9px; }
+.student-scholarships .scholarship-detail-list li::marker { color: #7938d6; font-weight: 700; }
+.student-scholarships .scholarship-detail-section a { color: #642bc3; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.student-scholarships .scholarship-detail-table-wrap { max-width: 100%; overflow-x: auto; border: 1px solid #e3d6f5; border-radius: 12px; }
+.student-scholarships .scholarship-detail-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; line-height: 1.6; }
+.student-scholarships .scholarship-detail-table th, .student-scholarships .scholarship-detail-table td { padding: 12px 14px; vertical-align: top; border-bottom: 1px solid #e9e0f5; min-width: 130px; overflow-wrap: anywhere; }
+.student-scholarships .scholarship-detail-table thead th { color: #4b2480; background: #eee6fc; font-weight: 750; }
+.student-scholarships .scholarship-detail-table tbody th { color: #493365; font-weight: 650; background: #f8f4ff; }
+.student-scholarships .scholarship-detail-table td { color: var(--muted); }
+.student-scholarships .scholarship-detail-table tr:last-child > * { border-bottom: 0; }
+@media (max-width: 650px) {
+  .student-scholarships .scholarship-detail-backdrop { padding: 12px; }
+  .student-scholarships .scholarship-detail-modal { max-height: 90dvh; }
+  .student-scholarships .scholarship-detail-section { margin: 14px 16px 0; padding: 17px; }
+  .student-scholarships .scholarship-detail-grid { grid-template-columns: 1fr; padding: 18px 16px 0; }
+  .student-scholarships .scholarship-detail-header { padding: 28px 20px 20px; }
+  .student-scholarships .scholarship-detail-header h2 { padding-right: 30px; font-size: 25px; }
+  .student-scholarships .scholarship-detail-actions { flex-wrap: wrap; padding: 20px 16px; }
+}
+
 .sh-views { display: flex; flex-wrap: wrap; gap: 10px; }
 .sh-views button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 11px 17px; border: 1px solid #e0cef9; border-radius: 18px; background: #ffffffce; color: #6b36b7; font-size: 13px; font-weight: 750; cursor: pointer; }
 .sh-views button[aria-pressed="true"] { color: white; background: linear-gradient(110deg,#9751fb,#6722e7); border-color: transparent; box-shadow: 0 4px 9px #7532cc25; }
@@ -69,3 +101,12 @@
 .sh-empty p { margin: 0; font-size: 13px; line-height: 1.6; }
 .sh-empty .ss-button { border: 0; margin-top: 7px; }
 @media(max-width:650px) { .sh-views { display: grid; grid-template-columns: 1fr; } }
+.eligibility-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 14px; margin-bottom: 18px; }
+.eligibility-check fieldset { border: 0; padding: 0; min-width: 0; }
+.eligibility-inputs label { display: grid; gap: 7px; font-size: 14px; font-weight: 700; }
+.eligibility-inputs input, .eligibility-inputs select { min-width: 0; width: 100%; padding: 11px; border: 1px solid #ded1f7; border-radius: 10px; background: white; color: #27334e; }
+.eligibility-results { list-style: none; padding: 0; display: grid; gap: 12px; }
+.eligibility-results li { padding: 15px; border-radius: 12px; border-left: 4px solid #8c73ba; background: #f4f0fc; }
+.eligibility-results li.matched { border-color: #238057; background: #ecf8f1; }
+.eligibility-results li.mismatch { border-color: #bc4058; background: #fff0f3; }
+.eligibility-results p { margin: 7px 0 0; white-space: pre-line; }

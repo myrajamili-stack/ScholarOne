@@ -1,5 +1,5 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import Icon from "../advisor/AdvisorIcon";
+import AccountNotifications from "../AccountNotifications";
+import { useLocation, useNavigate } from "react-router-dom";
 import { clearStoredUser, useStoredUser } from "../../utils/authStorage";
 import { getInitials } from "../../utils/userDisplay";
 
@@ -30,7 +30,8 @@ function AdminTopbar() {
       </div>
 
       <div className="admin-top-actions">
-        <Link className="admin-icon-button" to="/admin/dashboard#admin-pending" aria-label="View pending approvals"><Icon name="bell" /></Link>
+        <AccountNotifications />
+
         <div className="admin-avatar">{getInitials(displayName)}</div>
         <div className="admin-top-user">
           <strong>{displayName}</strong>

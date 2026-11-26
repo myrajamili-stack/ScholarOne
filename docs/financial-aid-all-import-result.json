@@ -1,0 +1,554 @@
+{
+  "source_document": "SCHOLARONE DATA - ALL .pdf",
+  "source_entries": 124,
+  "reviewed_unique_listings": 116,
+  "previous_count": 53,
+  "inserted": [
+    {
+      "title": "Perak State Higher Education Loan (Pinjaman Pengajian Tinggi Negeri Perak)",
+      "scholarship_id": 57
+    },
+    {
+      "title": "Kedah State Education Financing – SPPNK (iPINJAM)",
+      "scholarship_id": 58
+    },
+    {
+      "title": "Yayasan Islam Negeri Kedah (YINK) – Education Loan",
+      "scholarship_id": 59
+    },
+    {
+      "title": "Penang State Student Loan (Pinjaman Penuntut Negeri Pulau Pinang – ePPN)",
+      "scholarship_id": 60
+    },
+    {
+      "title": "Perlis State Education Loan (Pinjaman Pelajaran Negeri Perlis)",
+      "scholarship_id": 61
+    },
+    {
+      "title": "Perlis Education Loan Advance (Pendahuluan Pinjaman Pelajaran)",
+      "scholarship_id": 62
+    },
+    {
+      "title": "Yayasan Kelantan Darulnaim (YAKIN) – Education Loan (Pinjaman Pelajaran)",
+      "scholarship_id": 63
+    },
+    {
+      "title": "Yayasan Terengganu – Overseas First Degree Tuition Fee Loan",
+      "scholarship_id": 64
+    },
+    {
+      "title": "Yayasan Terengganu – Domestic IPTA Top-Up Education Loan",
+      "scholarship_id": 65
+    },
+    {
+      "title": "Yayasan Terengganu – Domestic IPTS One-Off / Top-Up Education Loan",
+      "scholarship_id": 66
+    },
+    {
+      "title": "Yayasan Terengganu – Skills Training Education Loan (Pinjaman Latihan Kemahiran)",
+      "scholarship_id": 67
+    },
+    {
+      "title": "Yayasan Sabah – Higher Education Loan (Pinjaman Pengajian Tinggi Yayasan Sabah)",
+      "scholarship_id": 68
+    },
+    {
+      "title": "Yayasan Sarawak – Domestic Education Loan (Skim Biasiswa Pinjaman Pelajaran Dalam Negara)",
+      "scholarship_id": 69
+    },
+    {
+      "title": "Sarawak State Government Education Loan (Biasiswa Pinjaman Kerajaan Negeri Sarawak – BPKNS)",
+      "scholarship_id": 70
+    },
+    {
+      "title": "Financial Assistance for Community College Students (BKPKK)",
+      "scholarship_id": 71
+    },
+    {
+      "title": "Foundation Financial Assistance for Public Universities (BKA UA)",
+      "scholarship_id": 72
+    },
+    {
+      "title": "Foundation Financial Assistance for TVET Students (BKA TVET)",
+      "scholarship_id": 73
+    },
+    {
+      "title": "Living Allowance Assistance for Negeri Sembilan Students (Bantuan Sara Hidup Mahasiswa Anak Negeri Sembilan)",
+      "scholarship_id": 74
+    },
+    {
+      "title": "Monthly Living Allowance Assistance for IPT Students (Bantuan Sara Anak IPT)",
+      "scholarship_id": 75
+    },
+    {
+      "title": "Monthly Financial Assistance Scheme (Skim Bantuan Kewangan Bulanan)",
+      "scholarship_id": 76
+    },
+    {
+      "title": "Student Monthly Living Allowance Assistance (Bantuan Wang Saku Zakat Selangor)",
+      "scholarship_id": 77
+    },
+    {
+      "title": "Monthly Living Allowance for Asnaf Higher Education Students (Bantuan Sara Hidup Bulanan Pelajar IPT)",
+      "scholarship_id": 78
+    },
+    {
+      "title": "MAIPk – Bantuan Persediaan Pengajian Tinggi",
+      "scholarship_id": 79
+    },
+    {
+      "title": "Higher Education Financial Assistance Scheme (Skim Dermasiswa Pengajian Zakat MAINPP)",
+      "scholarship_id": 80
+    },
+    {
+      "title": "Sultan Ismail Petra Education Financial Assistance (Dermasiswa Sultan Ismail Petra – DSIP MAIK)",
+      "scholarship_id": 81
+    },
+    {
+      "title": "Financial Assistance for Persons with Disabilities (BKOKU)",
+      "scholarship_id": 82
+    },
+    {
+      "title": "Free Education Initiative – PTPTN eKasih Children Scholarship (BAeK PTPTN)",
+      "scholarship_id": 83
+    },
+    {
+      "title": "JAKOA Higher Education Financial Assistance (Bantuan Kewangan Pendidikan IPT)",
+      "scholarship_id": 84
+    },
+    {
+      "title": "Higher Education Admission Assistance (Skim Bantuan Kemasukan ke Institusi Pengajian Tinggi – IPT)",
+      "scholarship_id": 85
+    },
+    {
+      "title": "MAINJ – IPT Registration Assistance 2026",
+      "scholarship_id": 86
+    },
+    {
+      "title": "Bantuan Pendaftaran ke IPT untuk Anak Asnaf MAIM 2026",
+      "scholarship_id": 87
+    },
+    {
+      "title": "Skim Bantuan Am Pelajaran IPT",
+      "scholarship_id": 88
+    },
+    {
+      "title": "Bantuan Kecemasan (Emergency Assistance)",
+      "scholarship_id": 89
+    },
+    {
+      "title": "Bantuan Perubatan Am (General Medical Assistance)",
+      "scholarship_id": 90
+    },
+    {
+      "title": "Bantuan Dermasiswa Pengajian Tinggi (BDPT) 2026",
+      "scholarship_id": 91
+    },
+    {
+      "title": "UNISEL Student Financial Assistance (Bantuan Kewangan Pelajar)",
+      "scholarship_id": 92
+    },
+    {
+      "title": "Dermasiswa Pelajar Miskin IPT – Yayasan Pahang",
+      "scholarship_id": 93
+    },
+    {
+      "title": "MAIPk Emergency / Immediate Assistance",
+      "scholarship_id": 94
+    },
+    {
+      "title": "MAIPk Disaster Assistance",
+      "scholarship_id": 95
+    },
+    {
+      "title": "MAIK Natural Disaster Assistance",
+      "scholarship_id": 96
+    },
+    {
+      "title": "i-Sejahtera – OKU Assistance Programme (Program Bantuan OKU)",
+      "scholarship_id": 97
+    },
+    {
+      "title": "MAIPs Disaster Assistance (Skim Agihan Bencana)",
+      "scholarship_id": 98
+    },
+    {
+      "title": "Kelantan Higher Education Student Assistance (Bantuan Pelajar IPT Kelantan) – Yayasan Kelantan Darulnaim (YAKIN)",
+      "scholarship_id": 99
+    },
+    {
+      "title": "Tabung Serambi Mekah (Kelantan State Government Emergency Assistance Fund)",
+      "scholarship_id": 100
+    },
+    {
+      "title": "MAIDAM Medical Assistance (Bantuan Perubatan / Hemodialisis)",
+      "scholarship_id": 101
+    },
+    {
+      "title": "MAIDAM Higher Education Student Airfare Assistance (Bantuan Tambang Penerbangan Pelajar IPT)",
+      "scholarship_id": 102
+    },
+    {
+      "title": "Sumbangan Mahasiswa Pengajian Tinggi Dalam Sabah (SENTOSA)",
+      "scholarship_id": 103
+    },
+    {
+      "title": "Special Financial Assistance for Sarawak Students (Bantuan Khas Kewangan Sarawak)",
+      "scholarship_id": 104
+    },
+    {
+      "title": "Emergency Assistance for Natural Disasters and Public Health Emergencies (Bantuan Kecemasan – Bencana Alam dan Kesihatan Awam)",
+      "scholarship_id": 105
+    },
+    {
+      "title": "Bantuan Khas Pembelian Tiket Penerbangan Secara Sekali Beri (One-Off) – FlySiswa 2026",
+      "scholarship_id": 106
+    },
+    {
+      "title": "Skim Dana Ehsan Pendidikan (SDEP)",
+      "scholarship_id": 107
+    },
+    {
+      "title": "Skim Dermasiswa Dato' Haji Yusoff Hilmi",
+      "scholarship_id": 108
+    },
+    {
+      "title": "Skim Bantuan Pendaftaran (SBP)",
+      "scholarship_id": 109
+    },
+    {
+      "title": "Tabung Pendidikan Sarjana PDT (TPSPDT)",
+      "scholarship_id": 110
+    },
+    {
+      "title": "Bantuan Kewangan Kemasukan ke IPT (Aspirasi IPT) 2026",
+      "scholarship_id": 111
+    },
+    {
+      "title": "Bantuan Ke Institusi Pengajian Tinggi (IPT)",
+      "scholarship_id": 112
+    },
+    {
+      "title": "Skim Bantuan Awal IPT (Yayasan Wilayah Persekutuan)",
+      "scholarship_id": 113
+    },
+    {
+      "title": "Hadiah Pengajian Institut Pengajian Tinggi (HPIPT) Selangor / Iltizam Mahasiswa Selangor",
+      "scholarship_id": 114
+    },
+    {
+      "title": "Program Bantuan Yuran Pengajian (BYP) Institusi Pengajian Tinggi Awam dan Swasta bagi Pelajar Komuniti India B40",
+      "scholarship_id": 115
+    },
+    {
+      "title": "Geran Pra Siswazah & Pasca Siswazah (Geran Bantuan Pelajar ke IPT)",
+      "scholarship_id": 116
+    },
+    {
+      "title": "Yayasan Perak – Insentif Siswa Yayasan Perak (INSISYP)",
+      "scholarship_id": 117
+    },
+    {
+      "title": "Bantuan Awal Kemasukan ke Institusi Pengajian Tinggi (BAKIPT)",
+      "scholarship_id": 118
+    },
+    {
+      "title": "Bantuan Pendaftaran Pelajar ke Institut Pengajian Tinggi (iBITA)",
+      "scholarship_id": 119
+    },
+    {
+      "title": "Sumbangan Dana Pendidikan Kerajaan Negeri Perlis",
+      "scholarship_id": 120
+    },
+    {
+      "title": "Bantuan Persediaan Yayasan Terengganu (BPYT) – University Category (IPTA/IPTS)",
+      "scholarship_id": 121
+    },
+    {
+      "title": "Bantuan Tunai Pendaftaran IPT Secara One-Off (BUDI)",
+      "scholarship_id": 122
+    },
+    {
+      "title": "Higher Education Entry Assistance (Bantuan Kemasukan ke IPT)",
+      "scholarship_id": 123
+    },
+    {
+      "title": "Hadiah Galakan ke IPT (Higher Education Encouragement Award)",
+      "scholarship_id": 124
+    }
+  ],
+  "to_insert": [
+    "Perak State Higher Education Loan (Pinjaman Pengajian Tinggi Negeri Perak)",
+    "Kedah State Education Financing – SPPNK (iPINJAM)",
+    "Yayasan Islam Negeri Kedah (YINK) – Education Loan",
+    "Penang State Student Loan (Pinjaman Penuntut Negeri Pulau Pinang – ePPN)",
+    "Perlis State Education Loan (Pinjaman Pelajaran Negeri Perlis)",
+    "Perlis Education Loan Advance (Pendahuluan Pinjaman Pelajaran)",
+    "Yayasan Kelantan Darulnaim (YAKIN) – Education Loan (Pinjaman Pelajaran)",
+    "Yayasan Terengganu – Overseas First Degree Tuition Fee Loan",
+    "Yayasan Terengganu – Domestic IPTA Top-Up Education Loan",
+    "Yayasan Terengganu – Domestic IPTS One-Off / Top-Up Education Loan",
+    "Yayasan Terengganu – Skills Training Education Loan (Pinjaman Latihan Kemahiran)",
+    "Yayasan Sabah – Higher Education Loan (Pinjaman Pengajian Tinggi Yayasan Sabah)",
+    "Yayasan Sarawak – Domestic Education Loan (Skim Biasiswa Pinjaman Pelajaran Dalam Negara)",
+    "Sarawak State Government Education Loan (Biasiswa Pinjaman Kerajaan Negeri Sarawak – BPKNS)",
+    "Financial Assistance for Community College Students (BKPKK)",
+    "Foundation Financial Assistance for Public Universities (BKA UA)",
+    "Foundation Financial Assistance for TVET Students (BKA TVET)",
+    "Living Allowance Assistance for Negeri Sembilan Students (Bantuan Sara Hidup Mahasiswa Anak Negeri Sembilan)",
+    "Monthly Living Allowance Assistance for IPT Students (Bantuan Sara Anak IPT)",
+    "Monthly Financial Assistance Scheme (Skim Bantuan Kewangan Bulanan)",
+    "Student Monthly Living Allowance Assistance (Bantuan Wang Saku Zakat Selangor)",
+    "Monthly Living Allowance for Asnaf Higher Education Students (Bantuan Sara Hidup Bulanan Pelajar IPT)",
+    "MAIPk – Bantuan Persediaan Pengajian Tinggi",
+    "Higher Education Financial Assistance Scheme (Skim Dermasiswa Pengajian Zakat MAINPP)",
+    "Sultan Ismail Petra Education Financial Assistance (Dermasiswa Sultan Ismail Petra – DSIP MAIK)",
+    "Financial Assistance for Persons with Disabilities (BKOKU)",
+    "Free Education Initiative – PTPTN eKasih Children Scholarship (BAeK PTPTN)",
+    "JAKOA Higher Education Financial Assistance (Bantuan Kewangan Pendidikan IPT)",
+    "Higher Education Admission Assistance (Skim Bantuan Kemasukan ke Institusi Pengajian Tinggi – IPT)",
+    "MAINJ – IPT Registration Assistance 2026",
+    "Bantuan Pendaftaran ke IPT untuk Anak Asnaf MAIM 2026",
+    "Skim Bantuan Am Pelajaran IPT",
+    "Bantuan Kecemasan (Emergency Assistance)",
+    "Bantuan Perubatan Am (General Medical Assistance)",
+    "Bantuan Dermasiswa Pengajian Tinggi (BDPT) 2026",
+    "UNISEL Student Financial Assistance (Bantuan Kewangan Pelajar)",
+    "Dermasiswa Pelajar Miskin IPT – Yayasan Pahang",
+    "MAIPk Emergency / Immediate Assistance",
+    "MAIPk Disaster Assistance",
+    "MAIK Natural Disaster Assistance",
+    "i-Sejahtera – OKU Assistance Programme (Program Bantuan OKU)",
+    "MAIPs Disaster Assistance (Skim Agihan Bencana)",
+    "Kelantan Higher Education Student Assistance (Bantuan Pelajar IPT Kelantan) – Yayasan Kelantan Darulnaim (YAKIN)",
+    "Tabung Serambi Mekah (Kelantan State Government Emergency Assistance Fund)",
+    "MAIDAM Medical Assistance (Bantuan Perubatan / Hemodialisis)",
+    "MAIDAM Higher Education Student Airfare Assistance (Bantuan Tambang Penerbangan Pelajar IPT)",
+    "Sumbangan Mahasiswa Pengajian Tinggi Dalam Sabah (SENTOSA)",
+    "Special Financial Assistance for Sarawak Students (Bantuan Khas Kewangan Sarawak)",
+    "Emergency Assistance for Natural Disasters and Public Health Emergencies (Bantuan Kecemasan – Bencana Alam dan Kesihatan Awam)",
+    "Bantuan Khas Pembelian Tiket Penerbangan Secara Sekali Beri (One-Off) – FlySiswa 2026",
+    "Skim Dana Ehsan Pendidikan (SDEP)",
+    "Skim Dermasiswa Dato' Haji Yusoff Hilmi",
+    "Skim Bantuan Pendaftaran (SBP)",
+    "Tabung Pendidikan Sarjana PDT (TPSPDT)",
+    "Bantuan Kewangan Kemasukan ke IPT (Aspirasi IPT) 2026",
+    "Bantuan Ke Institusi Pengajian Tinggi (IPT)",
+    "Skim Bantuan Awal IPT (Yayasan Wilayah Persekutuan)",
+    "Hadiah Pengajian Institut Pengajian Tinggi (HPIPT) Selangor / Iltizam Mahasiswa Selangor",
+    "Program Bantuan Yuran Pengajian (BYP) Institusi Pengajian Tinggi Awam dan Swasta bagi Pelajar Komuniti India B40",
+    "Geran Pra Siswazah & Pasca Siswazah (Geran Bantuan Pelajar ke IPT)",
+    "Yayasan Perak – Insentif Siswa Yayasan Perak (INSISYP)",
+    "Bantuan Awal Kemasukan ke Institusi Pengajian Tinggi (BAKIPT)",
+    "Bantuan Pendaftaran Pelajar ke Institut Pengajian Tinggi (iBITA)",
+    "Sumbangan Dana Pendidikan Kerajaan Negeri Perlis",
+    "Bantuan Persediaan Yayasan Terengganu (BPYT) – University Category (IPTA/IPTS)",
+    "Bantuan Tunai Pendaftaran IPT Secara One-Off (BUDI)",
+    "Higher Education Entry Assistance (Bantuan Kemasukan ke IPT)",
+    "Hadiah Galakan ke IPT (Higher Education Encouragement Award)"
+  ],
+  "skipped": [
+    {
+      "title": "MyBrainSc Scholarship",
+      "scholarship_id": 9
+    },
+    {
+      "title": "Kijang Undergraduate Scholarship",
+      "scholarship_id": 10
+    },
+    {
+      "title": "Biasiswa Yang di-Pertuan Agong (BYDPA)",
+      "scholarship_id": 11
+    },
+    {
+      "title": "PETRONAS Education Sponsorship Programme (PESP)",
+      "scholarship_id": 12
+    },
+    {
+      "title": "Khazanah Global Scholarship",
+      "scholarship_id": 13
+    },
+    {
+      "title": "Biasiswa Orang Muda Johor (BOMJ)",
+      "scholarship_id": 14
+    },
+    {
+      "title": "Biasiswa Kenangan Dato' Onn (BKDO)",
+      "scholarship_id": 15
+    },
+    {
+      "title": "Biasiswa Pasca Siswazah (BPS)",
+      "scholarship_id": 16
+    },
+    {
+      "title": "Biasiswa Kecemerlangan Menteri Besar (BKMB) Pahang",
+      "scholarship_id": 17
+    },
+    {
+      "title": "Biasiswa IPT Yayasan Pahang (Lepasan STPM)",
+      "scholarship_id": 18
+    },
+    {
+      "title": "Biasiswa Anak Yatim Yayasan Pahang",
+      "scholarship_id": 19
+    },
+    {
+      "title": "Biasiswa Diploma Tahfiz Al-Quran MTNP",
+      "scholarship_id": 20
+    },
+    {
+      "title": "Program Khas Biasiswa Selangor Bitara",
+      "scholarship_id": 21
+    },
+    {
+      "title": "Biasiswa Khas Dato' Menteri Besar Selangor (Mesir, Jordan & Maghribi)",
+      "scholarship_id": 22
+    },
+    {
+      "title": "Biasiswa Khas Sagong Tasi (Peringkat Pengajian Tinggi)",
+      "scholarship_id": 23
+    },
+    {
+      "title": "Tabung Pendidikan Anak-Anak Syarikat dan Badan Berkanun Negeri Selangor (TPASBB)",
+      "scholarship_id": 24
+    },
+    {
+      "title": "Biasiswa Majlis Agama Islam Wilayah Persekutuan (MAIWP)",
+      "scholarship_id": 25
+    },
+    {
+      "title": "MAIWP Full Scholarship – UniMAIWP",
+      "scholarship_id": 26
+    },
+    {
+      "title": "MAIWP Scholarship – Pro-Tahfiz Programme",
+      "scholarship_id": 27
+    },
+    {
+      "title": "Biasiswa Khas YT-TAZU – Universiti Teknologi PETRONAS (UTP)",
+      "scholarship_id": 28
+    },
+    {
+      "title": "Biasiswa Yayasan Terengganu – Program Sarjana (Master)",
+      "scholarship_id": 29
+    },
+    {
+      "title": "Biasiswa ACCA Yayasan Terengganu",
+      "scholarship_id": 30
+    },
+    {
+      "title": "Biasiswa Pendidikan Dalam Negara (BPDN) MAIK",
+      "scholarship_id": 31
+    },
+    {
+      "title": "Biasiswa Sultan Ismail Petra (BSIP) MAIK",
+      "scholarship_id": 32
+    },
+    {
+      "title": "Biasiswa Profesional Perakaunan (BPP) MAIK",
+      "scholarship_id": 33
+    },
+    {
+      "title": "Biasiswa Pendidikan LZNK IPTA",
+      "scholarship_id": 34
+    },
+    {
+      "title": "Penang Future Foundation (PFF) Scholarship",
+      "scholarship_id": 35
+    },
+    {
+      "title": "Penang Future Foundation (PFF) – Mutiara Scholar",
+      "scholarship_id": 36
+    },
+    {
+      "title": "PIDM Undergraduate Scholarship Programme",
+      "scholarship_id": 37
+    },
+    {
+      "title": "Anugerah Biasiswa Tuan Yang Terutama Yang di-Pertua Negeri Sabah (TYT)",
+      "scholarship_id": 38
+    },
+    {
+      "title": "Biasiswa Cemerlang Kerajaan Negeri Sabah (BKNS)",
+      "scholarship_id": 39
+    },
+    {
+      "title": "Sarawak Free Tertiary Education Scheme (FTES)",
+      "scholarship_id": 40
+    },
+    {
+      "title": "Biasiswa Yayasan Sarawak Tun Taib (BYSTT)",
+      "scholarship_id": 41
+    },
+    {
+      "title": "Biasiswa Yayasan Sarawak Tunku Abdul Rahman (YBSTAR)",
+      "scholarship_id": 42
+    },
+    {
+      "title": "Tunku Abdul Rahman Scholarship (YTAR)",
+      "scholarship_id": 43
+    },
+    {
+      "title": "Pinjaman Pendidikan PTPTN",
+      "scholarship_id": 44
+    },
+    {
+      "title": "Pembiayaan Pendidikan Boleh Ubah (PPBU) Yayasan Bank Rakyat",
+      "scholarship_id": 45
+    },
+    {
+      "title": "Program Pinjaman Pelajaran Tertiari (TESP) MARA",
+      "scholarship_id": 46
+    },
+    {
+      "title": "Education Loan KOJADI",
+      "scholarship_id": 47
+    },
+    {
+      "title": "Pinjaman Pelajaran Dalam Negara Yayasan Pelajaran Johor (YPJ)",
+      "scholarship_id": 48
+    },
+    {
+      "title": "Pembiayaan Pendidikan PTPK untuk pelajar Kolej Kemahiran Johor",
+      "scholarship_id": 49
+    },
+    {
+      "title": "Pinjaman Pendidikan Yayasan Negeri Sembilan (YNS)",
+      "scholarship_id": 50
+    },
+    {
+      "title": "Pinjaman Wang Pengajian Tinggi (PWPT) TAPEM",
+      "scholarship_id": 51
+    },
+    {
+      "title": "Pinjaman Pendidikan Yayasan Wilayah Persekutuan (YWP)",
+      "scholarship_id": 52
+    },
+    {
+      "title": "Peduli Siswa – Pinjaman Boleh Ubah Dalam Negara (PBUDN)",
+      "scholarship_id": 53
+    },
+    {
+      "title": "Pinjaman Pelajaran Yayasan Selangor",
+      "scholarship_id": 54
+    },
+    {
+      "title": "Pinjaman Boleh Ubah Luar Negara (PBULN)",
+      "scholarship_id": 55
+    },
+    {
+      "title": "Yayasan Pahang Education Loan (Pinjaman Pendidikan Yayasan Pahang)",
+      "scholarship_id": 56
+    }
+  ],
+  "aid_types_to_insert": {
+    "Education Loan": 14,
+    "Financial Assistance": 11,
+    "Special Assistance": 24,
+    "One-off Assistance": 19
+  },
+  "database_changes": true,
+  "published": true,
+  "final_count": 121,
+  "original_records_unchanged": true
+}

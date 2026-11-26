@@ -19,6 +19,7 @@ type AdminDashboardData = {
     academic_pathways: number;
     quizzes: number;
     reports: number;
+    appointments: number;
   };
   recent_users: Array<{
     user_id: number;
@@ -45,6 +46,7 @@ const emptyDashboard: AdminDashboardData = {
     academic_pathways: 0,
     quizzes: 0,
     reports: 0,
+    appointments: 0,
   },
   recent_users: [],
   recent_scholarships: [],
@@ -199,6 +201,10 @@ function AdminDashboard() {
       </section>
 
       <section className="adh-metrics" aria-label="Platform totals">
+        <article className="adh-metric blue">
+          <span className="adh-icon"><Icon name="appointment" /></span>
+          <div><h2>Total Appointments</h2><strong>{formatNumber(data.summary.appointments)}</strong><small>All booking statuses</small></div>
+        </article>
         {([
           { label: "Total Users", value: totalUsers, note: `${formatNumber(users.active_users)} active accounts`, path: "/admin/users", icon: "users", color: "purple" },
           { label: "Scholarships", value: scholarships.total_scholarships, note: `${formatNumber(scholarships.pending)} pending approval`, path: "/admin/scholarships", icon: "layers", color: "amber" },

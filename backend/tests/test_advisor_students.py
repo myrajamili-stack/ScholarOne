@@ -7,6 +7,8 @@ from security import issue_access_token
 
 class AdvisorStudentsTests(unittest.TestCase):
     def setUp(self):
+        # Business-logic tests assume an active account; restriction tests cover the real lookup.
+        self.enterContext(patch("security.verify_active_account", return_value=None))
         self.client=create_app().test_client();self.root='/api/advisors/7/students'
         self.headers={'Authorization':'Bearer '+issue_access_token({'user_id':7,'role':'advisor'})}
         self.connection=MagicMock();self.cursor=self.connection.cursor.return_value.__enter__.return_value
@@ -51,7 +53,32 @@ class AdvisorStudentsTests(unittest.TestCase):
         response=self.client.post(self.root+'/11/consultations',headers=self.headers,json={'appointment_datetime':'2026-11-09T09:00','slot_minutes':30,'consultation_topic':'Course Selection'})
         self.assertEqual(response.status_code,201,response.json)
         self.assertEqual(response.json['appointment_status'],'confirmed')
-        self.assertEqual(self.cursor.execute.call_args.args[1],(11,7,datetime(2026,11,9,9),30,'Course Selection'))
+        booking, notification = self.cursor.execute.call_args_list[-2:]
+        self.assertEqual(booking.args[1],(11,7,datetime(2026,11,9,9),30,'Course Selection'))
+        self.assertIn('insert into notification', notification.args[0])
+        student_id, student_message, advisor_id, advisor_message = notification.args[1]
+        self.assertEqual((student_id, advisor_id), (11, 7))
+        self.assertEqual(student_message, advisor_message)
+        self.assertIn('Appointment #22: Advisor scheduled a confirmed consultation.', student_message)
+        self.assertIn('09:00 Malaysia time', student_message)
+
+    @patch('routes.advisor_students.get_db_connection')
+    @patch('routes.advisor_students.malaysia_now')
+    @patch('advisor_scheduling.malaysia_now')
+    def test_notification_failure_aborts_consultation_transaction(self, shared_now, now, db):
+        shared_now.return_value = now.return_value = self.now
+        db.return_value = self.connection
+        self.database_rows()
+
+        def fail_notification(sql, params):
+            if 'insert into notification' in sql:
+                raise RuntimeError('Notification insert failed')
+
+        self.cursor.execute.side_effect = fail_notification
+        response = self.client.post(self.root+'/11/consultations', headers=self.headers,
+                                    json={'appointment_datetime': '2026-11-09T09:00', 'slot_minutes': 30})
+        self.assertEqual(response.status_code, 503)
+        self.assertIs(self.connection.__exit__.call_args.args[0], RuntimeError)
     @patch('routes.advisor_students.get_db_connection')
     @patch('routes.advisor_students.malaysia_now')
     def test_unrelated_student_is_rejected(self,now,db):

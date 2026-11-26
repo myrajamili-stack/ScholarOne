@@ -69,5 +69,19 @@ class ScholarshipImportTests(unittest.TestCase):
         row = {'title': 'Existing listing', 'amount': 1000, 'organization_name': 'Provider'}
         self.assertEqual(enrich_scholarship(row), row)
 
+    def test_provider_listings_with_past_deadlines_are_closed_without_changing_approval(self):
+        now = datetime(2026, 11, 19, 12, tzinfo=timezone(timedelta(hours=8)))
+        row = {'title': 'Provider listing', 'deadline': '2026-11-18', 'status': 'approved'}
+        result = enrich_scholarship(row, now)
+        self.assertEqual(result['intake_status'], 'closed')
+        self.assertEqual(result['status'], 'approved')
+        self.assertNotIn('intake_status', row)
+        for deadline in ['2026-11-19', '2026-11-20']:
+            self.assertEqual(enrich_scholarship({**row, 'deadline': deadline}, now)['intake_status'], 'dated')
+
+    def test_expiry_uses_malaysia_date_when_clock_is_supplied_in_utc(self):
+        now = datetime(2026, 11, 18, 17, tzinfo=timezone.utc)
+        self.assertEqual(enrich_scholarship({'deadline': '2026-11-18'}, now)['intake_status'], 'closed')
+
 
 if __name__ == '__main__': unittest.main()

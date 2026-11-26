@@ -8,6 +8,7 @@ from advisor_scheduling import available_slots, malaysia_now, read_schedule, val
 from db import get_db_connection
 from responses import error_response
 from security import advisor_access_required, student_access_required
+from appointment_workflows import appointment_notifications
 
 scheduling_bp = Blueprint('advisor_scheduling', __name__, url_prefix='/api/advisors')
 
@@ -97,7 +98,7 @@ def my_appointments():
         with closing(get_db_connection()) as connection, connection:
             with connection.cursor() as cursor:
                 cursor.execute('''SELECT ap.appointment_id, ap.advisor_id, u.full_name AS advisor_name,
-                    ap.appointment_datetime, ap.duration_minutes, coalesce(ap.appointment_status, 'pending') AS appointment_status
+                    ap.appointment_datetime, ap.duration_minutes, ap.rejection_reason, coalesce(ap.appointment_status, 'pending') AS appointment_status
                     FROM appointment ap JOIN app_user u ON u.user_id = ap.advisor_id
                     WHERE ap.student_id = %s ORDER BY ap.appointment_datetime DESC''', (g.student_id,))
                 appointments = cursor.fetchall()
@@ -148,6 +149,7 @@ def book_appointment(advisor_id):
                 cursor.execute('''INSERT INTO appointment (student_id, advisor_id, appointment_datetime, appointment_status, duration_minutes, consultation_topic, student_message)
                     VALUES (%s, %s, %s, 'pending', %s, %s, %s) RETURNING appointment_id''', (g.student_id, advisor_id, selected, schedule['slot_minutes'], topic.strip(), message.strip()))
                 appointment = cursor.fetchone()
+                appointment_notifications(cursor, appointment['appointment_id'], g.student_id, advisor_id, 'Booking requested; awaiting advisor approval', selected)
         return jsonify({
             **appointment,
             'advisor_id': advisor_id,
@@ -193,13 +195,15 @@ def reschedule_appointment(advisor_id, appointment_id):
             with connection.cursor() as cursor:
                 if not active_advisor(cursor, advisor_id, lock=True):
                     return error_response('Advisor account not found.', 404)
-                cursor.execute('''SELECT appointment_id, student_id, appointment_status, duration_minutes
+                cursor.execute('''SELECT appointment_id, student_id, appointment_status, duration_minutes, appointment_datetime
                     FROM appointment WHERE appointment_id=%s AND advisor_id=%s FOR UPDATE''', (appointment_id, advisor_id))
                 appointment = cursor.fetchone()
                 if not appointment:
                     return error_response('Appointment not found.', 404)
                 if (appointment['appointment_status'] or 'pending').lower() not in ('pending', 'confirmed'):
                     return error_response('Only pending or confirmed appointments can be rescheduled.', 409)
+                if request.method == 'PATCH' and appointment.get('appointment_datetime') == selected:
+                    return jsonify(message='Appointment rescheduled.', appointment_datetime=selected.isoformat()+'+08:00')
                 cursor.execute('SELECT student_id FROM student WHERE student_id=%s FOR UPDATE', (appointment['student_id'],))
                 slots = reschedule_slots(cursor, advisor_id, appointment, selected_date)
                 if request.method == 'GET':
@@ -208,6 +212,7 @@ def reschedule_appointment(advisor_id, appointment_id):
                     return error_response('This time is no longer available. Choose another slot.', 409)
                 cursor.execute('UPDATE appointment SET appointment_datetime=%s WHERE appointment_id=%s AND advisor_id=%s',
                                (selected, appointment_id, advisor_id))
+                appointment_notifications(cursor, appointment_id, appointment['student_id'], advisor_id, 'Rescheduled by advisor', selected)
         return jsonify(message='Appointment rescheduled.', appointment_datetime=selected.isoformat()+'+08:00')
     except Exception:
         return scheduling_error()

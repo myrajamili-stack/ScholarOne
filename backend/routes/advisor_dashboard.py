@@ -40,7 +40,7 @@ def get_dashboard(advisor_id):
         with closing(get_db_connection()) as connection, connection:
             with connection.cursor() as cursor:
                 cursor.execute("""SELECT u.user_id AS advisor_id, u.full_name, u.email,
-                    a.specialization, a.qualification, a.experience_years, coalesce(a.average_rating, 0) AS average_rating
+                    a.specialization, a.qualification, a.experience_years
                     FROM app_user u LEFT JOIN advisor a ON a.advisor_id = u.user_id
                     WHERE u.user_id = %s AND u.role = 'advisor' AND coalesce(u.status, 'active') = 'active'""", (advisor_id,))
                 advisor = cursor.fetchone()
@@ -53,10 +53,20 @@ def get_dashboard(advisor_id):
                     count(DISTINCT student_id) AS total_students
                     FROM appointment WHERE advisor_id = %s""", (now.date(), advisor_id))
                 summary = dict(cursor.fetchone())
-                cursor.execute("""SELECT count(*) AS total_reviews, coalesce(round(avg(rating), 1), 0) AS average_rating
-                    FROM review WHERE advisor_id = %s""", (advisor_id,))
-                reviews = cursor.fetchone()
-                summary['average_rating'] = reviews['average_rating'] if reviews['total_reviews'] else advisor['average_rating']
+                cursor.execute("""SELECT count(*) AS total_reviews, round(avg(r.rating), 1) AS average_rating,
+                    ARRAY[count(*) FILTER (WHERE r.rating = 5),
+                          count(*) FILTER (WHERE r.rating = 4),
+                          count(*) FILTER (WHERE r.rating = 3),
+                          count(*) FILTER (WHERE r.rating = 2),
+                          count(*) FILTER (WHERE r.rating = 1)] AS rating_counts
+                    FROM review r JOIN appointment ap
+                      ON ap.appointment_id = r.appointment_id AND ap.advisor_id = r.advisor_id
+                      AND ap.student_id = r.student_id
+                    WHERE r.advisor_id = %s AND r.rating BETWEEN 1 AND 5
+                      AND ap.appointment_status = 'completed' AND ap.appointment_datetime IS NOT NULL""", (advisor_id,))
+                reviews = dict(cursor.fetchone())
+                rating_counts = reviews.pop('rating_counts')
+                summary['average_rating'] = advisor['average_rating'] = reviews['average_rating']
                 cursor.execute("""SELECT count(DISTINCT m.message_id) AS unread_messages FROM message m
                     JOIN conversation_participant mine ON mine.conversation_id = m.conversation_id AND mine.user_id = %s
                     JOIN app_user sender ON sender.user_id = m.sender_id AND sender.role = 'student'
@@ -105,11 +115,9 @@ def get_dashboard(advisor_id):
                     coalesce(round(avg(qa.score), 2), 0) AS average_score
                     FROM quiz q LEFT JOIN quiz_attempt qa ON qa.quiz_id = q.quiz_id WHERE q.advisor_id = %s""", (advisor_id,))
                 quiz_overview = cursor.fetchone()
-                cursor.execute('SELECT rating, count(*) AS count FROM review WHERE advisor_id = %s GROUP BY rating', (advisor_id,))
-                ratings = {row['rating']: row['count'] for row in cursor.fetchall()}
                 feedback = {**reviews, 'rating_distribution': [
-                    {'rating': rating, 'percentage': round(100 * ratings.get(rating, 0) / reviews['total_reviews']) if reviews['total_reviews'] else 0}
-                    for rating in range(5, 0, -1)
+                    {'rating': rating, 'percentage': round(100 * count / reviews['total_reviews']) if reviews['total_reviews'] else 0}
+                    for rating, count in zip(range(5, 0, -1), rating_counts)
                 ]}
         return jsonify({
             'advisor': advisor, 'summary': summary, 'selected_date': selected_date.isoformat(),

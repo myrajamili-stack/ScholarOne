@@ -5,6 +5,7 @@ import AdvisorIcon, { type AdvisorIconName } from "../../components/advisor/Advi
 import { getApiErrorMessage } from "../../utils/apiError";
 import { getStoredUser } from "../../utils/authStorage";
 import AdvisorAccountMenu from "../../components/advisor/AdvisorAccountMenu";
+import AccountNotifications from "../../components/AccountNotifications";
 import "../../styles/advisor-home.css";
 
 type Appointment = {
@@ -18,7 +19,7 @@ type Appointment = {
 };
 type DashboardData = {
   advisor: { full_name: string; specialization: string | null };
-  summary: { today_appointments: number; pending_requests: number; total_students: number; average_rating: number | string; unread_messages: number };
+  summary: { today_appointments: number; pending_requests: number; total_students: number; average_rating: number | string | null; unread_messages: number };
   selected_date: string;
   schedule: Appointment[];
   calendar_month: string;
@@ -92,9 +93,7 @@ function AdvisorDashboard() {
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState<SearchState>({ query: "", results: [] });
   const [searchOpen, setSearchOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const searchArea = useRef<HTMLDivElement>(null);
-  const notificationsArea = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -145,13 +144,12 @@ function AdvisorDashboard() {
   }, [query, userId]);
 
   useEffect(() => {
-    function closePopovers(event: PointerEvent) {
+    function closeSearch(event: PointerEvent) {
       const target = event.target as Node;
       if (!searchArea.current?.contains(target)) setSearchOpen(false);
-      if (!notificationsArea.current?.contains(target)) setNotificationsOpen(false);
     }
-    document.addEventListener("pointerdown", closePopovers);
-    return () => document.removeEventListener("pointerdown", closePopovers);
+    document.addEventListener("pointerdown", closeSearch);
+    return () => document.removeEventListener("pointerdown", closeSearch);
   }, []);
 
   async function updateRequest(appointment: Appointment, status: "confirmed" | "cancelled") {
@@ -175,9 +173,8 @@ function AdvisorDashboard() {
   }
 
   const fullName = dashboard?.advisor.full_name || user?.full_name || "Academic Advisor";
-  const pendingCount = dashboard?.summary.pending_requests || 0;
-  const unreadCount = dashboard?.summary.unread_messages || 0;
-  const notificationCount = pendingCount + unreadCount;
+  const reviewCount = dashboard?.feedback.total_reviews;
+  const averageRating = dashboard?.summary.average_rating;
   const monthDate = new Date(`${calendarMonth}-01T12:00:00Z`);
   const monthTitle = new Intl.DateTimeFormat("en-MY", { timeZone: "UTC", month: "long", year: "numeric" }).format(monthDate);
   const firstWeekday = (monthDate.getUTCDay() + 6) % 7;
@@ -187,7 +184,7 @@ function AdvisorDashboard() {
 
   return (
     <div className="advisor-home">
-      <header className="advisor-home-toolbar" onKeyDown={(event) => { if (event.key === "Escape") { setSearchOpen(false); setNotificationsOpen(false); } }}>
+      <header className="advisor-home-toolbar" onKeyDown={(event) => { if (event.key === "Escape") setSearchOpen(false); }}>
         <div className="advisor-home-search" ref={searchArea}>
           <AdvisorIcon name="search" />
           <input type="search" aria-label="Search students, appointments, or quizzes" placeholder="Search students, appointments, or quizzes..." value={query} maxLength={100} onFocus={() => setSearchOpen(true)} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true); }} />
@@ -199,13 +196,8 @@ function AdvisorDashboard() {
           </div>}
         </div>
         <div className="advisor-home-account-actions">
-          <div ref={notificationsArea} className="advisor-home-popover-anchor">
-            <button type="button" className="advisor-home-bell" aria-label={`Notifications, ${pendingCount} pending requests and ${unreadCount} unread messages`} aria-expanded={notificationsOpen} onClick={() => { setNotificationsOpen((value) => !value); }}>
-              <AdvisorIcon name="bell" />{notificationCount > 0 && <span>{notificationCount > 99 ? "99+" : notificationCount}</span>}
-            </button>
-            {notificationsOpen && <section className="advisor-home-popover" aria-label="Notifications"><h2>Notifications</h2><Link to="/advisor/appointments?status=pending"><AdvisorIcon name="appointment" /><span><strong>{pendingCount} pending requests</strong><small>Review student bookings</small></span></Link><Link to="/advisor/messages"><AdvisorIcon name="message" /><span><strong>{unreadCount} unread messages</strong><small>Open your inbox</small></span></Link>{notificationCount === 0 && <p>You’re all caught up.</p>}</section>}
-          </div>
-          <AdvisorAccountMenu name={fullName} onOpen={() => setNotificationsOpen(false)} />
+          <AccountNotifications advisorActivity={dashboard ? { pending: dashboard.summary.pending_requests, unreadMessages: dashboard.summary.unread_messages } : undefined} />
+          <AdvisorAccountMenu name={fullName} />
         </div>
       </header>
 
@@ -218,7 +210,16 @@ function AdvisorDashboard() {
         <Link className="advisor-home-metric purple" to={`/advisor/schedule?date=${malaysiaDate()}`}><span className="advisor-home-metric-icon"><AdvisorIcon name="calendar" /></span><div><span>Today’s Appointments</span><strong>{dashboard?.summary.today_appointments ?? "—"}</strong></div></Link>
         <Link className="advisor-home-metric amber" to="/advisor/appointments?status=pending"><span className="advisor-home-metric-icon"><AdvisorIcon name="hourglass" /></span><div><span>Pending Requests</span><strong>{dashboard?.summary.pending_requests ?? "—"}</strong></div></Link>
         <Link className="advisor-home-metric blue" to="/advisor/students"><span className="advisor-home-metric-icon"><AdvisorIcon name="users" /></span><div><span>Total Students</span><strong>{dashboard?.summary.total_students ?? "—"}</strong></div></Link>
-        <Link className="advisor-home-metric green" to="/advisor/feedback"><span className="advisor-home-metric-icon"><AdvisorIcon name="star" /></span><div><span>Average Rating</span><strong>{dashboard ? Number(dashboard.summary.average_rating).toFixed(1) : "—"}<small> / 5</small></strong></div></Link>
+        <Link className="advisor-home-metric advisor-home-rating green" to="/advisor/feedback">
+          <span className="advisor-home-metric-icon"><AdvisorIcon name="star" /></span>
+          <div>
+            <span>Average Rating</span>
+            {reviewCount === 0 ? <strong className="advisor-home-rating-empty">No ratings yet</strong>
+              : averageRating == null ? <strong>—</strong>
+              : <strong>{Number(averageRating).toFixed(1)}<small> / 5</small></strong>}
+            {reviewCount != null && <small className="advisor-home-review-count">{reviewCount} student {reviewCount === 1 ? "review" : "reviews"}</small>}
+          </div>
+        </Link>
       </section>
       <section className="advisor-home-main-grid">
         <article className="advisor-home-card advisor-home-schedule">

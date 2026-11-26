@@ -1,0 +1,7 @@
+{
+  "excluded_import_keys": [
+    "scholarone-all-pdf:f0bc4912e4254e5bbd26cdc1",
+    "scholarone-all-pdf:03ae1789ae9cbb487309c5b8"
+  ],
+  "reason": "Skim Bantuan Awal IPT (Yayasan Wilayah Persekutuan) and Skim Dana Ehsan Pendidikan (SDEP) were removed at the user's request on 19 November 2026. Do not recreate them during PDF reimports."
+}

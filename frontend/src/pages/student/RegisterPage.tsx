@@ -38,6 +38,7 @@ function RegisterPage() {
         full_name: String(formData.get("full_name") || "").trim(),
         email,
         password: formData.get("password"),
+        confirm_password: formData.get("confirm_password"),
         phone_number: `${formData.get("dial_code")}${String(formData.get("phone_number") || "").trim().replace(/^0+/, "")}`,
         role: "student",
       });
@@ -71,7 +72,7 @@ function RegisterPage() {
     try {
       clearStoredUser();
 
-      await api.post<RegisterResponse>("/auth/register", {
+      await api.post<RegisterResponse>(searchParams.get("resubmit") === "true" ? "/auth/provider-resubmission" : "/auth/register", {
         full_name: String(formData.get("full_name") || "").trim(),
         email,
         password: formData.get("password"),
@@ -96,7 +97,7 @@ function RegisterPage() {
     return <StudentRegistration onSubmit={handleStudentSubmit} error={error} isSubmitting={isSubmitting} />;
   }
 
-  return <ProviderRegistration onSubmit={handleSponsorSubmit} error={error} isSubmitting={isSubmitting} submitted={providerSubmitted} />;
+  return <ProviderRegistration resubmitting={searchParams.get("resubmit") === "true"} onSubmit={handleSponsorSubmit} error={error} isSubmitting={isSubmitting} submitted={providerSubmitted} />;
 }
 
 export default RegisterPage;

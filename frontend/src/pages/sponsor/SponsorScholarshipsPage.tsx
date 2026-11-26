@@ -1,6 +1,6 @@
 import Icon from "../../components/advisor/AdvisorIcon";
 import { Link } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import api from "../../api/axios";
 import { getApiErrorMessage } from "../../utils/apiError";
 import { getStoredUser } from "../../utils/authStorage";
@@ -14,6 +14,7 @@ type SponsorScholarship = {
   deadline?: string | null;
   funding_type?: string | null;
   status?: string | null;
+  rejection_reason?: string | null;
   created_at?: string | null;
   application_count: number;
 };
@@ -87,6 +88,25 @@ function SponsorScholarshipsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [deleting, setDeleting] = useState<SponsorScholarship | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const [notice, setNotice] = useState("");
+  const deleteConfirmation = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (deleting) deleteConfirmation.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [deleting]);
+
+  async function deleteListing() {
+    if (!deleting || isDeleting) return;
+    setIsDeleting(true); setActionError("");
+    try {
+      await api.delete(`/sponsors/${sponsorId}/scholarships/${deleting.scholarship_id}`, { data: { confirm_scholarship_id: deleting.scholarship_id } });
+      setDeleting(null); setNotice("Scholarship deleted successfully."); setRetry(value => value + 1);
+    } catch (err) {
+      setActionError(getApiErrorMessage(err, "Unable to delete this listing."));
+    } finally { setIsDeleting(false); }
+  }
 
   useEffect(() => {
     async function loadScholarships() {
@@ -142,6 +162,8 @@ function SponsorScholarshipsPage() {
 
   return (
     <div className="sponsor-page">
+      {notice && <p className="sponsor-form-success" role="status">{notice}</p>}
+      {deleting && <section ref={deleteConfirmation} className="sponsor-panel" role="group" aria-label="Confirm scholarship deletion"><h2>Delete {deleting.title}?</h2><p>This permanently removes the listing. Listings with applications or other linked records cannot be deleted.</p>{actionError && <p className="sponsor-form-error" role="alert">{actionError}</p>}<button type="button" className="sponsor-add-button" disabled={isDeleting} onClick={() => void deleteListing()}>{isDeleting ? "Deleting…" : "Confirm Delete"}</button> <button type="button" className="sponsor-secondary-link" disabled={isDeleting} onClick={() => setDeleting(null)}>Cancel</button></section>}
       <section className="sponsor-hero spl-hero spl-trophy-banner">
         <div>
           <p className="sponsor-kicker"><Icon name="graduation" />Scholarship Management</p>
@@ -225,12 +247,13 @@ function SponsorScholarshipsPage() {
               <article className="sponsor-scholarship-card" key={scholarship.scholarship_id}>
                 <div className="sponsor-scholarship-main">
                   <span className={`sponsor-status ${normalizeStatus(scholarship.status)}`}>{scholarship.status || "Pending"}</span>
-                  <div className="spl-card-title"><span><Icon name="graduation" /></span><h3>{scholarship.title}</h3></div>
+                  <div className="spl-card-title"><span><Icon name="graduation" /></span><h3>{scholarship.title}</h3></div>{scholarship.rejection_reason && normalizeStatus(scholarship.status) === "rejected" && <p role="note"><strong>Rejection reason:</strong> {scholarship.rejection_reason}</p>}
                   <p>{scholarship.description || "No description has been added yet."}</p>
                   <div className="sponsor-scholarship-tags">
                     <span>{scholarship.category || "Category not set"}</span>
                     <span>{scholarship.funding_type || "Funding type not set"}</span>
                   </div>
+                  <div className="sponsor-listing-actions"><Link className="sponsor-secondary-link" to={`/sponsor/add-scholarship?edit=${scholarship.scholarship_id}`}>Edit Listing</Link><button type="button" className="sponsor-secondary-link" disabled={isDeleting} onClick={() => { setDeleting(scholarship); setActionError(""); }}>Delete Listing</button></div>
                 </div>
                 <div className="sponsor-scholarship-meta">
                   <div>

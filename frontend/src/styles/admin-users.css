@@ -67,6 +67,19 @@
 .aum-dialog label small { color: #7a6294; font-size: 11px; font-weight: 400; }
 .aum-dialog input, .aum-dialog select { min-width: 0; width: 100%; border: 1px solid #dfccf9; border-radius: 10px; padding: 10px 12px; background: white; color: #311744; font-size: 14px; }
 .aum-manage h3 { font-size: 18px; font-weight: 750; margin-bottom: 8px; }
+.aum-manage form + form { margin-top: 24px; padding-top: 22px; border-top: 1px solid #dfccf9; }
+.aum-dialog-tools { display: flex; gap: 8px; }
+.aum-account-details { display: grid; gap: 0; margin: 24px 0; border: 1px solid #e5d8f7; border-radius: 16px; overflow: hidden; }
+.aum-account-details > div { padding: 14px 18px; background: #fff; }
+.aum-account-details > div + div { border-top: 1px solid #f0e8fa; }
+.aum-account-details dt { color: #7b6591; font-size: 12px; margin-bottom: 5px; }
+.aum-account-details dd { margin: 0; color: #311744; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.aum-delete-area { margin-top: 26px; padding-top: 22px; border-top: 1px solid #ecdce8; }
+.aum-delete-button { width: 100%; padding: 12px 18px; color: #b4233f; background: #fff0f3; border: 1px solid #f0b9c5; border-radius: 11px; font-weight: 750; cursor: pointer; }
+.aum-delete-button:hover:not(:disabled) { background: #ffe1e8; }
+.aum-delete-button:disabled { opacity: .55; cursor: not-allowed; }
+.aum-delete-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.aum-delete-actions > button { flex: 1; }
 .aum-manage p { font-size: 13px; color: #71558b; overflow-wrap: anywhere; }
 .aum-form-error { padding: 12px; border-radius: 11px; font-size: 12px; background: #fff0f2; color: #b92d4a; }
 @media(max-width:1200px) {

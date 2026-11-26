@@ -1,3 +1,5 @@
+from .admin_plans import admin_plans_bp
+from .scholarship_views import scholarship_views_bp
 from .advisor_students import students_management_bp
 from .advisor_profiles import profiles_bp
 from .messaging import messaging_bp
@@ -13,6 +15,12 @@ from .health import health_bp
 from .quizzes import quizzes_bp
 from .scholarships import scholarships_bp
 from .sponsors import sponsors_bp
+from .sponsor_listings import sponsor_listings_bp
+from .eligibility import eligibility_bp
+from .pathways import pathways_bp
+from .student_quizzes import student_quizzes_bp
+from .appointment_actions import appointment_actions_bp
+from .notifications import notifications_bp
 from .billing import billing_bp
 from .students import students_bp
 from .assessment_attempts import assessment_attempts_bp
@@ -20,6 +28,8 @@ from .scholarship_reminders import scholarship_reminders_bp
 
 
 def register_blueprints(app):
+    app.register_blueprint(admin_plans_bp)
+    app.register_blueprint(scholarship_views_bp)
     app.register_blueprint(scholarship_reminders_bp)
     app.register_blueprint(assessment_attempts_bp)
     app.register_blueprint(health_bp)
@@ -36,6 +46,12 @@ def register_blueprints(app):
     app.register_blueprint(quizzes_bp)
     app.register_blueprint(scholarships_bp)
     app.register_blueprint(sponsors_bp)
+    app.register_blueprint(sponsor_listings_bp)
+    app.register_blueprint(eligibility_bp)
+    app.register_blueprint(pathways_bp)
+    app.register_blueprint(student_quizzes_bp)
+    app.register_blueprint(appointment_actions_bp)
+    app.register_blueprint(notifications_bp)
     app.register_blueprint(billing_bp)
     app.register_blueprint(students_bp)
     app.register_blueprint(applications_bp)

@@ -17,14 +17,6 @@ DEFAULTS = {
 }
 
 
-def ensure_settings(cursor):
-    cursor.execute('''create table if not exists platform_configuration (
-        configuration_key text primary key,
-        configuration_value jsonb not null,
-        updated_at timestamptz not null default now()
-    )''')
-
-
 def validate_phone(value):
     return not value or (bool(re.fullmatch(r'\+?[0-9 ()-]+', value)) and 7 <= len(re.sub(r'\D', '', value)) <= 15)
 
@@ -36,7 +28,6 @@ def get_settings():
     try:
         connection = get_db_connection()
         cursor = connection.cursor()
-        ensure_settings(cursor)
         cursor.execute("select configuration_value from platform_configuration where configuration_key = 'general'")
         record = cursor.fetchone()
         general = {**DEFAULTS, **(record['configuration_value'] if record else {})}
@@ -95,7 +86,6 @@ def update_settings():
         connection = get_db_connection()
         cursor = connection.cursor()
         if section == 'general':
-            ensure_settings(cursor)
             cursor.execute('''insert into platform_configuration (configuration_key, configuration_value)
                 values ('general', %s::jsonb) on conflict (configuration_key) do update
                 set configuration_value = excluded.configuration_value, updated_at = now()''', (json.dumps(values),))
@@ -109,6 +99,8 @@ def update_settings():
                 connection.rollback()
                 return error_response('Administrator account not found.', 404)
             result = {'account': account}
+        cursor.execute("insert into audit_log (user_id, action, description) values (%s, %s, %s)",
+                       (g.admin_id, 'update_admin_settings', f'Updated {section} settings'))
         connection.commit()
         return jsonify({'message': 'Settings saved successfully.', **result})
     except Exception:

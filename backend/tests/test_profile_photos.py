@@ -38,6 +38,8 @@ class PhotoValidationTests(unittest.TestCase):
 
 class PhotoEndpointTests(unittest.TestCase):
     def setUp(self):
+        # Business-logic tests assume an active account; restriction tests cover the real lookup.
+        self.enterContext(patch("security.verify_active_account", return_value=None))
         self.directory=TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
         self.app=Flask(__name__)

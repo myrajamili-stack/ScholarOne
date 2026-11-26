@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-import api from "../../api/axios";
-import Icon from "../advisor/AdvisorIcon";
+import AccountNotifications from "../AccountNotifications";
 import { useLocation, useNavigate } from "react-router-dom";
 import { clearStoredUser, getStoredUser } from "../../utils/authStorage";
 import { getInitials } from "../../utils/userDisplay";
@@ -21,14 +19,6 @@ function SponsorTopbar() {
   };
   const [title, subtitle] = headings[page] || headings.dashboard;
   const user = getStoredUser();
-  const [unread, setUnread] = useState<number | null>(null);
-  const sponsorId = user?.user_id;
-  useEffect(() => {
-    if (!sponsorId) return;
-    const controller = new AbortController();
-    api.get<{ summary: { unread: number } }>(`/sponsors/${sponsorId}/messages`, { signal: controller.signal }).then(({data}) => {if (!controller.signal.aborted) setUnread(data.summary.unread);}).catch(() => {});
-    return () => controller.abort();
-  }, [sponsorId]);
   const displayName = user?.full_name || "Sponsorship Provider";
 
   function handleLogout() {
@@ -44,10 +34,8 @@ function SponsorTopbar() {
       </div>
 
       <div className="sponsor-top-actions">
-        <button className="sponsor-icon-button" type="button" aria-label={unread ? `${unread} unread provider updates` : "Open provider updates"} onClick={() => navigate("/sponsor/messages")}>
-          {unread !== null && unread > 0 && <span>{unread}</span>}
-          <Icon name="bell" />
-        </button>
+        <AccountNotifications />
+
         <div className="sponsor-avatar">{getInitials(displayName)}</div>
         <div className="sponsor-top-user">
           <strong>{displayName}</strong>

@@ -4,41 +4,38 @@ from datetime import date, timedelta
 from flask import Blueprint, current_app, jsonify, request
 
 from db import get_db_connection
-from responses import error_response
+from responses import error_response, internal_error_response
 from advisor_scheduling import malaysia_now, read_schedule
 from .advisor_scheduling import active_advisor
-from security import advisor_access_required
+from security import advisor_access_required, student_access_required
+from appointment_workflows import appointment_notifications, validate_transition
 
 advisors_bp = Blueprint("advisors", __name__, url_prefix="/api/advisors")
 
 
 @advisors_bp.route("", methods=["GET"])
+@student_access_required
 def get_advisors():
     try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-        cursor.execute("""
+        with closing(get_db_connection()) as connection, closing(connection.cursor()) as cursor:
+            cursor.execute("""
             select
                 a.advisor_id,
                 u.full_name,
-                u.email,
                 u.profile_picture,
-                u.status,
                 a.specialization,
                 a.qualification,
                 a.experience_years,
                 coalesce((SELECT round(avg(rating),1) FROM review WHERE advisor_id=a.advisor_id), a.average_rating, 0) AS average_rating, a.institution, a.professional_title, a.bio
             from advisor a
             join app_user u on u.user_id = a.advisor_id
-            where coalesce(u.status, 'active') = 'active'
+            where u.role = 'advisor' and lower(u.status) = 'active'
             order by u.full_name asc
         """)
-        advisors = cursor.fetchall()
-        cursor.close()
-        connection.close()
+            advisors = cursor.fetchall()
         return jsonify(advisors)
     except Exception as e:
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @advisors_bp.route("/<int:advisor_id>/schedule", methods=["GET"])
@@ -74,7 +71,7 @@ def get_advisor_schedule(advisor_id):
             from appointment
             where advisor_id = %s
               and appointment_datetime::date = %s
-              and lower(coalesce(appointment_status, 'pending')) <> 'cancelled'
+              and lower(coalesce(appointment_status, 'pending')) not in ('cancelled','rejected')
         """, (advisor_id, malaysia_now().date()))
         today_count = cursor.fetchone()["count"]
 
@@ -121,7 +118,7 @@ def get_advisor_schedule(advisor_id):
 
         return jsonify({
             "summary": {
-                "this_week_count": sum(1 for item in appointments if (item['appointment_status'] or 'pending').lower() != 'cancelled'),
+                "this_week_count": sum(1 for item in appointments if (item['appointment_status'] or 'pending').lower() not in ('cancelled', 'rejected')),
                 "today_count": today_count,
                 "upcoming_count": upcoming_count,
                 "pending_count": pending_count,
@@ -135,7 +132,7 @@ def get_advisor_schedule(advisor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @advisors_bp.route("/<int:advisor_id>/appointments", methods=["GET"])
@@ -176,7 +173,7 @@ def get_advisor_appointments(advisor_id):
                 ap.appointment_id,
                 ap.appointment_datetime,
                 ap.duration_minutes,
-                ap.consultation_topic, ap.student_message, ap.student_id,
+                ap.consultation_topic, ap.student_message, ap.student_id, ap.rejection_reason,
                 u.profile_picture AS student_photo,
                 coalesce(ap.appointment_status, 'pending') as appointment_status,
                 coalesce(u.full_name, 'Student') as student_name,
@@ -208,17 +205,22 @@ def get_advisor_appointments(advisor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @advisors_bp.route("/<int:advisor_id>/appointments/<int:appointment_id>/status", methods=["PATCH"])
 @advisor_access_required
 def update_advisor_appointment_status(advisor_id, appointment_id):
-    data = request.get_json() or {}
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return error_response('Send an appointment status object.', 400)
     status = data.get("status")
+    reason = data.get('rejection_reason', '')
 
-    if status not in ["pending", "confirmed", "completed", "cancelled"]:
+    if status not in ["pending", "confirmed", "completed", "cancelled", "rejected"]:
         return error_response("Invalid appointment status", 400)
+    if status == 'rejected' and (not isinstance(reason, str) or not reason.strip() or len(reason.strip()) > 1000):
+        return error_response('Provide a rejection reason of 1–1000 characters.', 400)
 
     connection = None
     cursor = None
@@ -226,25 +228,29 @@ def update_advisor_appointment_status(advisor_id, appointment_id):
     try:
         connection = get_db_connection()
         cursor = connection.cursor()
-        # Coordinate status changes with new bookings so reactivating a cancelled
-        # appointment cannot reserve a slot that another student has since booked.
+        # Coordinate status changes with concurrent bookings and rescheduling.
         cursor.execute("SELECT user_id FROM app_user WHERE user_id = %s AND role = 'advisor' FOR UPDATE", (advisor_id,))
         if not cursor.fetchone():
             cursor.close()
             connection.close()
             return error_response("Advisor account not found", 404)
-        cursor.execute("SELECT student_id, appointment_datetime, duration_minutes FROM appointment WHERE appointment_id = %s AND advisor_id = %s FOR UPDATE", (appointment_id, advisor_id))
+        cursor.execute("SELECT student_id, appointment_datetime, duration_minutes, appointment_status FROM appointment WHERE appointment_id = %s AND advisor_id = %s FOR UPDATE", (appointment_id, advisor_id))
         current = cursor.fetchone()
         if not current:
             cursor.close()
             connection.close()
             return error_response("Appointment not found", 404)
+        transition_error = validate_transition(current, status, reason, malaysia_now())
+        if transition_error:
+            return error_response(transition_error, 409)
+        if (current.get('appointment_status') or 'pending').lower() == status:
+            return jsonify(message='Appointment status is already up to date.')
         if current["student_id"]:
             cursor.execute("SELECT student_id FROM student WHERE student_id = %s FOR UPDATE", (current["student_id"],))
         if status in ("pending", "confirmed") and current["appointment_datetime"]:
             cursor.execute("""SELECT appointment_id FROM appointment
                 WHERE appointment_id <> %s AND (advisor_id = %s OR student_id = %s)
-                  AND lower(coalesce(appointment_status, 'pending')) <> 'cancelled'
+                  AND lower(coalesce(appointment_status, 'pending')) not in ('cancelled','rejected')
                   AND appointment_datetime < %s + (%s * interval '1 minute')
                   AND appointment_datetime + (duration_minutes * interval '1 minute') > %s LIMIT 1""",
                 (appointment_id, advisor_id, current["student_id"], current["appointment_datetime"], current.get("duration_minutes", 30), current["appointment_datetime"]))
@@ -255,11 +261,11 @@ def update_advisor_appointment_status(advisor_id, appointment_id):
                 return error_response("This appointment overlaps an existing booking.", 409)
         cursor.execute("""
             update appointment
-            set appointment_status = %s
+            set appointment_status = %s, rejection_reason = %s
             where appointment_id = %s
               and advisor_id = %s
             returning appointment_id
-        """, (status, appointment_id, advisor_id))
+        """, (status, reason.strip() if status == 'rejected' else None, appointment_id, advisor_id))
 
         if not cursor.fetchone():
             connection.rollback()
@@ -267,6 +273,8 @@ def update_advisor_appointment_status(advisor_id, appointment_id):
             connection.close()
             return error_response("Appointment not found", 404)
 
+        event = 'Booking rejected. View the appointment for details' if status == 'rejected' else f'Status changed to {status}'
+        appointment_notifications(cursor, appointment_id, current['student_id'], advisor_id, event, current['appointment_datetime'])
         connection.commit()
         cursor.close()
         connection.close()
@@ -279,7 +287,12 @@ def update_advisor_appointment_status(advisor_id, appointment_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return error_response('Unable to update this appointment. No changes were saved.', 503)
+    finally:
+        if cursor is not None and not cursor.closed:
+            cursor.close()
+        if connection is not None and not connection.closed:
+            connection.close()
 
 
 @advisors_bp.route("/<int:advisor_id>/feedback", methods=["GET"])
@@ -454,7 +467,7 @@ def get_advisor_messages(advisor_id):
             cursor.close()
         if connection:
             connection.close()
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @advisors_bp.route("/<int:advisor_id>/messages/<int:conversation_id>", methods=["POST"])

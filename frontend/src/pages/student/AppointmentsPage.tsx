@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
 import { getApiErrorMessage } from "../../utils/apiError";
+import StudentAppointmentReview from "../../components/StudentAppointmentReview";
 
 type Advisor = {
   advisor_id: number;
@@ -35,6 +36,7 @@ type Appointment = {
   duration_minutes: number;
   appointment_datetime: string | null;
   appointment_status: string;
+  rejection_reason?: string | null;
 };
 
 function malaysiaDate() {
@@ -61,6 +63,7 @@ function AppointmentsPage() {
   const [studentMessage, setStudentMessage] = useState("");
   const [bookingError, setBookingError] = useState("");
   const [booking, setBooking] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [message, setMessage] = useState("");
   const [refresh, setRefresh] = useState(0);
   const [findNext, setFindNext] = useState(false);
@@ -209,6 +212,18 @@ function AppointmentsPage() {
 
   const completedCount = appointments.filter((appointment) => appointment.appointment_status.toLowerCase() === "completed").length;
 
+  async function cancelSelectedAppointment() {
+    if (!selectedAppointment || cancelling || !window.confirm("Cancel this appointment? Your advisor will be notified.")) return;
+    setCancelling(true); setBookingError("");
+    try {
+      await api.post(`/appointments/${selectedAppointment.appointment_id}/cancel`);
+      setAppointments(current => current.map(item => item.appointment_id === selectedAppointment.appointment_id ? { ...item, appointment_status: "cancelled" } : item));
+      setSelectedAppointment(current => current ? { ...current, appointment_status: "cancelled" } : current);
+      setMessage("Appointment cancelled. Your advisor has been notified."); setRefresh(value => value + 1);
+    } catch (err) { setBookingError(getApiErrorMessage(err, "Unable to cancel this appointment.")); }
+    finally { setCancelling(false); }
+  }
+
   return (
     <section className="student-appointments">
       <header className="sa-hero">
@@ -341,6 +356,10 @@ function AppointmentsPage() {
       <dialog ref={detailsDialog} className="sa-details-dialog" aria-labelledby="sa-details-title" onClick={(event) => { if (event.target === event.currentTarget) detailsDialog.current?.close(); }}>
         <header><h2 id="sa-details-title">Appointment Details</h2><button type="button" aria-label="Close appointment details" onClick={() => detailsDialog.current?.close()}><Icon name="close" /></button></header>
         {selectedAppointment && <dl><dt>Advisor</dt><dd>{selectedAppointment.advisor_name}</dd><dt>Date and time (Malaysia time)</dt><dd>{selectedAppointment.appointment_datetime ? formatAppointment(selectedAppointment.appointment_datetime) : "Date not set"}</dd><dt>Session length</dt><dd>{selectedAppointment.duration_minutes} minutes</dd><dt>Status</dt><dd className="sa-status">{selectedAppointment.appointment_status}</dd></dl>}
+        {selectedAppointment?.rejection_reason && <div className="appointment-rejection"><strong>Rejection Reason</strong><p>{selectedAppointment.rejection_reason}</p></div>}
+        {selectedAppointment && ["pending", "confirmed"].includes(selectedAppointment.appointment_status) && <button className="ss-button" type="button" disabled={cancelling} onClick={() => void cancelSelectedAppointment()}>{cancelling ? "Cancelling?" : "Cancel Appointment"}</button>}
+        {bookingError && <p role="alert">{bookingError}</p>}
+        {selectedAppointment?.appointment_status === "completed" && <StudentAppointmentReview key={selectedAppointment.appointment_id} appointmentId={selectedAppointment.appointment_id} onSaved={() => setRefresh(value => value + 1)} />}
         <button className="ss-button" type="button" onClick={() => detailsDialog.current?.close()}>Done</button>
       </dialog>
     </section>

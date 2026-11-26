@@ -7,6 +7,8 @@ from security import issue_access_token
 
 class BreakTests(unittest.TestCase):
     def setUp(self):
+        # Business-logic tests assume an active account; restriction tests cover the real lookup.
+        self.enterContext(patch("security.verify_active_account", return_value=None))
         self.schedule=empty_schedule();self.schedule['published']=True
         self.schedule['availability'][0].update(enabled=True,start_time='09:00',end_time='12:00')
         self.day=date(2026,11,9);self.now=datetime(2026,11,8)
@@ -30,6 +32,8 @@ class BreakTests(unittest.TestCase):
 
 class RescheduleTests(unittest.TestCase):
     def setUp(self):
+        # Business-logic tests assume an active account; restriction tests cover the real lookup.
+        self.enterContext(patch("security.verify_active_account", return_value=None))
         self.client=create_app().test_client();self.url='/api/advisors/7/appointments/20/reschedule'
         self.headers={'Authorization':'Bearer '+issue_access_token({'user_id':7,'role':'advisor'})}
         self.connection=MagicMock();self.cursor=self.connection.cursor.return_value.__enter__.return_value
@@ -51,8 +55,10 @@ class RescheduleTests(unittest.TestCase):
         now.return_value=self.now;db.return_value=self.connection;slots.return_value=['2026-11-09T09:00']
         response=self.client.patch(self.url,headers=self.headers,json={'appointment_datetime':'2026-11-09T09:00'})
         self.assertEqual(response.status_code,200,response.json)
-        self.assertEqual(self.cursor.execute.call_args.args[1],(datetime(2026,11,9,9),20,7))
-        self.assertNotIn('appointment_status=',self.cursor.execute.call_args.args[0])
+        update = next(call for call in self.cursor.execute.call_args_list if 'UPDATE appointment' in call.args[0])
+        self.assertEqual(update.args[1],(datetime(2026,11,9,9),20,7))
+        self.assertNotIn('appointment_status=',update.args[0])
+        self.assertIn('notification', self.cursor.execute.call_args.args[0])
     @patch('routes.advisor_scheduling.reschedule_slots',return_value=[])
     @patch('routes.advisor_scheduling.get_db_connection')
     @patch('routes.advisor_scheduling.malaysia_now')
@@ -62,12 +68,25 @@ class RescheduleTests(unittest.TestCase):
         self.assertFalse(any('UPDATE appointment' in call.args[0] for call in self.cursor.execute.call_args_list))
     @patch('routes.advisor_scheduling.get_db_connection')
     @patch('routes.advisor_scheduling.malaysia_now')
+    def test_retry_at_same_time_does_not_notify_again(self,now,db):
+        now.return_value=self.now;db.return_value=self.connection
+        self.cursor.fetchone.side_effect=[{'user_id':7},{
+            'appointment_id':20,'student_id':11,'duration_minutes':30,'appointment_status':'confirmed',
+            'appointment_datetime':datetime(2026,11,9,9)}]
+        response=self.client.patch(self.url,headers=self.headers,json={'appointment_datetime':'2026-11-09T09:00'})
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(self.cursor.execute.call_count,2)
+    @patch('routes.advisor_scheduling.get_db_connection')
+    @patch('routes.advisor_scheduling.malaysia_now')
     def test_completed_cannot_reschedule(self,now,db):
         now.return_value=self.now;db.return_value=self.connection
         self.cursor.fetchone.side_effect=[{'user_id':7},{'appointment_id':20,'student_id':11,'duration_minutes':30,'appointment_status':'completed'}]
         self.assertEqual(self.client.get(self.url+'?date=2026-11-09',headers=self.headers).status_code,409)
 
 class BookingContextTests(unittest.TestCase):
+    def setUp(self):
+        self.enterContext(patch("security.verify_active_account", return_value=None))
+
     @patch('routes.advisor_scheduling.get_db_connection')
     @patch('routes.advisor_scheduling.malaysia_now', return_value=datetime(2026,11,8,8))
     def test_invalid_topic_and_message_do_not_write(self,now,db):

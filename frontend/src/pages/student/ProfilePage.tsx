@@ -3,10 +3,12 @@ import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "r
 import { Link } from "react-router-dom";
 import Icon from "../../components/advisor/AdvisorIcon";
 import ProfileAvatar from "../../components/advisor/ProfileAvatar";
+import AcademicQualificationFields from "../../components/AcademicQualificationFields";
+import { academicResultError, emptyAcademicResult, qualificationLabels } from "../../utils/academicQualifications";
 import { getApiErrorMessage } from "../../utils/apiError";
 import "../../styles/student-profile.css";
 import api from "../../api/axios";
-import type { StudentProfile } from "../../types/student";
+import type { AcademicQualifications, AcademicResult, Qualification, StudentProfile } from "../../types/student";
 import { getStoredUser, storeUser } from "../../utils/authStorage";
 import { getProfileCompletion, PROFILE_UPDATED_EVENT } from "../../utils/profileCompletion";
 
@@ -20,6 +22,7 @@ type ProfileForm = {
   education_level: string;
   cgpa: string;
   field_of_study: string;
+  other_field_of_study: string;
   university: string;
 };
 
@@ -108,6 +111,8 @@ const fieldOfStudyOptions = [
 function toForm(profile: StudentProfile | null, fallback = getStoredUser()): ProfileForm {
   const rawDate = profile?.date_of_birth ? String(profile.date_of_birth) : "";
   const birthDate = /^\d{4}-\d{2}-\d{2}/.test(rawDate) ? rawDate.slice(0, 10) : rawDate && Number.isFinite(Date.parse(rawDate)) ? new Date(rawDate).toISOString().slice(0, 10) : "";
+  const fieldOfStudy = profile?.field_of_study?.trim() || "";
+  const isCustomField = fieldOfStudy !== "" && !fieldOfStudyOptions.includes(fieldOfStudy);
 
   return {
     full_name: profile?.full_name || fallback?.full_name || "",
@@ -118,7 +123,8 @@ function toForm(profile: StudentProfile | null, fallback = getStoredUser()): Pro
     nationality: profile?.nationality || "",
     education_level: profile?.education_level || "",
     cgpa: profile?.cgpa != null ? String(profile.cgpa) : "",
-    field_of_study: profile?.field_of_study || "",
+    field_of_study: isCustomField ? "Other" : fieldOfStudy,
+    other_field_of_study: isCustomField ? fieldOfStudy : "",
     university: profile?.university || "",
   };
 }
@@ -161,6 +167,9 @@ function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [savedProfile, setSavedProfile] = useState<StudentProfile | null>(null);
   const [savedForm, setSavedForm] = useState<ProfileForm>(toForm(null, user));
+  const [qualification, setQualification] = useState<Qualification | "">("");
+  const [qualificationDrafts, setQualificationDrafts] = useState<AcademicQualifications>({});
+  const qualificationPicker = useRef<HTMLSelectElement>(null);
   const [tab, setTab] = useState<"personal" | "academic">("personal");
   const [fields, setFields] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState(false);
@@ -181,6 +190,8 @@ function ProfilePage() {
         const response = await api.get<StudentProfile>(`/students/${profileUser.user_id}/profile`);
         const profileForm = toForm(response.data, profileUser);
         setSavedProfile(response.data);
+        setQualification((Object.keys(response.data.academic_qualifications ?? {})[0] as Qualification | undefined) ?? "");
+        setQualificationDrafts({});
         setSavedForm(profileForm);
         setForm(profileForm);
         setBirthDate(toDateParts(profileForm.date_of_birth));
@@ -210,7 +221,15 @@ function ProfilePage() {
   function discardChanges() {
     setForm(savedForm);
     setBirthDate(toDateParts(savedForm.date_of_birth));
+    setQualificationDrafts({});
     setFields({}); setError(""); setMessage("Unsaved changes discarded.");
+  }
+
+  function changeAcademicResult(result: AcademicResult) {
+    if (!qualification) return;
+    setQualificationDrafts(current => ({ ...current, [qualification]: result }));
+    setFields(current => ({ ...current, academic_results: "" }));
+    setMessage("");
   }
 
   async function uploadPhoto(file?: File) {
@@ -240,6 +259,13 @@ function ProfilePage() {
     }
 
     const errors: Record<string, string> = {};
+    const { other_field_of_study: customField, ...profileChanges } = form;
+    const fieldOfStudy = form.field_of_study === "Other" ? customField.trim() : form.field_of_study;
+    if (form.field_of_study === "Other" && (!fieldOfStudy || fieldOfStudy.toLowerCase() === "other" || fieldOfStudy.length > 100)) {
+      errors.other_field_of_study = "Enter your field of study using up to 100 characters.";
+      const details = event.currentTarget.querySelector<HTMLDetailsElement>(".sp-current-study");
+      if (details) details.open = true;
+    }
     if (form.full_name.trim().length < 2 || form.full_name.trim().length > 100) errors.full_name = "Enter your full name (2–100 characters).";
     const phone = form.phone_number.trim();
     if (phone && (!/^\+?[0-9 ()-]+$/.test(phone) || !/^\+?[0-9]{7,15}$/.test(phone.replace(/[ ()-]/g, "")))) errors.phone_number = "Enter 7–15 digits, with an optional +, spaces, brackets or hyphens.";
@@ -248,7 +274,14 @@ function ProfilePage() {
       const parsed = new Date(`${dob}T12:00:00Z`);
       if (!dob || !Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== dob || parsed.getTime() > new Date().setUTCHours(23, 59, 59, 999)) errors.date_of_birth = "Choose a valid birth date that is not in the future.";
     }
-    if (form.cgpa !== "" && (!Number.isFinite(Number(form.cgpa)) || Number(form.cgpa) < 0 || Number(form.cgpa) > 4)) errors.cgpa = "Enter a CGPA between 0.00 and 4.00.";
+    for (const [type, result] of Object.entries(qualificationDrafts)) {
+      const validation = academicResultError(result);
+      if (validation) {
+        errors.academic_results = validation;
+        setQualification(type as Qualification);
+        break;
+      }
+    }
     if (Object.keys(errors).length) {
       setFields(errors); setTab(errors.full_name || errors.phone_number || errors.date_of_birth ? "personal" : "academic");
       setError("Please correct the highlighted fields before saving."); return;
@@ -256,11 +289,15 @@ function ProfilePage() {
     try {
       setIsSaving(true);
       const response = await api.put<StudentProfile>(`/students/${user.user_id}/profile`, {
-        ...form,
+        ...profileChanges,
+        field_of_study: fieldOfStudy,
+        cgpa: undefined,
         date_of_birth: toDateString(birthDate),
+        ...(Object.keys(qualificationDrafts).length ? { academic_qualifications: qualificationDrafts } : {}),
       });
       const profileForm = toForm(response.data, user);
       setSavedProfile(response.data);
+      setQualificationDrafts({});
       setSavedForm(profileForm);
       setFields({});
       setForm(profileForm);
@@ -280,6 +317,13 @@ function ProfilePage() {
   }
 
   const busy = isLoading || isSaving || uploading;
+  const recordedQualifications = (Object.keys(qualificationLabels) as Qualification[])
+    .filter(type => savedProfile?.academic_qualifications?.[type] || qualificationDrafts[type]);
+
+  function selectQualification(type: Qualification | "") {
+    setQualification(type);
+    setFields(current => ({ ...current, academic_results: "" }));
+  }
   return (
     <section className="student-profile">
       <header className="sp-hero">
@@ -385,48 +429,64 @@ function ProfilePage() {
 
               </section>
               <section id="sp-academic" role="tabpanel" aria-labelledby="sp-academic-tab" hidden={tab !== "academic"}>
-                <h2>Academic Information</h2><p className="sp-description">Your current studies and academic achievements.</p>
-          <div className="profile-form-grid">
-            <label>
-              <span>Education level</span>
-              <select name="education_level" value={form.education_level} onChange={handleChange}>
-                <option value="">Select education level</option>
-                <option value="Foundation">Foundation</option>
-                <option value="Diploma">Diploma</option>
-                <option value="Undergraduate">Undergraduate</option>
-                <option value="Postgraduate">Postgraduate</option>
-              </select>
-            </label>
-            <label>
-              <span>CGPA</span>
-              <input
-                name="cgpa" aria-invalid={!!fields.cgpa} aria-describedby={fields.cgpa ? "sp-error-cgpa" : undefined}
-                type="number"
-                min="0"
-                max="4"
-                step="0.01"
-                value={form.cgpa}
-                onChange={handleChange}
-              />
-              {fields.cgpa && <small className="sp-field-error" id="sp-error-cgpa">{fields.cgpa}</small>}
-            </label>
-            <label>
-              <span>Field of study</span>
-              <select name="field_of_study" value={form.field_of_study} onChange={handleChange}>
-                <option value="">Select field of study</option>
-                {fieldOfStudyOptions.map((field) => (
-                  <option value={field} key={field}>
-                    {field}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>University</span>
-              <input name="university" value={form.university} onChange={handleChange} />
-            </label>
-          </div>
-
+                <h2>Academic Information</h2>
+                <p className="sp-description">Choose the qualification whose results you want to record. Your current education level is saved separately.</p>
+                <div className="profile-form-grid">
+                  <div className="sp-qualification-picker">
+                    <label htmlFor="sp-academic-qualification">Academic Qualification</label>
+                    <div>
+                    <select id="sp-academic-qualification" ref={qualificationPicker} name="academic_qualification"
+                      value={qualification} onChange={event => selectQualification(event.target.value as Qualification | "")}>
+                      <option value="">Select an academic qualification</option>
+                      {Object.entries(qualificationLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                    </select>
+                    <button className="sp-discard" type="button" onClick={() => {
+                      selectQualification("");
+                      qualificationPicker.current?.focus();
+                    }}><span aria-hidden="true">+</span> Add qualification</button>
+                    </div>
+                  </div>
+                  <label>Current Education Level
+                    <select name="education_level" value={form.education_level} onChange={handleChange}>
+                      <option value="">Select education level</option>
+                      {form.education_level && !["Foundation", "Diploma", "Undergraduate", "Postgraduate"].includes(form.education_level) && <option>{form.education_level}</option>}
+                      {["Foundation", "Diploma", "Undergraduate", "Postgraduate"].map(level => <option key={level}>{level}</option>)}
+                    </select>
+                  </label>
+                </div>
+                {recordedQualifications.length > 0 && <ul className="sp-recorded-qualifications" aria-label="Recorded qualifications">
+                  {recordedQualifications.map(type => <li key={type}>
+                    <button type="button" className="sp-discard" aria-pressed={qualification === type} onClick={() => selectQualification(type)}>
+                      {qualificationLabels[type]}{qualificationDrafts[type] && <small>Unsaved</small>}
+                    </button>
+                  </li>)}
+                </ul>}
+                {qualification && <AcademicQualificationFields qualification={qualification} result={{
+                  ...emptyAcademicResult(qualification), ...savedProfile?.academic_qualifications?.[qualification], ...qualificationDrafts[qualification],
+                }} onChange={changeAcademicResult} />}
+                {fields.academic_results && <p className="sp-field-error" role="alert">{fields.academic_results}</p>}
+                <details className="sp-current-study">
+                  <summary>Current study details</summary>
+                  {form.cgpa && <p className="sp-description">Previously saved profile CGPA: {form.cgpa}. Qualification results are recorded separately above.</p>}
+                  <div className="profile-form-grid">
+                    <label>Current field of study
+                      <select name="field_of_study" value={form.field_of_study} onChange={handleChange}>
+                        <option value="">Select field of study</option>
+                        {fieldOfStudyOptions.map(field => <option key={field}>{field}</option>)}
+                      </select>
+                    </label>
+                    {form.field_of_study === "Other" && <label>Enter your field of study
+                      <input name="other_field_of_study" value={form.other_field_of_study} maxLength={100} required
+                        aria-invalid={!!fields.other_field_of_study}
+                        aria-describedby={fields.other_field_of_study ? "sp-other-field-error" : undefined}
+                        onChange={handleChange} />
+                      {fields.other_field_of_study && <small className="sp-field-error" id="sp-other-field-error">{fields.other_field_of_study}</small>}
+                    </label>}
+                    <label>Current institution / university
+                      <input name="university" value={form.university} onChange={handleChange} />
+                    </label>
+                  </div>
+                </details>
               </section>
             </fieldset>
             <footer className="sp-footer"><button className="sp-discard" type="button" disabled={busy} onClick={discardChanges}>Discard</button><button className="ss-button" type="submit" disabled={busy}><span aria-hidden="true">✓</span>{isSaving ? "Saving…" : "Save Changes"}</button></footer>

@@ -12,6 +12,8 @@ from security import issue_access_token
 
 class ScholarshipReminderTests(unittest.TestCase):
     def setUp(self):
+        # Business-logic tests assume an active account; restriction tests cover the real lookup.
+        self.enterContext(patch("security.verify_active_account", return_value=None))
         self.app = create_app()
         self.app.testing = True
         self.client = self.app.test_client()

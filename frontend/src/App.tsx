@@ -18,6 +18,7 @@ import RegisterPage from "./pages/student/RegisterPage";
 import ScholarshipsPage from "./pages/student/ScholarshipsPage";
 import SettingsPage from "./pages/student/SettingsPage";
 import StudentDashboard from "./pages/student/StudentDashboard";
+import AcademicPathwaysPage from "./pages/student/AcademicPathwaysPage";
 import AdminApplicationsPage from "./pages/admin/AdminApplicationsPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPathwaysPage from "./pages/admin/AdminPathwaysPage";
@@ -56,6 +57,7 @@ function App() {
           <Route path="/dashboard" element={<StudentDashboard />} />
           <Route path="/scholarships" element={<ScholarshipsPage />} />
           <Route path="/pathway-quiz" element={<PathwayQuizPage />} />
+          <Route path="/academic-pathways" element={<AcademicPathwaysPage />} />
           <Route path="/appointments" element={<AppointmentsPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/reminders" element={<Navigate to="/calendar?section=reminders" replace />} />

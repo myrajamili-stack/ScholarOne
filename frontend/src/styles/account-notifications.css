@@ -1,0 +1,76 @@
+.account-notifications { position: relative; flex: none; color: #422b69; font-size: 14px; }
+.account-notifications > summary {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 49px;
+  height: 49px;
+  padding: 0;
+  border: 1px solid #eee5ff;
+  border-radius: 50%;
+  background: #fffdff;
+  color: #35205a;
+  box-shadow: 0 4px 12px #9c7ac723;
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 150ms ease;
+}
+.account-notifications > summary::-webkit-details-marker { display: none; }
+.account-notifications > summary:hover, .account-notifications[open] > summary { background: #f3ebff; }
+.account-notifications :is(summary, button, a):focus-visible { outline: 2px solid #7b43c9; outline-offset: 2px; }
+.account-notifications > summary b {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 3px;
+  border: 2px solid white;
+  border-radius: 12px;
+  background: #7139c9;
+  color: white;
+  font-size: 10px;
+}
+.account-notifications > section {
+  position: absolute;
+  right: calc(-1 * var(--notification-offset, 0px));
+  top: calc(100% + 8px);
+  z-index: 30;
+  width: min(360px, calc(100vw - 24px));
+  max-height: 65dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+  padding: 16px;
+  border: 1px solid #ddd0f3;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 12px 40px #23124130;
+}
+.account-notifications-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.account-notifications-heading h2 { margin: 0; font-size: 18px; }
+.account-notifications > section > p { margin: 10px 0 0; font-size: 13px; }
+.account-notifications [role="alert"] { color: #a92349; }
+.account-notifications article { margin-top: 8px; padding: 10px; border: 1px solid #eee7f7; border-radius: 10px; }
+.account-notifications article h3 { margin: 0 0 4px; font-size: 14px; font-weight: 650; overflow-wrap: anywhere; }
+.account-notifications article p { margin: 0; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.account-notifications article time { display: block; margin: 4px 0 8px; color: #675587; font-size: 12px; font-weight: 400; }
+.account-notifications article.unread { border-inline-start: 3px solid #7139c9; background: #f8f3ff; }
+.account-notifications button { background: #f4efff; border: 1px solid #ded1f5; border-radius: 8px; color: #542591; padding: 6px 10px; font: inherit; font-size: 12px; cursor: pointer; }
+.account-notifications button[aria-disabled="true"] { opacity: .65; cursor: default; }
+.account-notifications .account-notifications-close { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; }
+.account-notifications-close svg { width: 18px; height: 18px; }
+.account-notifications-links { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 12px; }
+.account-notifications-links a { color: #542591; font-size: 12px; font-weight: 650; }
+@media (max-width: 700px) {
+  .account-notifications > summary { width: 44px; height: 44px; }
+}
+.appointment-rejection { border-left: 4px solid #be405a; padding: 14px; background: #fff0f4; border-radius: 10px; white-space: pre-line; }
+.appointment-review-form { display: grid; gap: 14px; margin: 22px 0; padding-top: 18px; border-top: 1px solid #e3d8f2; }
+.appointment-review-form label { display: grid; gap: 7px; }
+.appointment-review-form select, .appointment-review-form textarea { width: 100%; padding: 10px; border: 1px solid #dbcfef; border-radius: 10px; }
+
+.am-status.rejected { background: #fff0f4; color: #ae4566; }
+.am-request.rejected::before { background: #e8a1b7; }

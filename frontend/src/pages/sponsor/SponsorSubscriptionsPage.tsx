@@ -163,6 +163,7 @@ function SponsorSubscriptionsPage() {
       {error && <div className="sponsor-form-error" role="alert">{error}</div>}
       {success && <div className="sponsor-form-success" role="status">{success}</div>}
 
+      {!isFree && !data.current_subscription.stripe_subscription_id && <p role="status" className="sponsor-form-error">This legacy plan has no linked Stripe payment record. Contact the administrator to verify payment evidence.</p>}
       <section className="sps-overview" aria-label="Subscription summary">
         <article className="sponsor-panel sps-current-plan">
           <div className="sps-plan-identity">

@@ -7,6 +7,7 @@
 .billing-summary dt { font-size: 12px; color: #75558e; margin-bottom: 7px; }
 .billing-summary dd { margin: 0; font-size: 16px; font-weight: 750; color: #30134e; text-transform: capitalize; }
 .billing-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.subscription-billing .billing-actions + h3 { margin-top: 24px; }
 .billing-secondary { border: 1px solid #c9a8ed; padding: 10px 18px; border-radius: 12px; background: #faf6ff; color: #6924c5; cursor: pointer; }
 .billing-table-wrap { overflow-x: auto; }
 .billing-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }

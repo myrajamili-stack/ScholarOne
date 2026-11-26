@@ -33,6 +33,8 @@ class AssessmentPersistenceTests(unittest.TestCase):
         cls.rankings = ["value-1", "value-5", "value-6"]
 
     def setUp(self):
+        # Business-logic tests assume an active account; restriction tests cover the real lookup.
+        self.enterContext(patch("security.verify_active_account", return_value=None))
         self.app = create_app()
         self.app.testing = True
         self.client = self.app.test_client()

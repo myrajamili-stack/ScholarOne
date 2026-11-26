@@ -76,6 +76,7 @@ function LoginPage({ audience = "student" }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [decision, setDecision] = useState<{ reason: string; canResubmit: boolean } | null>(null);
   const [successMessage] = useState(locationState?.message || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isStaffLogin = audience === "staff";
@@ -85,6 +86,7 @@ function LoginPage({ audience = "student" }: LoginPageProps) {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    setDecision(null);
     setIsSubmitting(true);
 
     try {
@@ -113,6 +115,14 @@ function LoginPage({ audience = "student" }: LoginPageProps) {
       storeAccessToken(response.data.access_token);
       navigate(getDashboardPath(userRole));
     } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        const details = error.response.data;
+        if (details?.code === "provider_registration_rejected" && typeof details.reason === "string") {
+          setError("Your provider registration was rejected.");
+          setDecision({ reason: details.reason, canResubmit: details.can_resubmit === true });
+          return;
+        }
+      }
       setError(getApiErrorMessage(error,
         axios.isAxiosError(error) && !error.response
           ? "Cannot connect to the login server. Make sure the ScholarOne backend is running and try again."
@@ -190,6 +200,10 @@ function LoginPage({ audience = "student" }: LoginPageProps) {
             <label className="login-remember"><input type="checkbox" checked={rememberEmail} onChange={(event) => setRememberEmail(event.target.checked)} />Remember email</label>
 
             {error && <p className="auth-error" role="alert">{error}</p>}
+            {decision && <div>
+              <p><strong>Review reason:</strong> {decision.reason}</p>
+              {decision.canResubmit && <p><Link to="/register?role=sponsor&resubmit=true">Correct and resubmit your registration</Link> using your existing email and password.</p>}
+            </div>}
 
             <button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Logging in..." : "Log In"}

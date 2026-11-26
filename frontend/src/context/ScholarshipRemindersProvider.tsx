@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { retryRead } from '../utils/retryRead'
 import api from '../api/axios'
 import { getAccessToken } from '../utils/authStorage'
 import { getApiErrorMessage } from '../utils/apiError'
@@ -16,7 +17,7 @@ export default function ScholarshipRemindersProvider({ children }: { children: R
     request.current = controller
     try {
       if (!getAccessToken()) throw new Error('Sign in again to use scholarship reminders.')
-      const response = await api.get<ScholarshipReminder[]>('/scholarship-reminders', { signal: controller.signal, timeout: 15000 })
+      const response = await retryRead(() => api.get<ScholarshipReminder[]>('/scholarship-reminders', { signal: controller.signal, timeout: 15000 }), controller.signal)
       if (!controller.signal.aborted) { setReminders(response.data); setError('') }
     } catch (error) {
       if (!controller.signal.aborted) setError(getApiErrorMessage(error,
@@ -32,11 +33,13 @@ export default function ScholarshipRemindersProvider({ children }: { children: R
     const onFocus = () => { void refresh() }
     const onVisible = () => { if (!document.hidden) void refresh() }
     window.addEventListener('focus', onFocus)
+    window.addEventListener('online', onFocus)
     document.addEventListener('visibilitychange', onVisible)
     return () => {
       window.clearTimeout(initialLoad)
       window.clearInterval(timer)
       window.removeEventListener('focus', onFocus)
+      window.removeEventListener('online', onFocus)
       document.removeEventListener('visibilitychange', onVisible)
       request.current?.abort()
     }

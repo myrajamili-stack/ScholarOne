@@ -5,6 +5,8 @@ import PathwayArtwork from "../../components/student/PathwayArtwork";
 import api from "../../api/axios";
 import CareerAssessment from "../../components/CareerAssessment";
 import CareerAssessmentResults from "../../components/CareerAssessmentResults";
+import StudentAdvisorQuiz from "../../components/StudentAdvisorQuiz";
+import type { SavedAdvisorQuiz } from "../../types/advisorQuiz";
 import type { SavedCareerAssessmentAttempt } from "../../types/careerAssessment";
 import { getApiErrorMessage } from "../../utils/apiError";
 import { getAccessToken } from "../../utils/authStorage";
@@ -29,6 +31,10 @@ function PathwayQuizPage() {
   const [isLoadingResults, setIsLoadingResults] = useState(true);
   const [resultsError, setResultsError] = useState("");
   const [resultsRequest, setResultsRequest] = useState(0);
+  const [advisorAttempts, setAdvisorAttempts] = useState<SavedAdvisorQuiz[]>([]);
+  const [advisorResultsError, setAdvisorResultsError] = useState("");
+  const [activeAdvisorQuiz, setActiveAdvisorQuiz] = useState<number | null>(null);
+  const advisorPanel = useRef<HTMLElement>(null);
   const resultsDialog = useRef<HTMLDialogElement>(null);
   const resultsController = useRef<AbortController | null>(null);
   const assessmentPanel = useRef<HTMLElement>(null);
@@ -41,6 +47,16 @@ function PathwayQuizPage() {
     if (isAssessmentOpen) { assessmentPanel.current?.scrollIntoView({ behavior: "smooth", block: "start" }); assessmentPanel.current?.focus({ preventScroll: true }); }
   }, [isAssessmentOpen]);
   const advisorQuizzes = quizzes.filter((quiz) => quiz.title.trim().toUpperCase() !== "CAREER ASSESSMENT");
+  useEffect(() => {
+    if (activeAdvisorQuiz !== null) advisorPanel.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [activeAdvisorQuiz]);
+  useEffect(() => {
+    const controller = new AbortController();
+    api.get<{ attempts: SavedAdvisorQuiz[] }>("/quizzes/attempts", { signal: controller.signal }).then(({ data }) => {
+      if (!controller.signal.aborted) { setAdvisorAttempts(data.attempts); setAdvisorResultsError(""); }
+    }).catch(err => { if (!controller.signal.aborted) setAdvisorResultsError(getApiErrorMessage(err, "Unable to load advisor quiz results.")); });
+    return () => controller.abort();
+  }, [resultsRequest]);
 
   useEffect(() => {
     async function loadQuizzes() {
@@ -134,9 +150,10 @@ function PathwayQuizPage() {
             <PathwayArtwork name={index % 2 === 0 ? "academic" : "interest"} className="spq-quiz-art" />
             <div className="spq-quiz-copy"><h3>{quiz.title}</h3><p>{quiz.description || "Explore academic pathways with guidance from your advisor."}</p><small>By {quiz.advisor_name || "Academic Advisor"}</small></div>
             <div className="spq-meta"><span><Icon name="quiz" />{quiz.question_count || 0} Questions</span><span><Icon name="graduation" />Advisor Prepared</span></div>
-            <span className="spq-unavailable">Preview only</span>
+            <button type="button" className="ss-button" onClick={() => setActiveAdvisorQuiz(quiz.quiz_id)}>Take Quiz / View Results</button>
           </article>)}
-          {advisorQuizzes.length > 0 && <p className="spq-helper">Advisor quizzes are available to preview. Online submissions for these quizzes are not supported yet.</p>}
+          {advisorQuizzes.length > 0 && <p className="spq-helper">Answer advisor-created quizzes and save your outcomes to your account.</p>}
+          <section className="spq-results"><div><h3>Saved Advisor Quiz Results</h3>{advisorResultsError && <p role="alert">{advisorResultsError}</p>}{advisorAttempts.length ? advisorAttempts.map(attempt => <p key={attempt.quiz_id}><strong>{attempt.result.quiz_title}</strong> · {attempt.result.leading_outcomes.join(', ')} <button className="ss-button" type="button" onClick={() => setActiveAdvisorQuiz(attempt.quiz_id)}>View Saved Result</button></p>) : <p>Explore the quiz first!</p>}</div></section>
           <section className="spq-results" aria-labelledby="spq-results-title"><PathwayArtwork name="strengths" className="spq-results-art" /><div className="spq-results-copy"><h3 id="spq-results-title">Your Assessment Results</h3>
             {isLoadingResults ? <p role="status">Loading saved results…</p> : resultsError ? <div role="alert"><p>{resultsError}</p><button type="button" onClick={() => { setIsLoadingResults(true); setResultsRequest((current) => current + 1); }}>Try again</button></div> : latestAttempt ? <><p>Career Assessment · {latestAttempt.result.hollandCode}</p><button className="ss-button" type="button" aria-haspopup="dialog" onClick={() => resultsDialog.current?.showModal()}>View Results <Icon name="chevron" /></button></> : <p>Your completed Career Assessment results will appear here.</p>}
           </div></section>
@@ -148,6 +165,7 @@ function PathwayQuizPage() {
         </aside>
       </div>
       {isAssessmentOpen && <section className="spq-assessment" ref={assessmentPanel} tabIndex={-1} aria-label="Career Assessment"><div className="spq-assessment-toolbar"><strong>Your Career Assessment</strong><button type="button" onClick={() => quizList.current?.scrollIntoView({ behavior: "smooth" })}>Back to quiz list ↑</button></div><CareerAssessment onSaved={handleAssessmentSaved} /></section>}
+      {activeAdvisorQuiz !== null && <section ref={advisorPanel}><StudentAdvisorQuiz key={activeAdvisorQuiz} quizId={activeAdvisorQuiz} onSaved={() => setResultsRequest(value => value + 1)} /></section>}
     </section>
   );
 }

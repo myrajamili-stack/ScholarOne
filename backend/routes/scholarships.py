@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify
 
 from db import get_db_connection
-from responses import error_response
+from responses import error_response, internal_error_response
 from scholarship_imports import enrich_scholarship
+from scholarship_availability import PUBLISHED_SCHOLARSHIP, malaysia_now
 
 scholarships_bp = Blueprint("scholarships", __name__, url_prefix="/api/scholarships")
 
@@ -12,7 +13,7 @@ def get_scholarships():
     try:
         connection = get_db_connection()
         cursor = connection.cursor()
-        cursor.execute("""
+        cursor.execute(f"""
             select
                 s.scholarship_id,
                 s.sponsor_id,
@@ -31,15 +32,16 @@ def get_scholarships():
                 s.import_metadata
             from scholarship s
             left join sponsor sp on sp.sponsor_id = s.sponsor_id
-            where lower(coalesce(s.status, 'pending')) in ('approved', 'active')
+            where {PUBLISHED_SCHOLARSHIP}
             order by s.created_at desc
         """)
         scholarships = cursor.fetchall()
         cursor.close()
         connection.close()
-        return jsonify([enrich_scholarship(scholarship) for scholarship in scholarships])
+        now = malaysia_now()
+        return jsonify([enrich_scholarship(scholarship, now) for scholarship in scholarships])
     except Exception as e:
-        return error_response(str(e), 500)
+        return internal_error_response(e)
 
 
 @scholarships_bp.route("/<int:scholarship_id>", methods=["GET"])
@@ -47,14 +49,14 @@ def get_scholarship(scholarship_id):
     try:
         connection = get_db_connection()
         cursor = connection.cursor()
-        cursor.execute("""
+        cursor.execute(f"""
             select
                 s.*,
                 sp.organization_name
             from scholarship s
             left join sponsor sp on sp.sponsor_id = s.sponsor_id
             where s.scholarship_id = %s
-              and lower(coalesce(s.status, 'pending')) in ('approved', 'active')
+              and {PUBLISHED_SCHOLARSHIP}
         """, (scholarship_id,))
         scholarship = cursor.fetchone()
         cursor.close()
@@ -65,4 +67,4 @@ def get_scholarship(scholarship_id):
 
         return jsonify(enrich_scholarship(scholarship))
     except Exception as e:
-        return error_response(str(e), 500)
+        return internal_error_response(e)

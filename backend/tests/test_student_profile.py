@@ -9,6 +9,8 @@ from security import issue_access_token
 
 class StudentProfileTests(unittest.TestCase):
     def setUp(self):
+        # Business-logic tests assume an active account; restriction tests cover the real lookup.
+        self.enterContext(patch("security.verify_active_account", return_value=None))
         self.app = Flask(__name__)
         self.directory = TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
@@ -28,6 +30,51 @@ class StudentProfileTests(unittest.TestCase):
         response = self.client.put('/api/students/1/profile', headers=self.headers, json={'full_name':'Sarah Lee', 'phone_number':'letters'})
         self.assertEqual(response.status_code, 400)
         db.assert_not_called()
+
+    @patch('routes.students.get_db_connection')
+    def test_field_of_study_rejects_placeholder_and_saves_custom_text(self, db):
+        path = '/api/students/1/profile'
+        profile = {'full_name': 'Sarah Lee'}
+        for field in ('Other', 'x' * 101):
+            self.assertEqual(self.client.put(path, headers=self.headers, json={**profile, 'field_of_study': field}).status_code, 400)
+        db.assert_not_called()
+        cursor = db.return_value.cursor.return_value
+        cursor.fetchone.return_value = {'user_id': 1, 'field_of_study': 'Marine Robotics'}
+        response = self.client.put(path, headers=self.headers, json={**profile, 'field_of_study': ' Marine Robotics '})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Marine Robotics', cursor.execute.call_args_list[1].args[1])
+
+    @patch('routes.students.get_db_connection')
+    def test_valid_update_saves_both_tables_and_returns_reloaded_profile(self, db):
+        cursor = db.return_value.cursor.return_value
+        cursor.fetchone.return_value = {'user_id': 1, 'full_name': 'Sarah Lee', 'cgpa': 3.8}
+        response = self.client.put('/api/students/1/profile', headers=self.headers,
+                                   json={'full_name': ' Sarah Lee ', 'cgpa': '3.8', 'university': 'Example University'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json['full_name'], 'Sarah Lee')
+        calls = cursor.execute.call_args_list
+        self.assertIn('update app_user', calls[0].args[0])
+        self.assertEqual(calls[0].args[1][0], 'Sarah Lee')
+        self.assertIn('update student', calls[1].args[0])
+        db.return_value.commit.assert_called_once()
+        db.assert_called_once()
+
+    @patch('routes.students.get_db_connection')
+    def test_missing_profile_rolls_back_account_change(self, db):
+        db.return_value.cursor.return_value.fetchone.return_value = None
+        response = self.client.put('/api/students/1/profile', headers=self.headers,
+                                   json={'full_name': 'Sarah Lee'})
+        self.assertEqual(response.status_code, 404)
+        db.return_value.rollback.assert_called_once()
+        db.return_value.commit.assert_not_called()
+
+    @patch('routes.students.get_db_connection')
+    def test_failed_profile_update_rolls_back(self, db):
+        db.return_value.cursor.return_value.execute.side_effect = [None, RuntimeError('Update failed')]
+        response = self.client.put('/api/students/1/profile', headers=self.headers, json={'full_name': 'Sarah Lee'})
+        self.assertEqual(response.status_code, 500)
+        db.return_value.rollback.assert_called_once()
+        db.return_value.commit.assert_not_called()
 
     @patch('routes.students.get_db_connection')
     def test_owner_required_for_profile_and_photo(self, db):

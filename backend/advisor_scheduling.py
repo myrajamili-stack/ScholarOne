@@ -95,7 +95,7 @@ def available_slots(schedule, selected_date, appointments, now=None):
     duration = timedelta(minutes=schedule.get('slot_minutes', SLOT_MINUTES))
     busy = [(item['appointment_datetime'], timedelta(minutes=item.get('duration_minutes') or SLOT_MINUTES))
             for item in appointments if item['appointment_datetime'] and
-            (item.get('appointment_status') or 'pending').lower() != 'cancelled']
+            (item.get('appointment_status') or 'pending').lower() not in ('cancelled', 'rejected')]
     for item in schedule.get('daily_breaks', []):
         break_start = datetime.combine(selected_date, datetime.strptime(item['start_time'], '%H:%M').time())
         break_end = datetime.combine(selected_date, datetime.strptime(item['end_time'], '%H:%M').time())

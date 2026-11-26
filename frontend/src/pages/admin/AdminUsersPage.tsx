@@ -6,8 +6,9 @@ import "../../styles/admin-users.css";
 import api from "../../api/axios";
 import { getApiErrorMessage } from "../../utils/apiError";
 import { getInitials } from "../../utils/userDisplay";
+import { getStoredUser, storeUser } from "../../utils/authStorage";
 
-type UserStatus = "active" | "disabled" | "suspended" | "pending";
+type UserStatus = "active" | "disabled" | "suspended" | "pending" | "rejected";
 
 type AdminUserRecord = {
   user_id: number;
@@ -16,7 +17,16 @@ type AdminUserRecord = {
   phone_number: string | null;
   role: string;
   status: UserStatus | string;
+  provider_rejection_reason?: string | null;
   created_at: string | null;
+  date_of_birth?: string | null;
+  gender?: string | null;
+  nationality?: string | null;
+  cgpa?: number | string | null;
+  experience_years?: number | string | null;
+  institution?: string | null;
+  professional_title?: string | null;
+  bio?: string | null;
   education_level?: string | null;
   field_of_study?: string | null;
   university?: string | null;
@@ -45,7 +55,13 @@ type UsersResponse = {
 };
 
 const roleOptions = ["all", "student", "sponsor", "advisor", "admin"];
-const statusOptions = ["all", "active", "pending", "disabled", "suspended"];
+const statusOptions = ["all", "active", "pending", "disabled", "suspended", "rejected"];
+const profileFields: Record<string, { name: keyof AdminUserRecord; label: string; maxLength: number }[]> = {
+  student: [{name:"date_of_birth",label:"Date of Birth",maxLength:10},{name:"gender",label:"Gender",maxLength:30},{name:"nationality",label:"Nationality",maxLength:100},{name:"cgpa",label:"CGPA",maxLength:10},{ name: "education_level", label: "Education Level", maxLength: 100 }, { name: "field_of_study", label: "Field of Study", maxLength: 100 }, { name: "university", label: "University / Institution", maxLength: 150 }],
+  advisor: [{name:"experience_years",label:"Years of Experience",maxLength:10},{name:"institution",label:"Institution",maxLength:150},{name:"professional_title",label:"Professional Title",maxLength:100},{name:"bio",label:"Biography",maxLength:300},{ name: "specialization", label: "Specialization", maxLength: 100 }, { name: "qualification", label: "Qualification", maxLength: 150 }],
+  sponsor: [{ name: "organization_name", label: "Organisation Name", maxLength: 200 }, { name: "website", label: "Website", maxLength: 500 }],
+  admin: [{ name: "department", label: "Department", maxLength: 100 }],
+};
 
 function formatRole(role: string) {
   const labels: Record<string, string> = {
@@ -103,6 +119,9 @@ function AdminUsersPage() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [actionUser, setActionUser] = useState<AdminUserRecord | null>(null);
   const [addingUser, setAddingUser] = useState(false);
+  const [editingUser, setEditingUser] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [success, setSuccess] = useState("");
   const [formError, setFormError] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -180,6 +199,8 @@ function AdminUsersPage() {
   function openDialog(user: AdminUserRecord | null) {
     setActionUser(user);
     setAddingUser(user === null);
+    setEditingUser(false);
+    setConfirmingDelete(false);
     setFormError("");
     modalRef.current?.showModal();
   }
@@ -204,14 +225,14 @@ function AdminUsersPage() {
     });
   }
 
-  async function updateUserStatus(userId: number, status: UserStatus) {
+  async function updateUserStatus(userId: number, status: UserStatus, rejection_reason = "") {
     if (operationPending.current) return;
     operationPending.current = true;
     setUpdatingUserId(userId);
     setFormError("");
     setSuccess("");
     try {
-      const response = await api.patch<{ user: AdminUserRecord }>(`/admin/users/${userId}/status`, { status });
+      const response = await api.patch<{ user: AdminUserRecord }>(`/admin/users/${userId}/status`, { status, rejection_reason });
       setUsers((current) => current.map((user) => user.user_id === userId ? { ...user, ...response.data.user } : user));
       setSuccess("Account status updated successfully.");
       modalRef.current?.close();
@@ -219,6 +240,52 @@ function AdminUsersPage() {
       setFormError(getApiErrorMessage(requestError, "Unable to update account status."));
     } finally {
       setUpdatingUserId(null);
+      operationPending.current = false;
+    }
+  }
+
+  async function deleteUserAccount() {
+    if (!actionUser || operationPending.current) return;
+    operationPending.current = true;
+    setIsDeleting(true); setFormError(""); setSuccess("");
+    try {
+      await api.delete(`/admin/users/${actionUser.user_id}`, { data: { confirm_user_id: actionUser.user_id } });
+      setUsers(current => current.filter(user => user.user_id !== actionUser.user_id));
+      setSelectedIds(current => { const next = new Set(current); next.delete(actionUser.user_id); return next; });
+      setSuccess("Account deleted successfully.");
+      modalRef.current?.close();
+    } catch (requestError) {
+      setFormError(getApiErrorMessage(requestError, "Unable to delete the account."));
+    } finally {
+      setIsDeleting(false); operationPending.current = false;
+    }
+  }
+
+  async function updateUserProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!actionUser || operationPending.current) return;
+    const values = new FormData(event.currentTarget);
+    const payload = Object.fromEntries(values.entries());
+    if (/\p{Decimal_Number}/u.test(String(payload.full_name))) {
+      setFormError("Full name must not contain numbers."); return;
+    }
+    operationPending.current = true;
+    setIsCreating(true);
+    setFormError(""); setSuccess("");
+    try {
+      const response = await api.patch<{ user: AdminUserRecord }>(`/admin/users/${actionUser.user_id}`, payload);
+      setUsers(current => current.map(user => user.user_id === actionUser.user_id ? { ...user, ...response.data.user } : user));
+      setActionUser(current => current ? { ...current, ...response.data.user } : current);
+      const signedIn = getStoredUser();
+      if (signedIn?.user_id === actionUser.user_id) {
+        storeUser({ ...signedIn, full_name: response.data.user.full_name, email: response.data.user.email, phone_number: response.data.user.phone_number });
+      }
+      setSuccess("User information updated successfully.");
+      modalRef.current?.close();
+    } catch (requestError) {
+      setFormError(getApiErrorMessage(requestError, "Unable to update user information."));
+    } finally {
+      setIsCreating(false);
       operationPending.current = false;
     }
   }
@@ -245,7 +312,7 @@ function AdminUsersPage() {
     const role = String(values.get("role"));
     try {
       const response = await api.post<{ user: AdminUserRecord }>("/auth/register", {
-        full_name: fullName, email, phone_number: phone || null, password, role,
+        full_name: fullName, email, phone_number: phone.replace(/[ ()-]/g, "") || null, password, confirm_password: password, role,
         organization_name: String(values.get("organization_name") || "").trim() || null,
         organization_type: String(values.get("organization_type") || ""),
       });
@@ -338,7 +405,7 @@ function AdminUsersPage() {
       </section>
 
       <dialog className="aum-dialog" aria-labelledby="aum-dialog-title" ref={modalRef} onCancel={(event) => { if (operationPending.current) event.preventDefault(); }}>
-        <header><h2 id="aum-dialog-title">{addingUser ? "Add User" : "Manage Account"}</h2><button type="button" aria-label="Close account dialog" disabled={isCreating || updatingUserId !== null} onClick={() => modalRef.current?.close()}><Icon name="close" /></button></header>
+        <header><h2 id="aum-dialog-title">{addingUser ? "Add User" : "Manage Account"}</h2><div className="aum-dialog-tools">{!addingUser && !editingUser && <button type="button" aria-label="Edit account information" title="Edit account information" disabled={isDeleting} onClick={() => { setEditingUser(true); setConfirmingDelete(false); setFormError(""); }}><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m16 3 5 5-12 12-6 1 1-6L16 3Zm-3 3 5 5" /></svg></button>}<button type="button" aria-label="Close account dialog" disabled={isCreating || isDeleting || updatingUserId !== null} onClick={() => modalRef.current?.close()}><Icon name="close" /></button></div></header>
         {formError && <p className="aum-form-error" role="alert">{formError}</p>}
         {addingUser ? <form onSubmit={createUser} key="create">
           <label>Full Name<input name="full_name" required maxLength={150} autoComplete="name" /></label>
@@ -351,10 +418,35 @@ function AdminUsersPage() {
           <button type="submit" className="aum-primary" disabled={isCreating}>{isCreating ? "Creating Account…" : "Create Account"}</button>
         </form> : actionUser && <div className="aum-manage">
           <h3>{actionUser.full_name}</h3><p>{actionUser.email}</p><p>{formatRole(actionUser.role)} · {String(actionUser.status || "active")}</p>
-          <form key={actionUser.user_id} onSubmit={(event) => { event.preventDefault(); const status = new FormData(event.currentTarget).get("status") as UserStatus; void updateUserStatus(actionUser.user_id, status); }}>
-            <label>Account Status<select name="status" defaultValue={String(actionUser.status || "active").toLowerCase()}><option value="active">{actionUser.role === "sponsor" && actionUser.status === "pending" ? "Approve Provider" : "Active"}</option>{actionUser.role === "sponsor" && <option value="pending">Pending Verification</option>}<option value="disabled">Disabled</option><option value="suspended">Suspended</option></select></label>
-            <button type="submit" className="aum-primary" disabled={updatingUserId !== null}>{updatingUserId !== null ? "Saving…" : "Save Status"}</button>
-          </form>
+          {actionUser.provider_rejection_reason && <p><strong>Rejection reason:</strong> {actionUser.provider_rejection_reason}</p>}
+          {!editingUser ? <dl className="aum-account-details">
+            <div><dt>Full Name</dt><dd>{actionUser.full_name}</dd></div>
+            <div><dt>Email</dt><dd>{actionUser.email}</dd></div>
+            <div><dt>Phone Number</dt><dd>{actionUser.phone_number || "Not set"}</dd></div>
+            {(profileFields[actionUser.role] || []).map(field => <div key={field.name}><dt>{field.label}</dt><dd>{String(actionUser[field.name] ?? "Not set")}</dd></div>)}
+            {actionUser.role === "sponsor" && <div><dt>Organisation Type</dt><dd>{actionUser.organization_type || "Not set"}</dd></div>}
+            <div><dt>Account Status</dt><dd><span className={`admin-status-badge ${actionUser.status}`}>{actionUser.status}</span></dd></div>
+            <div><dt>Joined</dt><dd>{formatDate(actionUser.created_at)}</dd></div>
+          </dl> : <><form key={`profile-${actionUser.user_id}`} onSubmit={updateUserProfile}>
+            <h3>Edit User Information</h3>
+            <label>Full Name<input name="full_name" required maxLength={150} defaultValue={actionUser.full_name} autoComplete="name" /></label>
+            <label>Email<input name="email" type="email" required maxLength={254} defaultValue={actionUser.email} autoComplete="email" /></label>
+            <label>Phone Number<input name="phone_number" type="tel" maxLength={25} defaultValue={actionUser.phone_number || ""} autoComplete="tel" /></label>
+            {(profileFields[actionUser.role] || []).map(field => <label key={field.name}>{field.label}<input name={field.name} maxLength={field.maxLength} type={field.name === "website" ? "url" : field.name === "date_of_birth" ? "date" : ["cgpa","experience_years"].includes(field.name) ? "number" : "text"} step={field.name === "cgpa" ? "0.01" : "1"} min={["cgpa","experience_years"].includes(field.name) ? "0" : undefined} max={field.name === "cgpa" ? "4" : field.name === "experience_years" ? "60" : undefined} required={field.name === "organization_name"} defaultValue={String(actionUser[field.name] ?? "")} /></label>)}
+            {actionUser.role === "sponsor" && <label>Organisation Type<select name="organization_type" required defaultValue={actionUser.organization_type || ""}><option value="">Select organisation type</option>{["Government Agency", "Foundation", "Private Company", "NGO", "Educational Institution", "Corporate", "University", "Non-Profit Organization"].map(type => <option key={type}>{type}</option>)}</select></label>}
+            <button type="submit" className="aum-primary" disabled={isCreating || updatingUserId !== null}>{isCreating ? "Saving Information…" : "Save Information"}</button>
+            <button type="button" className="aum-outline" disabled={isCreating || updatingUserId !== null} onClick={() => { setEditingUser(false); setFormError(""); }}>Cancel Editing</button>
+          </form></>}
+          {editingUser && <form key={actionUser.user_id} onSubmit={(event) => { event.preventDefault(); const status = new FormData(event.currentTarget).get("status") as UserStatus; void updateUserStatus(actionUser.user_id, status, String(new FormData(event.currentTarget).get("rejection_reason") || "")); }}>
+            <label>Account Status<select name="status" defaultValue={String(actionUser.status || "active").toLowerCase()}><option value="active">{actionUser.role === "sponsor" && actionUser.status === "pending" ? "Approve Provider" : "Active"}</option>{actionUser.role === "sponsor" && <><option value="pending">Pending Verification</option><option value="rejected">Reject Provider Registration</option></>}<option value="disabled">Disabled</option><option value="suspended">Suspended</option></select></label>
+            {actionUser.role === "sponsor" && <label>Rejection reason (required when rejecting)<textarea name="rejection_reason" maxLength={2000} defaultValue={actionUser.provider_rejection_reason || ""} /></label>}
+            <button type="submit" className="aum-primary" disabled={isCreating || updatingUserId !== null}>{updatingUserId !== null ? "Saving…" : "Save Status"}</button>
+          </form>}
+          <div className="aum-delete-area">
+            {confirmingDelete ? <div role="group" aria-label="Confirm account deletion"><h3>Delete this account?</h3><p>This permanently deletes {actionUser.full_name}'s account. Accounts with linked records must be disabled instead.</p><div className="aum-delete-actions"><button type="button" className="aum-delete-button" disabled={isDeleting} onClick={() => void deleteUserAccount()}>{isDeleting ? "Deleting…" : "Yes, Delete Account"}</button><button type="button" className="aum-outline" disabled={isDeleting} onClick={() => setConfirmingDelete(false)}>Cancel</button></div></div>
+              : <button type="button" className="aum-delete-button" disabled={isCreating || updatingUserId !== null || actionUser.user_id === getStoredUser()?.user_id} onClick={() => { setConfirmingDelete(true); setFormError(""); }}>Delete Account</button>}
+            {actionUser.user_id === getStoredUser()?.user_id && <p>You cannot delete your own administrator account.</p>}
+          </div>
         </div>}
       </dialog>
     </div>

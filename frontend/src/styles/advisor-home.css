@@ -46,9 +46,6 @@
 .advisor-home-search-results strong { font-size: 12px; }
 .advisor-home-search-results small { font-size: 10px; color: var(--home-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .advisor-home-account-actions { display: flex; align-items: center; gap: 13px; }
-.advisor-home-popover-anchor { position: relative; }
-.advisor-home-bell { display: grid; place-items: center; position: relative; width: 49px; height: 49px; padding: 12px; border: 0; border-radius: 50%; background: #fffdff; color: #35205a; box-shadow: 0 4px 12px #9c7ac723; }
-.advisor-home-bell > span { display: grid; place-items: center; position: absolute; top: -3px; right: -3px; min-width: 19px; height: 19px; padding: 0 4px; border: 2px solid white; border-radius: 50%; background: #f76b8c; color: white; font-size: 9px; font-weight: 800; }
 .advisor-home-account { display: flex; align-items: center; gap: 11px; min-height: 54px; padding: 5px 12px 5px 5px; border: 1px solid #fbf3ff; border-radius: 30px; color: var(--home-ink); background: #ffffffba; box-shadow: 0 4px 10px #ae8cdd18; text-align: left; }
 .advisor-home-avatar { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #ffd66b, #ff9e26); color: white; font-size: 15px; font-weight: 800; flex-shrink: 0; }
 .advisor-home-account strong, .advisor-home-account small { display: block; }
@@ -56,14 +53,6 @@
 .advisor-home-account strong { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; margin-bottom: 4px; }
 .advisor-home-account small { color: #7d6598; font-size: 10px; }
 .advisor-home-account > svg { width: 17px; margin-left: 12px; }
-.advisor-home-popover { position: absolute; z-index: 12; right: 0; top: calc(100% + 9px); width: 280px; padding: 14px; border: 1px solid #e5d5fb; border-radius: 18px; background: white; box-shadow: 0 10px 30px #7855ae25; }
-.advisor-home-popover h2 { margin: 0 0 12px; font-size: 16px; }
-.advisor-home-popover a, .advisor-home-popover button { display: flex; align-items: center; gap: 11px; width: 100%; padding: 10px; border: 0; border-radius: 11px; color: #493267; background: transparent; text-align: left; font-size: 12px; }
-.advisor-home-popover a:hover, .advisor-home-popover button:hover { background: #f7f1ff; }
-.advisor-home-popover a > svg, .advisor-home-popover button > svg { flex-shrink: 0; width: 20px; color: #8850e8; }
-.advisor-home-popover strong, .advisor-home-popover small { display: block; }
-.advisor-home-popover strong { font-size: 12px; margin-bottom: 3px; }
-.advisor-home-popover small, .advisor-home-popover p { font-size: 10px; color: var(--home-muted); }
 .advisor-home-account-menu { width: 205px; }
 .advisor-home-welcome { position: relative; display: flex; align-items: center; min-height: 150px; padding: 12px 18px; isolation: isolate; }
 .advisor-home-welcome > div:first-child { position: relative; z-index: 2; max-width: 61%; }
@@ -90,6 +79,9 @@
 .advisor-home-metric > div > span { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 750; line-height: 1.4; }
 .advisor-home-metric strong { font-size: 29px; font-weight: 850; line-height: 1; letter-spacing: -.7px; }
 .advisor-home-metric strong small { font-size: 20px; }
+.advisor-home-rating > div { min-width: 0; }
+.advisor-home-metric .advisor-home-rating-empty { font-size: clamp(16px, 1.5vw, 22px); line-height: 1.2; }
+.advisor-home-review-count { display: block; margin-top: 5px; font-size: 11px; line-height: 1.3; }
 .advisor-home-main-grid { display: grid; grid-template-columns: minmax(0, 1.62fr) minmax(245px, 1fr) minmax(245px, 1fr); gap: 15px; align-items: stretch; }
 .advisor-home-main-grid > .advisor-home-card { min-height: 330px; }
 .advisor-home-card { min-width: 0; border: 1px solid #eee4fd; border-radius: 23px; background: linear-gradient(140deg, white, #fefbff); box-shadow: 0 4px 10px #7b4dbd12; }

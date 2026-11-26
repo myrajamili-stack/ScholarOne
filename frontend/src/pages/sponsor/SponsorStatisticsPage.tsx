@@ -1,12 +1,14 @@
-import Icon from "../../components/advisor/AdvisorIcon";
+import Icon, { type AdvisorIconName } from "../../components/advisor/AdvisorIcon";
 import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
 import { getApiErrorMessage } from "../../utils/apiError";
 import { getStoredUser } from "../../utils/authStorage";
+import "../../styles/sponsor-statistics.css";
 
 type ScholarshipBreakdown = {
   scholarship_id: number;
   title: string;
+  total_views?: number;
   total_applications: number;
   awarded_students: number;
   pending_applications: number;
@@ -30,6 +32,8 @@ type SponsorStatisticsData = {
     organization_name: string;
   };
   summary: {
+    total_views: number;
+    unique_viewers: number;
     total_applications: number;
     unique_students: number;
     awarded_students: number;
@@ -38,6 +42,9 @@ type SponsorStatisticsData = {
     success_rate: number;
     top_field?: string | null;
   };
+  listing_totals: { total: number; active: number; expired: number; closed: number; unconfirmed: number; unpublished: number };
+  matched_listings: number;
+  view_breakdown?: Array<{ scholarship_id: number; title: string; total_views: number }>;
   scholarship_breakdown: ScholarshipBreakdown[];
   field_breakdown: FieldBreakdown[];
   monthly_trend: MonthlyTrend[];
@@ -52,8 +59,10 @@ function SponsorStatisticsPage() {
   const [data, setData] = useState<SponsorStatisticsData | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [lifecycle, setLifecycle] = useState("all");
 
   useEffect(() => {
+    const request = new AbortController();
     async function loadStatistics() {
       if (!user?.user_id) {
         setIsLoading(false);
@@ -61,17 +70,20 @@ function SponsorStatisticsPage() {
       }
 
       try {
-        const response = await api.get<SponsorStatisticsData>(`/sponsors/${user.user_id}/statistics`);
-        setData(response.data);
+        const response = await api.get<SponsorStatisticsData>(`/sponsors/${user.user_id}/statistics`, {
+          params: { lifecycle }, signal: request.signal,
+        });
+        if (!request.signal.aborted) setData(response.data);
       } catch (error) {
-        setError(getApiErrorMessage(error, "Unable to load sponsor statistics."));
+        if (!request.signal.aborted) setError(getApiErrorMessage(error, "Unable to load sponsor statistics."));
       } finally {
-        setIsLoading(false);
+        if (!request.signal.aborted) setIsLoading(false);
       }
     }
 
     loadStatistics();
-  }, [user?.user_id]);
+    return () => request.abort();
+  }, [user?.user_id, lifecycle]);
 
   const maxScholarshipApplications = useMemo(() => {
     if (!data?.scholarship_breakdown.length) {
@@ -79,7 +91,7 @@ function SponsorStatisticsPage() {
     }
 
     return Math.max(...data.scholarship_breakdown.map((item) => Number(item.total_applications || 0)));
-  }, [data?.scholarship_breakdown]);
+  }, [data]);
 
   const maxMonthlyApplications = useMemo(() => {
     if (!data?.monthly_trend.length) {
@@ -87,7 +99,7 @@ function SponsorStatisticsPage() {
     }
 
     return Math.max(...data.monthly_trend.map((item) => Number(item.total_applications || 0)));
-  }, [data?.monthly_trend]);
+  }, [data]);
 
   const fieldTotal = useMemo(() => {
     if (!data?.field_breakdown.length) {
@@ -95,80 +107,89 @@ function SponsorStatisticsPage() {
     }
 
     return data.field_breakdown.reduce((total, item) => total + Number(item.total_applications || 0), 0);
-  }, [data?.field_breakdown]);
+  }, [data]);
 
-  if (isLoading) {
-    return (
-      <div className="sponsor-page">
-        <section className="sponsor-empty-state">Loading scholarship statistics...</section>
-      </div>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <div className="sponsor-page">
-        <section className="sponsor-empty-state">{error || "Statistics data is not available."}</section>
-      </div>
-    );
-  }
-
-  const hasApplicationData = data.summary.total_applications > 0;
+  const views = data?.view_breakdown || data?.scholarship_breakdown || [];
+  const summary = data?.summary;
+  const metrics = summary ? [
+    { label: "Scholarship Views", value: summary.total_views || 0, icon: "eye", tone: "purple", detail: "One view per student, listing and Malaysia calendar day." },
+    { label: "Unique Student Viewers", value: summary.unique_viewers || 0, icon: "users", tone: "blue", detail: "Distinct students across the selected listings." },
+    { label: "Total Applications", value: summary.total_applications, icon: "quiz", tone: "purple", detail: "Applications received for the selected listings." },
+    { label: "Awarded Students", value: summary.awarded_students, icon: "trophy", tone: "mint", detail: "Approved scholarship outcomes." },
+    { label: "Award Rate", value: formatPercent(Number(summary.success_rate || 0)), icon: "trend", tone: "mint", detail: "Share of applications approved." },
+    { label: "Top Field", value: summary.top_field?.trim() || "No data", icon: "graduation", tone: "blue", detail: "Most common applicant field." },
+  ] satisfies { label: string; value: string | number; icon: AdvisorIconName; tone: string; detail: string }[] : [];
 
   return (
-    <div className="sponsor-page">
-      <section className="sponsor-statistics-hero sponsor-hero sponsor-workspace-hero sponsor-learning-banner sponsor-statistics-banner">
+    <div className="sponsor-page sponsor-analytics">
+      <header className="analytics-card analytics-header">
         <div>
-          <p className="sponsor-kicker"><Icon name="chart" />Performance</p>
-          <h2>Track Your Scholarship Performance</h2>
-          <span>See how students apply to scholarships from {data.sponsor.organization_name || "your organization"}.</span>
+          <h2>Scholarship Analytics</h2>
+          <p>Track views, applications and awards across your scholarship listings.</p>
         </div>
-      </section>
+        <div className="analytics-filter">
+          <label htmlFor="analytics-lifecycle">Listing Lifecycle</label>
+          <div className="analytics-select">
+            <select id="analytics-lifecycle" value={lifecycle} onChange={event => {
+              setLifecycle(event.target.value); setError(""); setIsLoading(true);
+            }}>
+              <option value="all">All listings</option><option value="active">Active</option>
+              <option value="expired">Expired</option><option value="closed">Closed</option>
+              <option value="unconfirmed">Deadline unconfirmed</option><option value="unpublished">Unpublished</option>
+            </select>
+            <Icon name="down" />
+          </div>
+          {error ? <p role="alert">{error}{data && " Showing the last loaded results."}</p> :
+            <p role="status">{isLoading ? (data ? "Updating statistics…" : "Loading scholarship statistics…") :
+              data?.matched_listings === 0 ? "No listings match this filter." :
+              data?.matched_listings === undefined ? "" : `${data.matched_listings} listings in filtered statistics.`}</p>}
+        </div>
+      </header>
 
-      <section className="sponsor-stats-grid" aria-label="Scholarship application statistics">
-        <article className="sponsor-stat-card purple">
-          <span><Icon name="users" /></span>
-          <p>Total Applications</p>
-          <strong>{data.summary.total_applications}</strong>
-          <small>Student applications received</small>
-        </article>
-        <article className="sponsor-stat-card green">
-          <span><Icon name="graduation" /></span>
-          <p>Awarded Students</p>
-          <strong>{data.summary.awarded_students}</strong>
-          <small>Approved scholarship outcomes</small>
-        </article>
-        <article className="sponsor-stat-card blue">
-          <span><Icon name="trend" /></span>
-          <p>Award Rate</p>
-          <strong>{formatPercent(Number(data.summary.success_rate || 0))}</strong>
-          <small>Approved from total applications</small>
-        </article>
-        <article className="sponsor-stat-card blue">
-          <span><Icon name="graduation" /></span>
-          <p>Top Field</p>
-          <strong>{data.summary.top_field || "No data"}</strong>
-          <small>Most common applicant field</small>
-        </article>
-      </section>
+      {data && <>
+        {data.listing_totals && <section className="analytics-card analytics-listings" aria-label="Listing lifecycle totals">
+          <dl>
+            <div><dt>Total Listings</dt><dd>{data.listing_totals.total}</dd></div>
+            <div><dt>Active Listings</dt><dd>{data.listing_totals.active}</dd></div>
+            <div><dt>Expired Listings</dt><dd>{data.listing_totals.expired}</dd></div>
+          </dl>
+        </section>}
 
-      {!hasApplicationData ? (
-        <section className="sponsor-empty-state scholarship-empty">
-          <strong>No application statistics yet.</strong>
-          <p>
-            This page will show diagrams after students start applying and scholarship providers approve or reject
-            applications.
-          </p>
-        </section>
-      ) : (
-        <section className="sponsor-statistics-grid">
-          <article className="sponsor-panel sponsor-chart-panel">
-            <div className="sponsor-panel-header">
-              <div>
-                <p className="sponsor-kicker">Scholarship Performance</p>
-                <h2>Applications and awards</h2>
+        <section className="analytics-metrics" aria-label="Scholarship statistics" aria-busy={isLoading}>
+          {metrics.map(({ label, value, icon, tone, detail }) => (
+            <article className="analytics-card analytics-metric" key={label}>
+              <div className="analytics-metric-heading">
+                <span className={`analytics-icon ${tone}`}><Icon name={icon} /></span>
+                <h3>{label}</h3>
               </div>
+              <strong>{value}</strong>
+              <p>{detail}</p>
+            </article>
+          ))}
+        </section>
+
+        {views.length > 0 && (
+          <section className="analytics-card analytics-chart">
+            <h3>Views by Scholarship</h3>
+            <dl className="analytics-breakdown">
+              {views.map(row => <div key={row.scholarship_id}><dt>{row.title}</dt><dd>{row.total_views || 0} views</dd></div>)}
+            </dl>
+          </section>
+        )}
+
+        {data.summary.total_applications === 0 ? (
+          <section className="analytics-card analytics-empty">
+            <span className="analytics-icon"><Icon name="chart" /></span>
+            <div>
+              <h3>{data.summary.total_views > 0 ? "No application data yet" : "No analytics data yet"}</h3>
+              <p>{data.summary.total_views > 0 ? "Application and award charts will appear after students apply." :
+                "View and application statistics will appear when students visit or apply to your listings."}</p>
             </div>
+          </section>
+        ) : (
+        <section className="analytics-charts">
+          <article className="analytics-card analytics-chart">
+            <h3>Applications and awards</h3>
             <div className="sponsor-horizontal-chart">
               {data.scholarship_breakdown.map((item) => {
                 const totalWidth = maxScholarshipApplications
@@ -197,20 +218,16 @@ function SponsorStatisticsPage() {
             </div>
           </article>
 
-          <article className="sponsor-panel sponsor-chart-panel">
-            <div className="sponsor-panel-header">
-              <div>
-                <p className="sponsor-kicker">Applicant Fields</p>
-                <h2>Field of study mix</h2>
-              </div>
-            </div>
+          <article className="analytics-card analytics-chart">
+            <h3>Field of study mix</h3>
             <div className="sponsor-field-chart">
-              {data.field_breakdown.map((item, index) => {
+              {data.field_breakdown.length === 0 && <p>No field data available.</p>}
+              {data.field_breakdown.map((item) => {
                 const percentage = fieldTotal ? (Number(item.total_applications || 0) / fieldTotal) * 100 : 0;
 
                 return (
                   <div className="sponsor-field-row" key={item.field_of_study}>
-                    <span className={`sponsor-field-dot tone-${index % 4}`} />
+                    <span className="sponsor-field-dot" />
                     <div>
                       <strong>{item.field_of_study}</strong>
                       <small>
@@ -224,13 +241,8 @@ function SponsorStatisticsPage() {
             </div>
           </article>
 
-          <article className="sponsor-panel sponsor-chart-panel sponsor-trend-panel">
-            <div className="sponsor-panel-header">
-              <div>
-                <p className="sponsor-kicker">Application Trend</p>
-                <h2>Monthly applications</h2>
-              </div>
-            </div>
+          <article className="analytics-card analytics-chart analytics-trend">
+            <h3>Monthly applications</h3>
             {data.monthly_trend.length > 0 ? (
               <div className="sponsor-trend-chart">
                 {data.monthly_trend.map((item) => {
@@ -249,6 +261,7 @@ function SponsorStatisticsPage() {
                         </span>
                       </div>
                       <small>{item.month_label}</small>
+                      <small>{item.total_applications} applied · {item.awarded_students} awarded</small>
                     </div>
                   );
                 })}
@@ -258,7 +271,8 @@ function SponsorStatisticsPage() {
             )}
           </article>
         </section>
-      )}
+        )}
+      </>}
     </div>
   );
 }

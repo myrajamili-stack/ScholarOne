@@ -42,6 +42,12 @@
 .sponsor-workspace-shell .submission-form { display: block; padding: 22px 26px; min-width: 0; }
 .submission-form fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 .submission-section { padding: 0 0 20px; scroll-margin-top: 25px; }
+.submission-section > label { display: grid; gap: 8px; margin-top: 18px; font-size: 14px; font-weight: 700; }
+.submission-section > label textarea { width: 100%; min-height: 100px; padding: 12px 14px; border: 1px solid #dfccff; border-radius: 13px; background: #fcf9ff; color: #30204f; font: inherit; font-weight: 400; resize: vertical; }
+.submission-fields select[multiple] { height: 148px; padding: 8px; }
+.submission-fields select[multiple] option { padding: 6px 8px; border-radius: 5px; }
+.submission-review dd { white-space: pre-line; overflow-wrap: anywhere; }
+.sponsor-listing-actions { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; margin-top: 16px; }
 .submission-section + .submission-section { padding-top: 16px; border-top: 1px solid #eae0f6; }
 .submission-layout h3 { display: flex; align-items: center; gap: 12px; margin: 0 0 17px; color: #241440; font-size: 18px; font-weight: 800; }
 .submission-layout h3 > svg { box-sizing: content-box; padding: 9px; border-radius: 14px; background: #f2e7ff; color: #8a2cff; flex: 0 0 23px; }

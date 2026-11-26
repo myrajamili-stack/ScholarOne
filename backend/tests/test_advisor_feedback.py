@@ -7,6 +7,8 @@ from security import issue_access_token
 
 class AdvisorFeedbackTests(unittest.TestCase):
     def setUp(self):
+        # Business-logic tests assume an active account; restriction tests cover the real lookup.
+        self.enterContext(patch("security.verify_active_account", return_value=None))
         self.client = create_app().test_client()
         self.url = '/api/advisors/7/feedback'
         self.headers = {

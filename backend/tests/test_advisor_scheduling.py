@@ -12,6 +12,8 @@ from security import issue_access_token
 
 class SchedulingTests(unittest.TestCase):
     def setUp(self):
+        # Business-logic tests assume an active account; restriction tests cover the real lookup.
+        self.enterContext(patch("security.verify_active_account", return_value=None))
         self.client = create_app().test_client()
         self.advisor = self.auth(7, 'advisor')
         self.student = self.auth(11, 'student')
@@ -243,7 +245,9 @@ class SchedulingTests(unittest.TestCase):
         self.assertEqual(response.json['appointment_status'], 'pending')
         self.assertEqual(response.json['appointment_datetime'], '2026-11-09T09:00:00+08:00')
         self.assertEqual(response.json['duration_minutes'], 30)
-        self.assertEqual(cursor.execute.call_args.args[1], (11, 7, datetime(2026, 11, 9, 9), 30, '', ''))
+        insert = next(call for call in cursor.execute.call_args_list if 'INSERT INTO appointment' in call.args[0])
+        self.assertEqual(insert.args[1], (11, 7, datetime(2026, 11, 9, 9), 30, '', ''))
+        self.assertIn('notification', cursor.execute.call_args.args[0])
         queries = [call.args[0] for call in cursor.execute.call_args_list]
         self.assertIn('FOR UPDATE', queries[0])
         self.assertIn('FOR UPDATE', queries[1])

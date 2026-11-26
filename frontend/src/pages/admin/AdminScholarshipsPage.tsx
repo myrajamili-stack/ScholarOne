@@ -21,6 +21,7 @@ type AdminScholarship = {
   deadline: string | null;
   funding_type: string | null;
   status: string;
+  rejection_reason?: string | null;
   created_at: string | null;
   application_count: number | string;
 };
@@ -101,6 +102,7 @@ export default function AdminScholarshipsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
   const [selectedScholarship, setSelectedScholarship] = useState<AdminScholarship | null>(null);
   const [error, setError] = useState("");
   const [dialogError, setDialogError] = useState("");
@@ -172,6 +174,7 @@ export default function AdminScholarshipsPage() {
 
   function openReview(scholarship: AdminScholarship) {
     setSelectedScholarship(scholarship);
+    setRejectionReason("");
     setDialogError("");
     dialogRef.current?.showModal();
   }
@@ -183,7 +186,7 @@ export default function AdminScholarshipsPage() {
     setDialogError("");
     setSuccess("");
     try {
-      const response = await api.patch<{ scholarship: Pick<AdminScholarship, "scholarship_id" | "title" | "status"> }>(`/admin/scholarships/${id}/status`, { status });
+      const response = await api.patch<{ scholarship: Pick<AdminScholarship, "scholarship_id" | "title" | "status"> }>(`/admin/scholarships/${id}/status`, { status, rejection_reason: rejectionReason });
       setScholarships((current) => current.map((item) => item.scholarship_id === id ? { ...item, ...response.data.scholarship } : item));
       setSuccess(`Scholarship marked as ${status}.`);
       dialogRef.current?.close();
@@ -259,10 +262,11 @@ export default function AdminScholarshipsPage() {
       {selectedScholarship && <div className="asm-review">
         <h3>{selectedScholarship.title}</h3><p>{selectedScholarship.organization_name}{selectedScholarship.sponsor_email ? ` · ${selectedScholarship.sponsor_email}` : ""}</p>
         <dl><div><dt>Status</dt><dd>{getStatusLabel(selectedScholarship.status)}</dd></div><div><dt>Funding</dt><dd>{formatCurrency(selectedScholarship.amount)} · {selectedScholarship.funding_type || "Not stated"}</dd></div><div><dt>Deadline</dt><dd>{formatDate(selectedScholarship.deadline)}</dd></div><div><dt>Applications</dt><dd>{Number(selectedScholarship.application_count || 0)}</dd></div></dl>
+        {selectedScholarship.rejection_reason && <p><strong>Rejection reason:</strong> {selectedScholarship.rejection_reason}</p>}
         <h4>Description</h4><p className="asm-copy">{selectedScholarship.description || "No description added."}</p><h4>Eligibility</h4><p className="asm-copy">{selectedScholarship.eligibility_criteria || "No eligibility criteria added."}</p>
-        {["pending", "appeal_submitted"].includes(normalizeStatus(selectedScholarship.status)) && <div className="asm-review-actions">
+        {["pending", "appeal_submitted"].includes(normalizeStatus(selectedScholarship.status)) && <div className="asm-review-actions"><label>Rejection reason (required when rejecting)<textarea value={rejectionReason} maxLength={2000} onChange={event => setRejectionReason(event.target.value)} /></label>
           <button type="button" className="aum-primary" disabled={isSaving} onClick={() => void updateScholarshipStatus(selectedScholarship.scholarship_id, "approved")}>{isSaving ? "Saving…" : "Approve Listing"}</button>
-          <button type="button" className="aum-outline asm-reject" disabled={isSaving} onClick={() => void updateScholarshipStatus(selectedScholarship.scholarship_id, "rejected")}>Reject Listing</button>
+          <button type="button" className="aum-outline asm-reject" disabled={isSaving || !rejectionReason.trim()} onClick={() => void updateScholarshipStatus(selectedScholarship.scholarship_id, "rejected")}>Reject Listing</button>
         </div>}
       </div>}
     </dialog>

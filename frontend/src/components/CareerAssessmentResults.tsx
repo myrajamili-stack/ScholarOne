@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import type { CareerAssessmentResult, ProfileScore } from '../utils/careerAssessment'
 import { buildCareerGuidance, describePersonality } from '../utils/careerGuidance'
+import { Link } from 'react-router-dom'
 
 function ScoreList({ title, scores }: { title: string; scores: ProfileScore[] }) {
   return <section className="assessment-score-section">
@@ -17,6 +18,7 @@ export default function CareerAssessmentResults({ result }: { result: CareerAsse
   const guidance = buildCareerGuidance(result)
   const workValues = [...result.workValues].filter((value) => value.rank !== null).sort((a, b) => b.score - a.score)
   return <div className="assessment-written-results">
+    <p><Link to="/academic-pathways">Explore academic pathways and recommended study progression →</Link></p>
     <section aria-labelledby={`${resultId}-holland`}>
       <h3 id={`${resultId}-holland`}>1. Your Holland Code: {result.hollandCode.replaceAll('-', '–')}</h3>
       <div className="assessment-profile-card">

@@ -28,7 +28,16 @@
 .st-action:hover { background: #f2e9ff; color: #6b2bc8; }
 .st-switch { appearance: none; flex-shrink: 0; width: 43px; height: 25px; border: 0; border-radius: 20px; background: #ddd8e7; position: relative; }
 .st-switch::after { content: ''; position: absolute; left: 3px; top: 3px; width: 19px; height: 19px; border-radius: 50%; background: white; box-shadow: 0 1px 3px #66537f33; }
+.st-switch:enabled { cursor: pointer; }
+.st-switch:checked { background: #7432c6; }
+.st-switch:checked::after { transform: translateX(18px); }
 .st-switch:disabled { cursor: not-allowed; }
+.st-password-form { display: grid; gap: 12px; padding: 15px; border-bottom: 1px solid #ece3fa; }
+.st-password-form label { display: grid; gap: 5px; min-width: 0; color: #27194d; font-size: 13px; font-weight: 700; }
+.st-password-form input { width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1px solid #dfd0f5; border-radius: 11px; color: #27194d; background: white; font: inherit; }
+.st-button { justify-self: start; margin-top: 6px; padding: 8px 14px; border: 0; border-radius: 10px; background: #7432c6; color: white; font: inherit; font-size: 13px; cursor: pointer; }
+.student-settings button:disabled { opacity: .65; cursor: wait; }
+.st-note.st-error { color: #a12747; }
 .st-note { margin-top: 13px !important; color: #8a739e; font-size: 11px; line-height: 1.6; }
 .st-note a { color: #7432c6; font-weight: 650; }
 .st-badge { flex-shrink: 0; padding: 4px 7px; border-radius: 12px; background: #efe9f7; color: #8a739e; font-size: 9px; }
@@ -36,7 +45,7 @@
 .st-visibility select { max-width: 170px; padding: 9px 12px; border: 1px solid #dfd0f5; border-radius: 11px; background: #f9f5ff; color: #8b7b9c; font-size: 12px; }
 .st-logout .st-icon, .st-logout strong { color: #d62c4f; }
 .st-logout:hover { background: #fff0f4; }
-.student-settings button:focus-visible, .student-settings a:focus-visible { outline: 3px solid #ba91ee; outline-offset: 2px; }
+.student-settings button:focus-visible, .student-settings a:focus-visible, .student-settings input:focus-visible { outline: 3px solid #ba91ee; outline-offset: 2px; }
 @media(max-width:1100px) { .st-layout { grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); } .st-card { padding: 20px 15px; } .st-row { padding: 13px 10px; gap: 10px; } .st-heading h2 { font-size: 20px; } .st-icon { width: 37px; height: 42px; } .st-icon svg { width: 25px; height: 25px; } }
 @media(max-width:850px) { .st-layout { grid-template-columns: 1fr; } }
 @media(max-width:650px) { .st-hero { padding: 23px; min-height: 340px; } .st-hero-copy { width: 100%; } .st-hero h1 { font-size: 35px; } .st-hero-art { width: 100%; height: 160px; right: 0; } .st-row { gap: 10px; } .st-visibility select { margin-left: 47px; } }

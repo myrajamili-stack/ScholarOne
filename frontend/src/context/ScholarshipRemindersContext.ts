@@ -5,6 +5,7 @@ export type ScholarshipReminder = {
   title: string
   organization_name?: string | null
   deadline: string
+  deadline_at?: string
   remind_on: string
   days_until: number
   is_due: boolean

@@ -11,6 +11,7 @@ type DeadlineEvent = {
   title: string;
   organization_name?: string | null;
   deadline: string;
+  deadline_at?: string;
 };
 
 type Appointment = {
@@ -39,6 +40,7 @@ const fullDateFormatter = new Intl.DateTimeFormat("en-MY", { timeZone: "UTC", da
 const shortMonthFormatter = new Intl.DateTimeFormat("en-MY", { timeZone: "UTC", month: "short" });
 const eventIcons = { deadline: "graduation", appointment: "calendar", reminder: "bell" } as const;
 const eventLabels = { deadline: "Scholarship Deadline", appointment: "Appointment", reminder: "Reminder" };
+const closingTime = new Intl.DateTimeFormat("en-MY", { timeZone: "Asia/Kuala_Lumpur", hour: "numeric", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
 
 function malaysiaDateKey(date = new Date()) {
   return new Intl.DateTimeFormat("en-CA", {
@@ -134,13 +136,14 @@ export default function CalendarPage() {
       date: deadline.deadline.slice(0, 10),
       description: deadline.organization_name || "ScholarOne Provider",
       link: `/scholarships?q=${encodeURIComponent(deadline.title)}`,
+      time: deadline.deadline_at ? closingTime.format(new Date(deadline.deadline_at)) : undefined,
     }));
     const reminderEvents: CalendarEvent[] = reminders.map((reminder) => ({
       id: `reminder-${reminder.scholarship_id}`,
       type: "reminder",
       title: reminder.title,
       date: reminder.remind_on.slice(0, 10),
-      description: `Your selected reminder, 3 days before the deadline on ${reminder.deadline}.`,
+      description: `Your selected reminder, 3 days before the deadline on ${reminder.deadline}${reminder.deadline_at ? ` at ${closingTime.format(new Date(reminder.deadline_at))} Malaysia time` : ""}.`,
       link: "/calendar?section=reminders",
     }));
     const bookingEvents: CalendarEvent[] = appointments

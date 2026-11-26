@@ -38,8 +38,10 @@ class SponsorSubscriptionTests(unittest.TestCase):
         subscription_query = next(call.args[0] for call in cursor.execute.call_args_list
                                   if 'from subscription sub' in call.args[0])
         self.assertIn("= 'active'", subscription_query)
-        self.assertIn('sub.start_date <= current_date', subscription_query)
-        self.assertIn('sub.end_date >= current_date', subscription_query)
+        self.assertIn("sub.start_date <= (statement_timestamp() at time zone 'UTC')", subscription_query)
+        self.assertIn("sub.end_date > (statement_timestamp() at time zone 'UTC')", subscription_query)
+        self.assertIn("sub.payment_status = 'paid'", subscription_query)
+        self.assertIn('sub.stripe_subscription_id is null and sp.price = 0', subscription_query)
 
     @patch('routes.sponsors.get_db_connection')
     def test_active_subscription_reports_saved_plan_and_usage(self, connect):

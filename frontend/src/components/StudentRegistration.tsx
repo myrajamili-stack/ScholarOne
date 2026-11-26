@@ -12,6 +12,7 @@ type Props = {
 export default function StudentRegistration({ onSubmit, error, isSubmitting }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [nameError, setNameError] = useState("");
 
   return (
     <main className="student-registration">
@@ -33,7 +34,15 @@ export default function StudentRegistration({ onSubmit, error, isSubmitting }: P
           <h2>Register as Student</h2>
           <p className="registration-description">Create your account to start your scholarship journey with ScholarOne.</p>
           <form onSubmit={onSubmit} className="registration-form">
-            <label><span><Icon name="user" />Full Name</span><input name="full_name" autoComplete="name" placeholder="Enter your full name" required maxLength={150} /></label>
+            <label><span><Icon name="user" />Full Name</span><input name="full_name" autoComplete="name" placeholder="Enter your full name" required maxLength={150}
+              aria-invalid={!!nameError} aria-describedby={nameError ? "registration-name-error" : undefined}
+              onChange={(event) => {
+                const message = /\p{Decimal_Number}/u.test(event.currentTarget.value) ? "Full name must not contain numbers." : "";
+                event.currentTarget.setCustomValidity(message);
+                setNameError(message);
+              }} />
+              {nameError && <small id="registration-name-error" className="auth-error" role="alert">{nameError}</small>}
+            </label>
             <label><span><Icon name="mail" />Email</span><input name="email" type="email" autoComplete="email" placeholder="Enter your email address" required /></label>
             <label><span><Icon name="lock" />Password</span>
               <span className="registration-password"><input name="password" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="Create a password" required /><button type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}><Icon name="eye" /></button></span>
